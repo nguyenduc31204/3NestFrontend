@@ -169,7 +169,10 @@ const Users = () => {
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {users.map((user, index) => (
-                                                <tr key={index} className="hover:bg-gray-50">
+                                                <tr 
+                                                key={index} 
+                                                className="hover:bg-gray-100 cursor-pointer"
+                                                onClick={() => navigate(`/users/detail/${user.user_id}`)}>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="flex items-center">
                                                             <div className="flex-shrink-0 h-10 w-10">
@@ -200,19 +203,26 @@ const Users = () => {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                         <div className="flex space-x-2">
-                                                            <button 
-                                                                onClick={() => handleEditUser(user.id)}
-                                                                className="text-blue-600 hover:text-blue-900"
-                                                                title="Edit"
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEditUser(user.user_id);
+                                                            }}
+                                                            className="text-blue-600 hover:text-blue-900"
+                                                            title="Edit"
                                                             >
-                                                                <LuSettings className="w-5 h-5" />
+                                                            <LuSettings className="w-5 h-5" />
                                                             </button>
-                                                            <button 
-                                                                onClick={() => handleDeleteUser(user.user_id)}
-                                                                className="text-red-600 hover:text-red-900"
-                                                                title="Delete"
+
+                                                            <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); 
+                                                                handleDeleteUser(user.user_id);
+                                                            }}
+                                                            className="text-red-600 hover:text-red-900"
+                                                            title="Delete"
                                                             >
-                                                                <LuTrash2 className="w-5 h-5" />
+                                                            <LuTrash2 className="w-5 h-5" />
                                                             </button>
                                                         </div>
                                                     </td>

@@ -12,6 +12,10 @@ import Home from './pages/admin/Dashboard/Home'
 import SalesProducts from './pages/Sales/Products/SalesProducts'
 import SalesOrders from './pages/Sales/Order/SalesOrder'
 import SalesAddOrder from './pages/Sales/Order/AddOder'
+import AddUser from './pages/admin/User/AddUser';
+import EditUser from './pages/admin/User/EditUser';
+import UserDetail from './pages/admin/User/UserDetail';
+
 
 const Root = () => {
   const isAuthenticated = !!localStorage.getItem('access_token')
@@ -28,24 +32,26 @@ const App = () => {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Root/>} />
-        <Route path='/admin/dashboard' element={<Home/>} />
-        <Route path="/login" element={<Login/>} />
-        <Route path="/admin/products" element={<Products/>} />
-        <Route path="/sales/products" element={<SalesProducts/>} />
-        <Route path="/categories" element={<Categories/>} />
-        <Route path="/admin/orders" element={<Orders/>} />
-        <Route path="/sales/orders" element={<SalesOrders/>} />
-        <Route path="/users" element={<Users/>} />
-        <Route path="/reports" element={<Reports/>} />
-        <Route path="/settings" element={<Settings/>} />
-        <Route path="/logout" element={<Logout/>} />
-        <Route path="/addorder" element={<AddOrder/>} />
+        <Route path="/" element={<Root />} />
+        <Route path="/admin/dashboard" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin/products" element={<Products />} />
+        <Route path="/sales/products" element={<SalesProducts />} />
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/admin/orders" element={<Orders />} />
+        <Route path="/sales/orders" element={<SalesOrders />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/users/add" element={<AddUser />} />
+        <Route path="/users/edit/:userId" element={<EditUser />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/logout" element={<Logout />} />
+        <Route path="/addorder" element={<AddOrder />} />
         <Route path="/sales/addorder" element={<SalesAddOrder />} />
         <Route path="/sales/editorder/:order_id" element={<SalesAddOrder />} />
+        <Route path="/users/detail/:userId" element={<UserDetail />} />
       </Routes>
     </div>
   )
 }
-
 export default App
