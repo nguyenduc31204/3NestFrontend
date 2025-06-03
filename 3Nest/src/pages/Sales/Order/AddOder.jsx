@@ -32,6 +32,8 @@ const SalesAddOrder = () => {
   const [createdOrderId, setCreatedOrderId] = useState(
     order_id ? Number(order_id) : localStorage.getItem('createdOrderId') || null
   );
+  const [selectedOrder, setSelectedOrder] = useState(null); 
+
 
   const {
     register,
@@ -81,6 +83,8 @@ const SalesAddOrder = () => {
       }
     };
 
+    
+
     const loadAllOrders = async () => {
       try {
         const response = await fetch(`${BASE_URL}/orders/get-order-by-user`, {
@@ -100,6 +104,8 @@ const SalesAddOrder = () => {
         setError(`Failed to load orders: ${err.message}`);
       }
     };
+
+    
 
     const loadOrderDetails = async () => {
       if (order_id || createdOrderId) {
@@ -132,6 +138,8 @@ const SalesAddOrder = () => {
 
     loadData();
   }, [activeRole, order_id, createdOrderId]);
+  const orderIdToUse = order_id ? Number(order_id) : createdOrderId;
+
 
   useEffect(() => {
     if (order_id || createdOrderId) {
@@ -525,6 +533,13 @@ const SalesAddOrder = () => {
                         <label className="block text-sm font-medium text-gray-700">Name Company</label>
                         <p className="text-base text-gray-800">{user?.company_name || '--'}</p>
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Order Time</label>
+                        <p className="text-base text-gray-800">
+                          {new Date(orderData?.created_at).toLocaleDateString() || '--'} {' '}
+                          {new Date(orderData?.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '--'}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex-1 space-y-4">
                       <div>
@@ -542,7 +557,7 @@ const SalesAddOrder = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Customer Name</label>
                         <input
-                          {...register('customer_name')}
+                          {...register('customer_name', { required: 'Order title is required' })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter customer name"
                           disabled={orderData?.status && orderData.status !== 'draft'}
@@ -551,7 +566,7 @@ const SalesAddOrder = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Contact Name</label>
                         <input
-                          {...register('contact_name')}
+                          {...register('contact_name', { required: 'Order title is required' })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter contact name"
                           disabled={orderData?.status && orderData.status !== 'draft'}
@@ -560,7 +575,7 @@ const SalesAddOrder = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Contact Email</label>
                         <input
-                          {...register('contact_email')}
+                          {...register('contact_email', { required: 'Order title is required' })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter contact email"
                           disabled={orderData?.status && orderData.status !== 'draft'}
@@ -569,7 +584,7 @@ const SalesAddOrder = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Contact Phone</label>
                         <input
-                          {...register('contact_phone')}
+                          {...register('contact_phone', { required: 'Order title is required' })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter contact phone"
                           disabled={orderData?.status && orderData.status !== 'draft'}
@@ -578,7 +593,7 @@ const SalesAddOrder = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Address</label>
                         <input
-                          {...register('address')}
+                          {...register('address', { required: 'Order title is required' })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter address"
                           disabled={orderData?.status && orderData.status !== 'draft'}
@@ -587,7 +602,7 @@ const SalesAddOrder = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Billing Address</label>
                         <input
-                          {...register('billing_address')}
+                          {...register('billing_address', { required: 'Order title is required' })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter billing address"
                           disabled={orderData?.status && orderData.status !== 'draft'}
@@ -599,7 +614,7 @@ const SalesAddOrder = () => {
                   <div className="mt-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-medium text-gray-800">Order Details</h3>
-                      {!['submitted', 'accepted', 'draft'].includes(orderData?.status) && (
+                      {!['submitted', 'accepted', 'draft'].includes(orderData?.status || '') && (
                         <button
                           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2 touch-manipulation"
                           onClick={handleAddOrderClick}
@@ -619,40 +634,50 @@ const SalesAddOrder = () => {
                     ) : existingDetails.length === 0 ? (
                       <p className="text-gray-500 text-sm">No products added yet.</p>
                     ) : (
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Description</th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Price</th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Duration</th>
+                            <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {existingDetails.map((detail, index) => (
+                            <tr key={index}>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900 truncate max-w-[100px] sm:max-w-[150px]">
+                                {detail.product_name || 'Unknown'}
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900 hidden lg:table-cell">
+                                {detail.description || '-'}
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900">
+                                {detail.quantity || 0}
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900 hidden sm:table-cell">
+                                ${(detail.price_for_customer || 0).toLocaleString()}
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900 hidden sm:table-cell">
+                                {detail.service_contract_duration || 0} years
+                              </td>
+                              <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900">
+                                ${((detail.price_for_customer || 0) * (detail.quantity || 0)).toLocaleString()}
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {existingDetails.map((detail, index) => (
-                              <tr key={index}>
-                                <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[150px]">
-                                  {detail.product_name || 'Unknown'}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">{detail.description || '-'}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900">{detail.quantity || 0}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900">
-                                  ${(detail.price_for_customer || 0).toLocaleString()}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">
-                                  {detail.service_contract_duration || 0} years
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">
-                                  ${((detail.price_for_customer || 0) * (detail.quantity || 0)).toLocaleString()}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                          ))}
+                        </tbody>
+                      </table>
+                      <div className="text-right mt-3 sm:mt-4 px-2 sm:px-4">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700">Total Budget</label>
+                        <p className="text-sm sm:text-base text-gray-800">
+                          ${orderData?.total_budget || '--'}
+                        </p>
                       </div>
+                    </div>
                     )}
                   </div>
 
