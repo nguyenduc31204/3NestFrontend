@@ -1,75 +1,402 @@
-import { useEffect, useState } from "react";
-import DasboardLayout from "../../../components/layouts/DashboardLayout"
-import Header from "../../../components/layouts/Header"
-import { decodeToken } from "../../../utils/help";
-import AddOrderDialog from "../../../components/order/AddOrderDialog";
-import { fetchProductsByTypeAndRole } from "../../../hook/fetchProduct";
-import { BASE_URL } from "../../../utils/apiPath";
-
+import React, { useEffect, useState } from 'react';
+import DashboardLayout from '../../../components/layouts/DashboardLayout';
+import Header from '../../../components/layouts/Header';
+import { decodeToken } from '../../../utils/help';
+import { BASE_URL } from '../../../utils/apiPath';
 import {
-    LuCoins,
-    LuWalletMinimal,
-    LuPersonStanding,
-    LuChevronsLeft,
-    LuChevronLeft,
-    LuChevronRight,
-    LuChevronsRight,
-    LuArrowDownToLine,
-    LuArrowUpNarrowWide,
-    LuRefreshCcw
-} from "react-icons/lu"
+  LuChevronsLeft,
+  LuChevronLeft,
+  LuChevronRight,
+  LuChevronsRight,
+  LuArrowDownToLine,
+  LuArrowUpNarrowWide,
+  LuRefreshCcw,
+} from 'react-icons/lu';
+import AddOrderDialog from './AddOrderDialog';
+import { useForm } from 'react-hook-form';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const AddOrder = () => {
+  const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { order_id } = useParams();
   const [activeRole, setActiveRole] = useState('sales');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [products, setProducts] = useState([]);
-  const [selectedTypeId, setSelectedTypeId] = useState(1);
-  const [user, setUser] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
+  const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-   
-  const token = localStorage.getItem('access_token');
+  const [orderData, setOrderData] = useState(null);
+  const [existingDetails, setExistingDetails] = useState([]);
+  const [createdOrderId, setCreatedOrderId] = useState(
+    order_id ? Number(order_id) : localStorage.getItem('createdOrderId') || null
+  );
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset,
+    setValue,
+  } = useForm({
+    defaultValues: {
+      order_title: '',
+      customer_name: '',
+      address: '',
+      billing_address: '',
+    },
+  });
+
+  const formValues = watch();
+
+  // Fetch user, products, orders, and order details
   useEffect(() => {
-    loadProducts();
-  }, [activeRole, selectedTypeId]);
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      setUser(decodeToken(token));
+    } else {
+      setError('No authentication token found');
+    }
 
-  const loadProducts = async () => {
-    setLoading(true);
+    const loadProductsByTypeAndRole = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/products/get-products-by-role`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const result = await response.json();
+        if (result.status_code !== 200 || !Array.isArray(result.data)) {
+          throw new Error(result.message || 'Invalid product data');
+        }
+        setProducts(result.data);
+      } catch (err) {
+        setError(`Failed to load products: ${err.message}`);
+      }
+    };
+
+    const loadAllOrders = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/orders/get-order-by-user`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const result = await response.json();
+        if (result.status_code === 200 && Array.isArray(result.data)) {
+          setAllOrders(result.data);
+        } else {
+          throw new Error(result.message || 'Failed to load orders');
+        }
+      } catch (err) {
+        setError(`Failed to load orders: ${err.message}`);
+      }
+    };
+
+    const loadOrderDetails = async () => {
+      if (order_id || createdOrderId) {
+        const idToUse = order_id ? Number(order_id) : createdOrderId;
+        try {
+          const response = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${idToUse}`, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+              'ngrok-skip-browser-warning': 'true',
+            },
+          });
+          const result = await response.json();
+          if (result.status_code === 200 && Array.isArray(result.data)) {
+            setExistingDetails(result.data);
+          } else {
+            throw new Error(result.message || 'Failed to load order details');
+          }
+        } catch (err) {
+          setError(`Failed to load order details: ${err.message}`);
+        }
+      }
+    };
+
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([loadProductsByTypeAndRole(), loadAllOrders(), loadOrderDetails()]);
+      setLoading(false);
+    };
+
+    loadData();
+  }, [activeRole, order_id, createdOrderId]);
+
+  // Load order for editing based on order_id
+  useEffect(() => {
+    if (order_id || createdOrderId) {
+      const idToUse = order_id ? Number(order_id) : createdOrderId;
+      const matchedOrder = allOrders.find((order) => order.order_id === idToUse);
+      if (matchedOrder) {
+        setOrderData(matchedOrder);
+        setValue('order_title', matchedOrder.order_title || '');
+        setValue('customer_name', matchedOrder.customer_name || '');
+        setValue('address', matchedOrder.address || '');
+        setValue('billing_address', matchedOrder.billing_address || '');
+      } else if (allOrders.length > 0) {
+        setError(`Order with ID ${idToUse} not found`);
+      }
+    }
+  }, [order_id, createdOrderId, allOrders, setValue]);
+
+  const handleDelete = async () => {
+    const orderIdToUse = order_id ? Number(order_id) : createdOrderId;
+    if (!orderIdToUse) {
+      setError('No order ID available for deletion');
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('access_token');
-      const products = await fetchProductsByTypeAndRole({
-        baseUrl: BASE_URL,
-        typeId: selectedTypeId,
-        role: activeRole,
-        token,
+      const response = await fetch(`${BASE_URL}/orders/delete-order?order_id=${orderIdToUse}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+        },
       });
-      setProducts(products);
-      setLoading(false);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to delete order: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('Order deleted:', result);
+
+      // Refresh orders list
+      const ordersResponse = await fetch(`${BASE_URL}/orders/get-order`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const ordersResult = await ordersResponse.json();
+      if (ordersResult.status_code === 200 && Array.isArray(ordersResult.data)) {
+        setAllOrders(ordersResult.data);
+      }
+
+      reset();
+      setOrderData(null);
+      setExistingDetails([]);
+      setCreatedOrderId(null);
+      localStorage.removeItem('createdOrderId');
+      navigate('/sales/orders');
     } catch (err) {
-      console.error("API Error:", err);
-      setError(`Failed to load products: ${err.message}`);
-      setLoading(false);
+      setError(`Delete failed: ${err.message}`);
+      console.error('Delete failed:', err);
     }
   };
 
-  useEffect(() => {
-      fetch(`${BASE_URL}/users/my-info`,{
-        headers: {
-          'ngrok-skip-browser-warning': 'true',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`
+  const handleSaveOrder = async () => {
+    try {
+      const orderIdToUse = order_id ? Number(order_id) : createdOrderId;
+      let response;
+      const updatedData = {
+        order_title: formValues.order_title || '',
+        status: 'draft',
+        customer_name: formValues.customer_name || '',
+        address: formValues.address || '',
+        billing_address: formValues.billing_address || '',
+        details: existingDetails.map((detail) => ({
+          product_id: detail.product_id || 0,
+          quantity: detail.quantity || 0,
+          price_for_customer: detail.price_for_customer || 0,
+          service_contract_duration: detail.service_contract_duration || 0,
+        })),
+      };
+
+      const updatedData2 = {
+        order_id: orderIdToUse,
+        order_title: formValues.order_title || '',
+        status: 'draft',
+        customer_name: formValues.customer_name || '',
+        address: formValues.address || '',
+        billing_address: formValues.billing_address || '',
+        details: existingDetails.map((detail) => ({
+          product_id: detail.product_id || 0,
+          quantity: detail.quantity || 0,
+          price_for_customer: detail.price_for_customer || 0,
+          service_contract_duration: detail.service_contract_duration || 0,
+        })),
+      };
+
+      if (orderIdToUse) {
+        response = await fetch(`${BASE_URL}/orders/update-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+          body: JSON.stringify(updatedData2),
+        });
+      } else {
+        console.log('Create Order Input:', updatedData);
+        response = await fetch(`${BASE_URL}/orders/create-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+          body: JSON.stringify(updatedData),
+        });
+      }
+
+      const result = await response.json();
+      // if (!response.ok || result.status_code !== 200) {
+      //   throw new Error(result.message || 'Failed to save order');
+      // }
+
+      if (!orderIdToUse) {
+        const newOrderId = result.data.order_id || result.data.id;
+        if (newOrderId) {
+          setCreatedOrderId(newOrderId);
+          localStorage.setItem('createdOrderId', newOrderId);
         }
-      })
-        .then(res => res.json())
-        .then(data => setUser(data.data));
-  }, []);
+      }
+
+      // Refresh orders list
+      const ordersResponse = await fetch(`${BASE_URL}/orders/get-order`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const ordersResult = await ordersResponse.json();
+      if (ordersResult.status_code === 200 && Array.isArray(ordersResult.data)) {
+        setAllOrders(ordersResult.data);
+      }
+
+      reset();
+      setOrderData(null);
+      setExistingDetails([]);
+      setCreatedOrderId(null);
+      localStorage.removeItem('createdOrderId');
+      navigate('/sales/orders');
+    } catch (err) {
+      setError(`Failed to save order: ${err.message}`);
+    }
+  };
+
+  const handleSubmitOrder = async () => {
+    try {
+      const orderIdToUse = order_id ? Number(order_id) : createdOrderId;
+      let response;
+      const updatedData = {
+        order_id: orderIdToUse,
+        order_title: formValues.order_title || '',
+        status: 'submitted',
+        customer_name: formValues.customer_name || '',
+        address: formValues.address || '',
+        billing_address: formValues.billing_address || '',
+        details: existingDetails.map((detail) => ({
+          product_id: detail.product_id || 0,
+          quantity: detail.quantity || 0,
+          price_for_customer: detail.price_for_customer || 0,
+          service_contract_duration: detail.service_contract_duration || 0,
+        })),
+      };
+
+      if (orderIdToUse) {
+        response = await fetch(`${BASE_URL}/orders/update-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+          body: JSON.stringify(updatedData),
+        });
+      } else {
+        console.log('Create Order Input (submitted):', updatedData);
+        response = await fetch(`${BASE_URL}/orders/create-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+          body: JSON.stringify(updatedData),
+        });
+      }
+
+      const result = await response.json();
+      if (!response.ok || result.status_code !== 200) {
+        throw new Error(result.message || 'Failed to submit order');
+      }
+
+      if (!orderIdToUse) {
+        const newOrderId = result.data.order_id || result.data.id;
+        if (newOrderId) {
+          setCreatedOrderId(newOrderId);
+          localStorage.setItem('createdOrderId', newOrderId);
+        }
+      }
+
+      // Refresh orders list
+      const ordersResponse = await fetch(`${BASE_URL}/orders/get-order`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const ordersResult = await ordersResponse.json();
+      if (ordersResult.status_code === 200 && Array.isArray(ordersResult.data)) {
+        setAllOrders(ordersResult.data);
+      }
+
+      reset();
+      setOrderData(null);
+      setExistingDetails([]);
+      setCreatedOrderId(null);
+      localStorage.removeItem('createdOrderId');
+      navigate('/sales/orders');
+    } catch (err) {
+      setError(`Failed to submit order: ${err.message}`);
+    }
+  };
 
   const handleAddOrderClick = () => {
     setIsDialogOpen(true);
   };
-  console.log("user", user)
-  const handleSubmitOrder = (orderData) => {
-    console.log('Dữ liệu đơn hàng gửi:', orderData);
+
+  const handleDialogSubmit = (data) => {
+    const updatedDetails = [...existingDetails];
+    data.details.forEach((newDetail) => {
+      const existingIndex = updatedDetails.findIndex(
+        (d) => d.product_id === newDetail.product_id
+      );
+      if (existingIndex >= 0) {
+        updatedDetails[existingIndex].quantity += newDetail.quantity;
+        updatedDetails[existingIndex].price_for_customer = newDetail.price_for_customer;
+        updatedDetails[existingIndex].service_contract_duration = newDetail.service_contract_duration;
+      } else {
+        updatedDetails.push({
+          product_id: newDetail.product_id,
+          product_name: products.find((p) => p.product_id === newDetail.product_id)?.product_name || 'Unknown',
+          sku_partnumber: products.find((p) => p.product_id === newDetail.product_id)?.sku_partnumber || '-',
+          quantity: newDetail.quantity,
+          price_for_customer: newDetail.price_for_customer,
+          service_contract_duration: newDetail.service_contract_duration,
+        });
+      }
+    });
+    setExistingDetails(updatedDetails);
+    setOrderData({ ...data, details: updatedDetails });
     setIsDialogOpen(false);
   };
 
@@ -77,63 +404,96 @@ const AddOrder = () => {
     setActiveRole(newRole);
   };
 
-  const decode = decodeToken(token);
-
   const handleRefresh = () => {
-    if (selectedTypeId && activeRole) {
-      loadProducts();
-    }
+    setLoading(true);
+    setProducts([]);
+    setAllOrders([]);
+    setExistingDetails([]);
+    setError(null);
+
+    const loadData = async () => {
+      try {
+        const productsResponse = await fetch(`${BASE_URL}/products/get-products-by-role`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const productsResult = await productsResponse.json();
+        if (productsResult.status_code === 200 && Array.isArray(productsResult.data)) {
+          setProducts(productsResult.data);
+        }
+
+        const ordersResponse = await fetch(`${BASE_URL}/orders/get-order`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const ordersResult = await ordersResponse.json();
+        if (ordersResult.status_code === 200 && Array.isArray(ordersResult.data)) {
+          setAllOrders(ordersResult.data);
+        }
+
+        if (order_id || createdOrderId) {
+          const idToUse = order_id ? Number(order_id) : createdOrderId;
+          const detailsResponse = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${idToUse}`, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+              'ngrok-skip-browser-warning': 'true',
+            },
+          });
+          const detailsResult = await detailsResponse.json();
+          if (detailsResult.status_code === 200 && Array.isArray(detailsResult.data)) {
+            setExistingDetails(detailsResult.data);
+          }
+        }
+      } catch (err) {
+        setError(`Failed to refresh data: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   };
 
   return (
     <div>
       <Header />
-      <DasboardLayout activeMenu="Orders">
-        <div className='my-5 mx-auto'>
-          <div className="content p-20">
-            <div className="page-header flex justify-between items-center mb-10">
-                <div className="page-title">
-                  <h1 className='text-2xl font-semibold mb-2'>Order Details</h1>
-                  <div className="breadcrumb text-gray-500 text-sm hover:text-slate-500">
-                      <a href="#" className='text-gray-500'>Dashboard</a> / Order
-                  </div>
+      <DashboardLayout activeMenu="04">
+        <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="content py-6">
+            <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+              <div className="page-title">
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Order Details</h1>
+                <div className="breadcrumb text-sm text-gray-500">
+                  <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / Order
                 </div>
-                <button
-                  className="btn btn-primary max-w-[200px]"
-                  onClick={handleAddOrderClick}
-                >
-                  <i className="fas fa-plus"></i> Add item
-                </button>
+              </div>
             </div>
 
-            <div className="product-role flex space-x-2 bg-gray-50 p-4">
+            <div className="product-role flex space-x-2 bg-gray-50 p-4 rounded-md">
               <button
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`px-4 py-2 text-sm font-medium rounded-md ${
                   activeRole === 'sales'
                     ? 'bg-white shadow text-blue-600'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                 }`}
                 onClick={() => handleRoleChange('sales')}
               >
                 Sales
               </button>
-              <button
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeRole === 'channels'
-                    ? 'bg-white shadow text-blue-600'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                }`}
-                onClick={() => handleRoleChange('channels')}
-              >
-                Channels
-              </button>
             </div>
 
             {activeRole === 'sales' && (
-              <div className="flex justify-center">
-                <div className="w-full max-w-5xl">
-                  <h1 className="text-2xl font-semibold mb-6">Order Sales</h1>
-                  <div className="flex flex-col md:flex-row gap-8">
+              <div className="mt-6">
+                <div className="w-full max-w-4xl mx-auto">
+                  <h1 className="text-xl sm:text-2xl font-semibold mb-6">Order Sales</h1>
+                  <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1 space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Username Sales</label>
@@ -156,184 +516,194 @@ const AddOrder = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Order Title</label>
                         <input
-                          type="text"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                          {...register('order_title', { required: 'Order title is required' })}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter order title"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
                         />
+                        {errors.order_title && (
+                          <p className="text-red-600 text-sm mt-1">{errors.order_title.message}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Customer Name</label>
                         <input
-                          type="text"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                          {...register('customer_name')}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter customer name"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Address</label>
                         <input
-                          type="text"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                          {...register('address')}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter address"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Billing Address</label>
                         <input
-                          type="text"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                          {...register('billing_address')}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter billing address"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
                         />
                       </div>
                     </div>
                   </div>
+
+                  <div className="mt-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-medium text-gray-800">Order Details</h3>
+                      {(!orderData || orderData?.status === '') && (
+                        <button
+                          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2 touch-manipulation"
+                          onClick={handleAddOrderClick}
+                        >
+                          <i className="fas fa-plus"></i> Add Item
+                        </button>
+                      )}
+                    </div>
+                    {error && (
+                      <div className="p-4 bg-red-50 border-l-4 border-red-400 mb-4">
+                        <p className="text-sm text-red-700">{error}</p>
+                      </div>
+                    )}
+                    {loading ? (
+                      <div className="p-4 text-center text-gray-500">Loading order details...</div>
+                    ) : existingDetails.length === 0 ? (
+                      <p className="text-gray-500 text-sm">No products added yet.</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {existingDetails.map((detail, index) => (
+                              <tr key={index}>
+                                <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[150px]">
+                                  {detail.product_name || 'Unknown'}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{detail.sku_partnumber || '-'}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{detail.quantity || 0}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  ${(detail.price_for_customer || 0).toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  {detail.service_contract_duration || 0} years
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  ${((detail.price_for_customer || 0) * (detail.quantity || 0)).toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {(!orderData || orderData?.status === 'draft') && (
+                    <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+                      {/* <button
+                        onClick={handleDelete}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
+                        disabled={!order_id && !createdOrderId}
+                      >
+                        Discard
+                      </button> */}
+                      <button
+                        onClick={() => setShowConfirm(true)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
+                        disabled={!order_id && !createdOrderId}
+                      >
+                        Discard
+                      </button>
+
+                      <button
+                        onClick={handleSubmit(handleSaveOrder)}
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
+                        disabled={existingDetails.length === 0}
+                      >
+                        Save as Draft
+                      </button>
+                      <button
+                        onClick={handleSubmit(handleSubmitOrder)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
+                        disabled={existingDetails.length === 0}
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                
               </div>
             )}
 
             {activeRole === 'channels' && (
-              <div className="flex justify-center mt-8">
-                <div className="w-full max-w-5xl">
-                  <h1 className="text-2xl font-semibold mb-6">Order Channels</h1>
-                  <p className="text-gray-600">Kênh phân phối...</p>
+              <div className="mt-8">
+                <div className="w-full max-w-4xl mx-auto">
+                  <h1 className="text-xl sm:text-2xl font-semibold mb-6">Order Channels</h1>
+                  <p className="text-gray-600 text-sm sm:text-base">Channel distribution details...</p>
+                </div>
+              </div>
+            )}
+            {showConfirm && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+                  <h2 className="text-lg font-semibold mb-4">Xác nhận xóa</h2>
+                  <p className="mb-6">Bạn có chắc chắn muốn xóa đơn hàng này không?</p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowConfirm(false)}
+                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleDelete();
+                        setShowConfirm(false);
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                    >
+                      Xóa
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
-            <div className="card bg-white rounded-lg shadow-md overflow-hidden mb-6">
-              <div className="card-header flex items-center justify-between p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-800">Orders</h2>
-                <div className="tools flex space-x-2">
-                  <button 
-                    className="p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-md transition-colors"
-                    title="Export Excel"
-                  >
-                    <LuArrowDownToLine className="w-5 h-5" />
-                  </button>
-                  <button 
-                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors"
-                    title="Filter"
-                  >
-                    <LuArrowUpNarrowWide className="w-5 h-5" />
-                  </button>
-                  <button 
-                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors"
-                    title="Refresh"
-                    onClick={handleRefresh}
-                  >
-                    <LuRefreshCcw className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
 
-              <div className="card-body p-0">
-                {error && (
-                  <div className="p-4 bg-red-50 border-l-4 border-red-400">
-                    <div className="flex">
-                      <div className="ml-3">
-                        <p className="text-sm text-red-700">{error}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {loading && (
-                  <div className="p-8 text-center">
-                    <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-blue-500 bg-white">
-                      Loading orders...
-                    </div>
-                  </div>
-                )}
-
-                <div className="table-responsive overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{activeRole === 'sales' ? 'Sales' : 'Channel'}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Year</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {!loading && products.length === 0 ? (
-                        <tr>
-                          <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                            No orders found for the selected criteria
-                          </td>
-                        </tr>
-                      ) : (
-                        products.map((order, index) => (
-                          order.details.map((detail, detailIndex) => (
-                            <tr key={`${order.order_title}-${detail.product_id}-${detailIndex}`} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 text-sm text-gray-900">{index + 1}</td>
-                              <td className="px-6 py-4 text-sm text-gray-900">{order.order_title || '-'}</td>
-                              <td className="px-6 py-4 text-sm text-gray-900">{detail.product_id || '-'}</td>
-                              <td className="px-6 py-4 text-sm text-gray-900">{order.customer_name || '-'}</td>
-                              <td className="px-6 py-4 text-sm text-gray-900">{detail.quantity || '-'}</td>
-                              <td className="px-6 py-4 text-sm text-gray-900">{detail.service_contract_duration || '-'}</td>
-                              <td className="px-6 py-4 text-sm text-gray-900">
-                                {detail.price_for_customer && detail.quantity 
-                                  ? `${(detail.price_for_customer * detail.quantity).toLocaleString()}`
-                                  : '-'}
-                              </td>
-                            </tr>
-                          ))
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="pagination flex items-center justify-between px-4 py-3 border-t border-gray-200">
-                  <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm text-gray-700">
-                        Showing <span className="font-medium">1</span> to <span className="font-medium">{products.length}</span> of{' '}
-                        <span className="font-medium">{products.length}</span> results
-                      </p>
-                    </div>
-                    <div>
-                      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                        <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                          <span className="sr-only">First</span>
-                          <LuChevronsLeft className="w-5 h-5" />
-                        </button>
-                        <button className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                          <span className="sr-only">Previous</span>
-                          <LuChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">1</button>
-                        <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</button>
-                        <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</button>
-                        <button className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                          <span className="sr-only">Next</span>
-                          <LuChevronRight className="w-5 h-5" />
-                        </button>
-                        <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                          <span className="sr-only">Last</span>
-                          <LuChevronsRight className="w-5 h-5" />
-                        </button>
-                      </nav>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AddOrderDialog
+              open={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+              onSubmit={handleDialogSubmit}
+              activeRole={activeRole}
+              order_title={formValues.order_title}
+              customer_name={formValues.customer_name}
+              address={formValues.address}
+              billing_address={formValues.billing_address}
+              existingDetails={existingDetails}
+            />
           </div>
-          <AddOrderDialog
-            open={isDialogOpen}
-            onClose={() => setIsDialogOpen(false)}
-            onSubmit={handleSubmitOrder}
-            activeRole={activeRole}
-          />
         </div>
-      </DasboardLayout>
+      </DashboardLayout>
     </div>
-  )
-}
+  );
+};
 
-export default AddOrder
+export default AddOrder;

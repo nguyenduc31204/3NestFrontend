@@ -273,8 +273,8 @@ const Products = () => {
                                                             {types.find(t => t.type_id === selectedTypeId)?.type_name || '-'}
                                                         </td>
                                                         <td className="px-6 py-4 text-sm text-gray-900">{product.sku_partnumber || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title={product.description}>
-                                                            {product.description || '-'}
+                                                        <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title={product.desciption}>
+                                                            {product.desciption || '-'}
                                                         </td>
                                                         <td className="px-6 py-4 text-sm text-gray-900">
                                                             {product.price ? `${parseFloat(product.price).toLocaleString()}` : '-'}

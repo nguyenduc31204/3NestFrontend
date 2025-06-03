@@ -18,6 +18,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 const SalesAddOrder = () => {
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
   const { order_id } = useParams();
   const [activeRole, setActiveRole] = useState('sales');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -43,6 +44,9 @@ const SalesAddOrder = () => {
     defaultValues: {
       order_title: '',
       customer_name: '',
+      contact_name: '',
+      contact_email: '',
+      contact_phone: '',
       address: '',
       billing_address: '',
     },
@@ -50,7 +54,6 @@ const SalesAddOrder = () => {
 
   const formValues = watch();
 
-  // Fetch user, products, orders, and order details
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
@@ -130,7 +133,6 @@ const SalesAddOrder = () => {
     loadData();
   }, [activeRole, order_id, createdOrderId]);
 
-  // Load order for editing based on order_id
   useEffect(() => {
     if (order_id || createdOrderId) {
       const idToUse = order_id ? Number(order_id) : createdOrderId;
@@ -139,6 +141,9 @@ const SalesAddOrder = () => {
         setOrderData(matchedOrder);
         setValue('order_title', matchedOrder.order_title || '');
         setValue('customer_name', matchedOrder.customer_name || '');
+        setValue('contact_name', matchedOrder.contact_name || '');
+        setValue('contact_email', matchedOrder.contact_email || '');
+        setValue('contact_phone', matchedOrder.contact_phone || '');
         setValue('address', matchedOrder.address || '');
         setValue('billing_address', matchedOrder.billing_address || '');
       } else if (allOrders.length > 0) {
@@ -200,12 +205,14 @@ const SalesAddOrder = () => {
   const handleSaveOrder = async () => {
     try {
       const orderIdToUse = order_id ? Number(order_id) : createdOrderId;
-      console.log("orderIdToUse", orderIdToUse)
       let response;
       const updatedData = {
         order_title: formValues.order_title || '',
         status: 'draft',
         customer_name: formValues.customer_name || '',
+        contact_name: formValues.contact_name || '',
+        contact_email: formValues.contact_email || '',
+        contact_phone: formValues.contact_phone || '',
         address: formValues.address || '',
         billing_address: formValues.billing_address || '',
         details: existingDetails.map((detail) => ({
@@ -221,6 +228,9 @@ const SalesAddOrder = () => {
         order_title: formValues.order_title || '',
         status: 'draft',
         customer_name: formValues.customer_name || '',
+        contact_name: formValues.contact_name || '',
+        contact_email: formValues.contact_email || '',
+        contact_phone: formValues.contact_phone || '',
         address: formValues.address || '',
         billing_address: formValues.billing_address || '',
         details: existingDetails.map((detail) => ({
@@ -230,10 +240,8 @@ const SalesAddOrder = () => {
           service_contract_duration: detail.service_contract_duration || 0,
         })),
       };
-      console.log("update 2", updatedData2)
 
       if (orderIdToUse) {
-        updatedData.order_id = orderIdToUse;
         response = await fetch(`${BASE_URL}/orders/update-order`, {
           method: 'POST',
           headers: {
@@ -257,9 +265,9 @@ const SalesAddOrder = () => {
       }
 
       const result = await response.json();
-      if (!response.ok || result.status_code !== 200) {
-        throw new Error(result.message || 'Failed to save order');
-      }
+      // if (!response.ok || result.status_code !== 200) {
+      //   throw new Error(result.message || 'Failed to save order');
+      // }
 
       if (!orderIdToUse) {
         const newOrderId = result.data.order_id || result.data.id;
@@ -302,6 +310,9 @@ const SalesAddOrder = () => {
         order_title: formValues.order_title || '',
         status: 'submitted',
         customer_name: formValues.customer_name || '',
+        contact_name: formValues.contact_name || '',
+        contact_email: formValues.contact_email || '',
+        contact_phone: formValues.contact_phone || '',
         address: formValues.address || '',
         billing_address: formValues.billing_address || '',
         details: existingDetails.map((detail) => ({
@@ -397,7 +408,6 @@ const SalesAddOrder = () => {
         });
       }
     });
-    console.log("data", data)
     setExistingDetails(updatedDetails);
     setOrderData({ ...data, details: updatedDetails });
     setIsDialogOpen(false);
@@ -463,6 +473,7 @@ const SalesAddOrder = () => {
 
     loadData();
   };
+  console.log("order", orderData)
 
   return (
     <div>
@@ -522,6 +533,7 @@ const SalesAddOrder = () => {
                           {...register('order_title', { required: 'Order title is required' })}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter order title"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
                         />
                         {errors.order_title && (
                           <p className="text-red-600 text-sm mt-1">{errors.order_title.message}</p>
@@ -533,6 +545,34 @@ const SalesAddOrder = () => {
                           {...register('customer_name')}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter customer name"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Contact Name</label>
+                        <input
+                          {...register('contact_name')}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
+                          placeholder="Enter contact name"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Contact Email</label>
+                        <input
+                          {...register('contact_email')}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
+                          placeholder="Enter contact email"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Contact Phone</label>
+                        <input
+                          {...register('contact_phone')}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
+                          placeholder="Enter contact phone"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
                         />
                       </div>
                       <div>
@@ -541,6 +581,7 @@ const SalesAddOrder = () => {
                           {...register('address')}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter address"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
                         />
                       </div>
                       <div>
@@ -549,6 +590,7 @@ const SalesAddOrder = () => {
                           {...register('billing_address')}
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                           placeholder="Enter billing address"
+                          disabled={orderData?.status && orderData.status !== 'draft'}
                         />
                       </div>
                     </div>
@@ -557,12 +599,15 @@ const SalesAddOrder = () => {
                   <div className="mt-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-medium text-gray-800">Order Details</h3>
-                      <button
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2 touch-manipulation"
-                        onClick={handleAddOrderClick}
-                      >
-                        <i className="fas fa-plus"></i> Add Item
-                      </button>
+                      {!['submitted', 'accepted', 'draft'].includes(orderData?.status) && (
+                        <button
+                          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2 touch-manipulation"
+                          onClick={handleAddOrderClick}
+                        >
+                          <i className="fas fa-plus"></i> Add Item
+                        </button>
+                      )}
+
                     </div>
                     {error && (
                       <div className="p-4 bg-red-50 border-l-4 border-red-400 mb-4">
@@ -579,7 +624,7 @@ const SalesAddOrder = () => {
                           <thead className="bg-gray-50">
                             <tr>
                               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
                               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
                               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
                               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
@@ -592,7 +637,7 @@ const SalesAddOrder = () => {
                                 <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[150px]">
                                   {detail.product_name || 'Unknown'}
                                 </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">{detail.sku_partnumber || '-'}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{detail.description || '-'}</td>
                                 <td className="px-4 py-3 text-sm text-gray-900">{detail.quantity || 0}</td>
                                 <td className="px-4 py-3 text-sm text-gray-900">
                                   ${(detail.price_for_customer || 0).toLocaleString()}
@@ -611,30 +656,42 @@ const SalesAddOrder = () => {
                     )}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
-                    <button
-                      onClick={handleDelete}
-                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
-                      disabled={!order_id && !createdOrderId}
-                    >
-                      Discard
-                    </button>
-                    <button
-                      onClick={handleSubmit(handleSaveOrder)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
-                      disabled={existingDetails.length === 0}
-                    >
-                      Save as Draft
-                    </button>
-                    <button
-                      onClick={handleSubmit(handleSubmitOrder)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
-                      disabled={existingDetails.length === 0}
-                    >
-                      Submit
-                    </button>
-                  </div>
+                  {(!orderData || orderData?.status === 'draft' || orderData?.status === '') && (
+                    <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+                      {/* <button
+                        onClick={handleDelete}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
+                        disabled={!order_id && !createdOrderId}
+                      >
+                        Discard
+                      </button> */}
+                      <button
+                        onClick={() => setShowConfirm(true)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
+                        disabled={!order_id && !createdOrderId}
+                      >
+                        Discard
+                      </button>
+
+                      <button
+                        onClick={handleSubmit(handleSaveOrder)}
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
+                        disabled={existingDetails.length === 0}
+                      >
+                        Save as Draft
+                      </button>
+                      <button
+                        onClick={handleSubmit(handleSubmitOrder)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
+                        disabled={existingDetails.length === 0}
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                
               </div>
             )}
 
@@ -646,6 +703,32 @@ const SalesAddOrder = () => {
                 </div>
               </div>
             )}
+            {showConfirm && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+                  <h2 className="text-lg font-semibold mb-4">Xác nhận xóa</h2>
+                  <p className="mb-6">Bạn có chắc chắn muốn xóa đơn hàng này không?</p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowConfirm(false)}
+                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleDelete();
+                        setShowConfirm(false);
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
 
             <AddOrderDialog
               open={isDialogOpen}
@@ -654,6 +737,9 @@ const SalesAddOrder = () => {
               activeRole={activeRole}
               order_title={formValues.order_title}
               customer_name={formValues.customer_name}
+              contact_name={formValues.contact_name}
+              contact_email={formValues.contact_email}
+              contact_phone={formValues.contact_phone}
               address={formValues.address}
               billing_address={formValues.billing_address}
               existingDetails={existingDetails}

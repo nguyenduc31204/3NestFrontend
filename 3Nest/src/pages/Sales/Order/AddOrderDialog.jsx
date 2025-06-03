@@ -6,9 +6,11 @@ const AddOrderDialog = ({
   open,
   onClose,
   onSubmit,
-  activeRole,
   order_title,
   customer_name,
+  contact_name,
+  contact_email,
+  contact_phone,
   address,
   billing_address,
   existingDetails,
@@ -33,6 +35,7 @@ const AddOrderDialog = ({
   const [selectedTypeId, setSelectedTypeId] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [fileadd, setfilead] = useState()
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -143,9 +146,12 @@ const AddOrderDialog = ({
     const submissionData = {
       order_title,
       customer_name,
+      contact_name,
+      contact_email,
+      contact_phone,
       address,
       billing_address,
-      status: 'draft',
+      status: '',
       details: data.details
         .filter((detail) => detail.product_id)
         .map((detail) => ({
@@ -179,7 +185,7 @@ const AddOrderDialog = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleClose}
     >
       <div
@@ -266,21 +272,15 @@ const AddOrderDialog = ({
                     ${selectedProduct.price?.toLocaleString() || 'N/A'}
                   </p>
                 </div>
-                <div>
+                {/* <div>
                   <span className="font-medium text-gray-700">Max Discount:</span>
                   <p className="text-gray-900">{selectedProduct.maximum_discount || 0}%</p>
-                </div>
+                </div> */}
                 <div>
                   <span className="font-medium text-gray-700">Max Discount Price:</span>
                   <p className="text-gray-900 text-orange-600">
                     ${selectedProduct.maximum_discount_price?.toLocaleString() || 'N/A'}
                   </p>
-                </div>
-                <div>
-                  {/* <span className="font-medium text-gray-700">Status:</span> */}
-                  {/* <p className={`font-medium ${selectedProduct.status ? 'text-green-600' : 'text-red-600'}`}>
-                    {selectedProduct.status ? 'Active' : 'Inactive'}
-                  </p> */}
                 </div>
                 <div className="col-span-2">
                   <span className="font-medium text-gray-700">Description:</span>
@@ -346,15 +346,13 @@ const AddOrderDialog = ({
                       required: 'Contract duration is required',
                     })}
                     className="border border-gray-300 rounded px-2 py-1 w-full"
-                    defaultValue={field.service_contract_duration} // hoặc "" nếu bạn muốn placeholder
+                    defaultValue={field.service_contract_duration}
                   >
                     <option value="">Select duration</option>
                     <option value="1">1 year</option>
                     <option value="3">3 years</option>
                     <option value="5">5 years</option>
                   </select>
-
-                  
                   {errors.details?.[index]?.service_contract_duration && (
                     <p className="text-red-600 text-sm mt-1">{errors.details[index].service_contract_duration.message}</p>
                   )}
@@ -364,7 +362,7 @@ const AddOrderDialog = ({
                   onClick={() => remove(index)}
                   className="text-red-600 hover:text-red-800 font-semibold px-2 py-1 rounded hover:bg-red-50"
                 >
-                  Remove
+                  Clear
                 </button>
               </div>
             ))}

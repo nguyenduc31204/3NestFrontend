@@ -209,9 +209,7 @@ useEffect(() => {
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Title</th>
-                            {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th> */}
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th> */}
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
@@ -232,9 +230,7 @@ useEffect(() => {
                                 <td className="px-4 py-4 text-sm text-gray-900">#{order.order_id}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900">#{order.order_id}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.order_title || '-'}</td>
-                                {/* <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[120px]">{order.user_name || '-'}</td> */}
                                 <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.user_email || '-'}</td>
-                                {/* <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[120px]">{order.company_name || '-'}</td> */}
                                 <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[120px]">{order.customer_name || '-'}</td>
                                 <td className="px-4 py-4 text-sm">
                                   <span
@@ -259,30 +255,11 @@ useEffect(() => {
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900 flex flex-wrap gap-2">
                                   <button
-                                    className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm touch-manipulation"
-                                    onClick={() => setSelectedOrder(order)}
+                                    className="text-yellow-600 hover:text-yellow-800 text-xs sm:text-sm touch-manipulation"
+                                    onClick={() => navigate(`/sales/editorder/${order.order_id}`)}
                                   >
                                     View
                                   </button>
-                                  {order.status === 'draft' && (
-                                    <>
-                                      <button
-                                        className="text-yellow-600 hover:text-yellow-800 text-xs sm:text-sm touch-manipulation"
-                                        onClick={() => navigate(`/sales/editorder/${order.order_id}`)}
-                                      >
-                                        Edit
-                                      </button>
-                                      <button
-                                        className="text-green-600 hover:text-green-800 text-xs sm:text-sm touch-manipulation"
-                                        onClick={() => {
-                                          const updatedOrder = { ...order, status: 'submited' };
-                                          updateOrderStatus(updatedOrder);
-                                        }}
-                                      >
-                                        Submit
-                                      </button>
-                                    </>
-                                  )}
                                 </td>
                               </tr>
                             ))
@@ -322,30 +299,11 @@ useEffect(() => {
                             </div>
                             <div className="flex gap-2 mt-3">
                               <button
-                                className="text-blue-600 hover:text-blue-800 text-sm touch-manipulation"
-                                onClick={() => setSelectedOrder(order)}
+                                className="text-yellow-600 hover:text-yellow-800 text-sm touch-manipulation"
+                                onClick={() => navigate(`/sales/editorder/${order.order_id}`)}
                               >
                                 View
                               </button>
-                              {order.status === 'draft' && (
-                                <>
-                                  <button
-                                    className="text-yellow-600 hover:text-yellow-800 text-sm touch-manipulation"
-                                    onClick={() => navigate(`/sales/editorder/${order.order_id}`)}
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    className="text-green-600 hover:text-green-800 text-sm touch-manipulation"
-                                    onClick={() => {
-                                      const updatedOrder = { ...order, status: 'submited' };
-                                      updateOrderStatus(updatedOrder);
-                                    }}
-                                  >
-                                    Submit
-                                  </button>
-                                </>
-                              )}
                             </div>
                           </div>
                         ))
@@ -394,6 +352,18 @@ useEffect(() => {
                     <div>
                       <span className="font-medium text-gray-700 text-sm sm:text-base">Customer Name:</span>
                       <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.customer_name || '-'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700 text-sm sm:text-base">Contact Name:</span>
+                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.contact_name || '-'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700 text-sm sm:text-base">Contact Email:</span>
+                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.contact_email || '-'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700 text-sm sm:text-base">Contact Phone:</span>
+                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.contact_phone || '-'}</p>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700 text-sm sm:text-base">Address:</span>
