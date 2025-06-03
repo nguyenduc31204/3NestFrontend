@@ -1,167 +1,211 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { BASE_URL } from '../../utils/apiPath';
-import { fetchProductsByTypeAndRole } from '../../hook/fetchProduct';
+import { BASE_URL } from '../../../utils/apiPath';
 
-const defaultValues = {
-  details: [
-    { product_id: '', quantity: '', price_for_customer: '', service_contract_duration: '' },
-  ],
-};
-
-const AddOrderDialog = ({ open, onClose, onSubmit, activeRole  }) => {
-  const { register, control, handleSubmit, reset } = useForm({ defaultValues });
-  const { fields, append, remove } = useFieldArray({ control, name: 'details' });
-  const [loading, setLoading] = useState(true);
+const AddOrderDialog = ({
+  open,
+  onClose,
+  onSubmit,
+  order_title,
+  customer_name,
+  address,
+  billing_address,
+  existingDetails,
+}) => {
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      details: existingDetails || [],
+    },
+  });
+  const { fields, append, remove, update } = useFieldArray({ control, name: 'details' });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedTypeId, setSelectedTypeId] = useState(1);
   const [types, setTypes] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [isCategories, setIsCategories] = useState("");
   const [products, setProducts] = useState([]);
-  const [listProducts, setListProducts] = useState([]);
-  const [isProducts, setIsProducts] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState(null); // Thêm state để lưu sản phẩm được chọn
-  const { watch, setValue } = useForm();
+  const [selectedTypeId, setSelectedTypeId] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
-      const fetchTypes = async () => {
-          setLoading(true);
-          setError(null);
-          try {
-              const url = `${BASE_URL}/types/get-types`;
-              const response = await fetch(url, {
-                  method: 'GET',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'ngrok-skip-browser-warning': 'true'
-                  },
-              });
-
-              const result = await response.json();
-              if (!response.ok) {
-                  throw new Error(response.message || `HTTP error! status: ${response.status}`);
-              }
-
-              setTypes(result.data);
-          } catch (err) {
-              console.error("API Error:", err);
-              setError(err.message);
-          } finally {
-              setLoading(false);
-          }
-      };
-
-      fetchTypes();
+    const fetchTypes = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${BASE_URL}/types/get-types`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to fetch types');
+        setTypes(result.data || []);
+        if (result.data?.length > 0) setSelectedTypeId(result.data[0].type_id);
+      } catch (err) {
+        setError(`Failed to load types: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTypes();
   }, []);
 
   useEffect(() => {
-    if (selectedTypeId) {
-      fetch(`${BASE_URL}/categories/get-categories-by-type?type_id=${selectedTypeId}`,{
-        headers: {
-          'ngrok-skip-browser-warning': 'true'
-        }
-      })
-        .then(res => res.json())
-        .then(data => setCategories(data.data));
-      setValue("category_id", ""); 
-      setProducts([]);
-      // Reset product selection khi thay đổi type
-      setSelectedProduct(null);
-      setIsProducts("");
-      setIsCategories("");
-    }
+    if (!selectedTypeId) return;
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `${BASE_URL}/categories/get-categories-by-type?type_id=${selectedTypeId}`,
+          { headers: { 'ngrok-skip-browser-warning': 'true' } }
+        );
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Failed to fetch categories');
+        setCategories(result.data || []);
+        setSelectedCategory('');
+        setProducts([]);
+        setSelectedProduct(null);
+      } catch (err) {
+        setError(`Failed to load categories: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
   }, [selectedTypeId]);
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    if (!selectedCategory) return;
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `${BASE_URL}/products/get-products-by-role?category_name=${encodeURIComponent(selectedCategory)}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }
+        );
+        const result = await response.json();
+        if (result.status_code !== 200 || !Array.isArray(result.data)) {
+          throw new Error(result.message || 'Invalid product data');
+        }
+        setProducts(result.data);
+        setSelectedProduct(null);
+      } catch (err) {
+        setError(`Failed to load products: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [selectedCategory]);
 
-  const loadProducts = async () => {
-    try {
-      const token = localStorage.getItem('access_token');
-      const product = await fetchProductsByTypeAndRole({
-        baseUrl: BASE_URL,
-        typeId: selectedTypeId,
-        role: activeRole,
-        token,
-      });
-      setListProducts(product);
-    } catch (err) {
-      console.error("API Error:", err);
-      setError(`Failed to load products: ${err.message}`);
-    }
-  };
-
-  useEffect(() => {
-    if (isCategories) {
-      const filtered = listProducts.filter(
-        (product1) => product1.category_name == (isCategories)
-      );
-      setProducts(filtered);
-    } else {
-      setProducts([]);
-      // Reset product selection khi không có category
-      setSelectedProduct(null);
-      setIsProducts("");
-    }
-  }, [isCategories, listProducts]);
-
-  // Hàm xử lý khi chọn sản phẩm
   const handleProductChange = (productId) => {
-    setIsProducts(productId);
-    
-    // Tìm sản phẩm được chọn từ danh sách products
-    const selected = products.find(product => product.product_id.toString() === productId);
-    setSelectedProduct(selected);
+    const product = products.find((p) => p.product_id.toString() === productId);
+    setSelectedProduct(product || null);
+
+    if (!product) {
+      setError('Please select a valid product.');
+      return;
+    }
+
+    const existingDetailIndex = fields.findIndex(
+      (field) => field.product_id.toString() === product.product_id.toString()
+    );
+
+    if (existingDetailIndex >= 0) {
+      update(existingDetailIndex, {
+        ...fields[existingDetailIndex],
+        quantity: (parseInt(fields[existingDetailIndex].quantity) || 0) + 1,
+      });
+    } else {
+      append({
+        product_id: product.product_id,
+        quantity: 1,
+        price_for_customer: product.price || 0,
+        service_contract_duration: 0,
+      });
+    }
   };
 
   const submitHandler = (data) => {
-    onSubmit(data);
-    reset();
-    // Reset selected product khi submit
-    setSelectedProduct(null);
-    setIsProducts("");
+    const submissionData = {
+      order_title,
+      customer_name,
+      address,
+      billing_address,
+      status: 'draft',
+      details: data.details
+        .filter((detail) => detail.product_id)
+        .map((detail) => ({
+          product_id: parseInt(detail.product_id) || 0,
+          quantity: parseInt(detail.quantity) || 0,
+          price_for_customer: parseFloat(detail.price_for_customer) || 0,
+          service_contract_duration: parseInt(detail.service_contract_duration) || 0,
+        })),
+    };
+
+    if (submissionData.details.length === 0) {
+      setError('At least one product is required.');
+      return;
+    }
+
+    onSubmit(submissionData);
+    handleClose();
   };
 
   const handleClose = () => {
-    // Reset tất cả state khi đóng dialog
+    setSelectedTypeId('');
+    setSelectedCategory('');
+    setProducts([]);
     setSelectedProduct(null);
-    setIsProducts("");
-    setIsCategories("");
-    setSelectedTypeId(1);
-    reset();
+    reset({ details: existingDetails || [] });
+    setError(null);
     onClose();
   };
 
-  if (!open) return null; 
+  if (!open) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+    <div
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleClose}
     >
       <div
         className="bg-white rounded-lg shadow-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-auto"
-        onClick={e => e.stopPropagation()} 
+        onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-semibold mb-4">Add New Item</h2>
+        <h2 className="text-xl font-semibold mb-4">Add Order Details</h2>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-400 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        {loading && <div className="mb-4 text-center text-blue-500">Loading...</div>}
 
         <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block mb-1 text-sm font-medium">Type</label>
+              <label className="block text-sm font-medium">Type</label>
               <select
-                name="type_id"
-                onChange={(e) => setSelectedTypeId(parseInt(e.target.value))}
                 value={selectedTypeId}
+                onChange={(e) => setSelectedTypeId(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-2 w-full"
+                disabled={loading}
               >
-                {!selectedTypeId && (
-                  <option value="" disabled hidden>
-                    Select a type
-                  </option>
-                )}
+                <option value="" disabled>Select a type</option>
                 {types.map((type) => (
                   <option key={type.type_id} value={type.type_id}>
                     {type.type_name}
@@ -169,38 +213,31 @@ const AddOrderDialog = ({ open, onClose, onSubmit, activeRole  }) => {
                 ))}
               </select>
             </div>
-
             <div>
-              <label className="block mb-1 text-sm font-medium">Category</label>
+              <label className="block text-sm font-medium">Category</label>
               <select
-                name="category_id"
-                onChange={(e) => setIsCategories(e.target.value)}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-2 w-full"
-                value={isCategories}
+                disabled={loading || !selectedTypeId}
               >
-                  <option value="">
-                    Select a category
-                  </option>
+                <option value="">Select a category</option>
                 {categories.map((category) => (
-                  <option key={category.category_name} value={category.category_name}>
+                  <option key={category.category_id} value={category.category_name}>
                     {category.category_name}
                   </option>
                 ))}
               </select>
             </div>
-
             <div>
-              <label className="block mb-1 text-sm font-medium">Product</label>
+              <label className="block text-sm font-medium">Product</label>
               <select
-                name="products_id"
+                value={selectedProduct?.product_id || ''}
                 onChange={(e) => handleProductChange(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-2 w-full"
-                value={isProducts}
-                disabled={!isCategories} 
+                disabled={loading || !selectedCategory}
               >
-                <option value="">
-                  Select a product
-                </option>
+                <option value="">Select a product</option>
                 {products.map((product) => (
                   <option key={product.product_id} value={product.product_id}>
                     {product.product_name}
@@ -208,12 +245,9 @@ const AddOrderDialog = ({ open, onClose, onSubmit, activeRole  }) => {
                 ))}
               </select>
             </div>
-            
-            
           </div>
 
-          {/* Hiển thị thông tin chi tiết sản phẩm được chọn - chỉ hiển thị khi có category và product được chọn */}
-          {selectedProduct && isCategories && (
+          {selectedProduct && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
               <h3 className="font-semibold text-blue-800 mb-3">Product Information</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -233,7 +267,7 @@ const AddOrderDialog = ({ open, onClose, onSubmit, activeRole  }) => {
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">Max Discount:</span>
-                  <p className="text-gray-900">{selectedProduct.maximum_discount}%</p>
+                  <p className="text-gray-900">{selectedProduct.maximum_discount || 0}%</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">Max Discount Price:</span>
@@ -241,51 +275,81 @@ const AddOrderDialog = ({ open, onClose, onSubmit, activeRole  }) => {
                     ${selectedProduct.maximum_discount_price?.toLocaleString() || 'N/A'}
                   </p>
                 </div>
-                <div>
-                  <span className="font-medium text-gray-700">Status:</span>
-                  <p className={`font-medium ${selectedProduct.status ? 'text-green-600' : 'text-red-600'}`}>
-                    {selectedProduct.status ? 'Active' : 'Inactive'}
-                  </p>
-                </div>
                 <div className="col-span-2">
                   <span className="font-medium text-gray-700">Description:</span>
-                  <p className="text-gray-900 mt-1">{selectedProduct.description}</p>
+                  <p className="text-gray-900 mt-1">{selectedProduct.desciption || 'No description available'}</p>
                 </div>
               </div>
             </div>
           )}
 
           <div>
-            <h3 className="font-medium mb-2">Details</h3>
+            <h3 className="font-medium mb-2">Order Details</h3>
+            {fields.length === 0 && <p className="text-gray-500 text-sm mb-2">No products added yet.</p>}
             {fields.map((field, index) => (
               <div key={field.id} className="grid grid-cols-5 gap-2 mb-2 items-end">
-                <input
-                  {...register(`details.${index}.product_id`)}
-                  placeholder="Product ID"
-                  className="border border-gray-300 rounded px-2 py-1"
-                  value={selectedProduct ? selectedProduct.product_id : ''}
-                  readOnly={!!selectedProduct}
-                />
-                <input
-                  {...register(`details.${index}.quantity`)}
-                  placeholder="Quantity"
-                  type="number"
-                  min="1"
-                  className="border border-gray-300 rounded px-2 py-1"
-                />
-                <input
-                  {...register(`details.${index}.price_for_customer`)}
-                  placeholder="Price"
-                  type="number"
-                  step="0.01"
-                  className="border border-gray-300 rounded px-2 py-1"
-                  defaultValue={selectedProduct ? selectedProduct.price : ''}
-                />
-                <input
-                  {...register(`details.${index}.service_contract_duration`)}
-                  placeholder="Contract Duration"
-                  className="border border-gray-300 rounded px-2 py-1"
-                />
+                <div>
+                  <span className="font-medium text-gray-700">Product:</span>
+                  <p className="text-gray-900">
+                    {products.find((p) => p.product_id.toString() === field.product_id.toString())?.product_name ||
+                      'Unknown'}
+                  </p>
+                  <input
+                    {...register(`details.${index}.product_id`, { required: 'Product ID is required' })}
+                    type="hidden"
+                    value={field.product_id}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">Quantity</label>
+                  <input
+                    {...register(`details.${index}.quantity`, {
+                      required: 'Quantity is required',
+                      min: { value: 1, message: 'Quantity must be at least 1' },
+                    })}
+                    type="number"
+                    min="1"
+                    className="border border-gray-300 rounded px-2 py-1 w-full"
+                    defaultValue={field.quantity}
+                  />
+                  {errors.details?.[index]?.quantity && (
+                    <p className="text-red-600 text-sm mt-1">{errors.details[index].quantity.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">Price</label>
+                  <input
+                    {...register(`details.${index}.price_for_customer`, {
+                      required: 'Price is required',
+                      min: { value: 0, message: 'Price cannot be negative' },
+                    })}
+                    type="number"
+                    step="0.01"
+                    className="border border-gray-300 rounded px-2 py-1 w-full"
+                    defaultValue={field.price_for_customer}
+                  />
+                  {errors.details?.[index]?.price_for_customer && (
+                    <p className="text-red-600 text-sm mt-1">{errors.details[index].price_for_customer.message}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">Contract Duration</label>
+                  <select
+                    {...register(`details.${index}.service_contract_duration`, {
+                      required: 'Contract duration is required',
+                    })}
+                    className="border border-gray-300 rounded px-2 py-1 w-full"
+                    defaultValue={field.service_contract_duration}
+                  >
+                    <option value="">Select duration</option>
+                    <option value="1">1 year</option>
+                    <option value="3">3 years</option>
+                    <option value="5">5 years</option>
+                  </select>
+                  {errors.details?.[index]?.service_contract_duration && (
+                    <p className="text-red-600 text-sm mt-1">{errors.details[index].service_contract_duration.message}</p>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => remove(index)}
@@ -295,18 +359,6 @@ const AddOrderDialog = ({ open, onClose, onSubmit, activeRole  }) => {
                 </button>
               </div>
             ))}
-            <button
-              type="button"
-              onClick={() => append({ 
-                product_id: selectedProduct ? selectedProduct.product_id : '', 
-                quantity: '', 
-                price_for_customer: selectedProduct ? selectedProduct.price : '', 
-                service_contract_duration: '' 
-              })}
-              className="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Add Detail
-            </button>
           </div>
 
           <div className="flex justify-end space-x-2 mt-6">
@@ -319,9 +371,10 @@ const AddOrderDialog = ({ open, onClose, onSubmit, activeRole  }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
+              disabled={loading || fields.length === 0}
             >
-              Save
+              Add
             </button>
           </div>
         </form>
