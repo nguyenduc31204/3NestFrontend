@@ -27,6 +27,14 @@ const AddOrderDialog = ({
     },
   });
   const { fields, append, remove, update } = useFieldArray({ control, name: 'details' });
+  const { fields: fields_tmp, remove: removeTmp,  replace: replaceTmp } = useFieldArray({
+    control,
+    name: 'tmp',
+  });
+  const copyToTmp = () => {
+    replaceTmp([...fields]); 
+  };
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [types, setTypes] = useState([]);
@@ -124,12 +132,14 @@ const AddOrderDialog = ({
     }
 
     const existingDetailIndex = fields.findIndex(
-      (field) => field.product_id.toString() === product.product_id.toString()
+      (field) => field.product_id.toString() === product.product_id.toString(),
+      (fields_tmp) => fields_tmp.product_id.toString() === product.product_id.toString()
     );
 
     if (existingDetailIndex >= 0) {
       update(existingDetailIndex, {
         ...fields[existingDetailIndex],
+        ...fields_tmp[existingDetailIndex],
         quantity: (parseInt(fields[existingDetailIndex].quantity) || 0) + 1,
       });
     } else {
@@ -168,6 +178,9 @@ const AddOrderDialog = ({
     }
 
     onSubmit(submissionData);
+      setTimeout(() => {
+        remove(); // Xoá tất cả items
+      }, 0);
     handleClose();
   };
 
