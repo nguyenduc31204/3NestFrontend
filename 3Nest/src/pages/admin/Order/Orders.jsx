@@ -20,44 +20,48 @@ import { decodeToken } from '../../../utils/help';
 const Orders = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState(null); 
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [activeRole, setActiveRole] = useState('admin');
 
   const token = localStorage.getItem('access_token');
   const decodedToken = decodeToken(token);
   const userId = decodedToken?.user_id;
+  const role = decodedToken?.role; // Assuming role is included in the decoded token
 
   useEffect(() => {
-    loadOrdersByUser();
-  }, []);
+    loadOrdersByRole();
+  }, [activeRole]);
 
-  const loadOrdersByUser = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch(`${BASE_URL}/orders/get-orders`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-      const result = await response.json();
-      if (result.status_code === 200 && Array.isArray(result.data)) {
-        setOrders(result.data);
-      } else {
-        throw new Error(result.message || 'Invalid orders data format');
-      }
-    } catch (err) {
-      setError(`Failed to load orders: ${err.message}`);
-    } finally {
-      setLoading(false);
+  const loadOrdersByRole = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    const response = await fetch(`${BASE_URL}/orders/orders-by-role?role=${activeRole}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+      },
+    });
+    const result = await response.json();
+    if (result.status_code === 200 && Array.isArray(result.data)) {
+      const filteredOrders = activeRole === 'admin'
+        ? result.data 
+        : result.data.filter(order => order.status !== 'draft');
+      setOrders(filteredOrders);
+    } else {
+      throw new Error(result.message || 'Invalid orders data format');
     }
-  };
-  
+  } catch (err) {
+    setError(`Failed to load orders: ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const updateOrderStatus = async (newStatus) => {
     try {
@@ -74,14 +78,14 @@ const Orders = () => {
       if (!response.ok || result.status_code !== 200) {
         throw new Error(result.message || 'Failed to update status');
       }
-      loadOrdersByUser();
+      loadOrdersByRole();
     } catch (err) {
       setError(`Failed to update status: ${err.message}`);
     }
   };
 
   const loadProductChoose = async (pro_id) => {
-  try {
+    try {
       const response = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${pro_id}`, {
         method: 'GET',
         headers: {
@@ -92,46 +96,44 @@ const Orders = () => {
       });
       const result = await response.json();
       if (!response.ok || result.status_code !== 200) {
-        throw new Error(result.message || 'Failed to update status');
+        throw new Error(result.message || 'Failed to load order details');
       }
-      setProducts(result.data)
-      console.log("result", products)
+      setProducts(result.data);
     } catch (err) {
-      setError(`Failed to update status: ${err.message}`);
+      setError(`Failed to load order details: ${err.message}`);
     }
   };
-  // loadProductChoose(selectedOrder.order_id)
-useEffect(() => {
-  if (selectedOrder?.order_id) {
-    loadProductChoose(selectedOrder.order_id);
-  }
-}, [selectedOrder]);
 
-  
-
-  console.log("order", orders)
+  useEffect(() => {
+    if (selectedOrder?.order_id) {
+      loadProductChoose(selectedOrder.order_id);
+    }
+  }, [selectedOrder]);
 
   const handleRefresh = () => {
-    loadOrdersByUser();
-  };  
-  console.log("selectedOrder", selectedOrder)
+    loadOrdersByRole();
+  };
+
+  const handleRoleChange = (role) => {
+    setActiveRole(role);
+  };
 
   return (
-<div>
+    <div>
       <Header />
       <DashboardLayout activeMenu="04">
         <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="content py-6">
             <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
               <div className="page-title">
-                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Sales Orders Management</h1>
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Orders Management</h1>
                 <div className="breadcrumb text-sm text-gray-500">
                   <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / My Orders
                 </div>
               </div>
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm sm:text-base flex items-center gap-2 touch-manipulation"
-                onClick={() => navigate('/sales/addorder')}
+                onClick={() => navigate('/admin/addorder')}
               >
                 <i className="fas fa-plus"></i> Add New Order
               </button>
@@ -167,20 +169,56 @@ useEffect(() => {
 
             <div className="card bg-white rounded-lg shadow-md overflow-hidden mb-6">
               <div className="card-header flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-gray-200 gap-4">
-                <h2 className="text-lg font-semibold text-gray-800">My Orders</h2>
-                <div className="tools flex space-x-2">
-                  <button className="p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-md touch-manipulation">
-                    <LuArrowDownToLine className="w-5 h-5" />
-                  </button>
-                  <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md touch-manipulation">
-                    <LuArrowUpNarrowWide className="w-5 h-5" />
-                  </button>
-                  <button
-                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md touch-manipulation"
-                    onClick={handleRefresh}
-                  >
-                    <LuRefreshCcw className="w-5 h-5" />
-                  </button>
+                <h2 className="text-lg font-semibold text-gray-800">Amin Orders</h2>
+                <div className="flex flex-col gap-4">
+                  {role === 'admin' && (
+                    <div className="product-role flex space-x-2 bg-gray-50 p-2 rounded-md">
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          activeRole === 'admin'
+                            ? 'bg-white shadow text-blue-600'
+                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleRoleChange('admin')}
+                      >
+                        Admin
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          activeRole === 'sales'
+                            ? 'bg-white shadow text-blue-600'
+                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleRoleChange('sales')}
+                      >
+                        Sales
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          activeRole === 'channels'
+                            ? 'bg-white shadow text-blue-600'
+                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleRoleChange('channels')}
+                      >
+                        Channels
+                      </button>
+                    </div>
+                  )}
+                  <div className="tools flex space-x-2">
+                    <button className="p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-md touch-manipulation">
+                      <LuArrowDownToLine className="w-5 h-5" />
+                    </button>
+                    <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md touch-manipulation">
+                      <LuArrowUpNarrowWide className="w-5 h-5" />
+                    </button>
+                    <button
+                      className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md touch-manipulation"
+                      onClick={handleRefresh}
+                    >
+                      <LuRefreshCcw className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -225,9 +263,9 @@ useEffect(() => {
                               </td>
                             </tr>
                           ) : (
-                            orders.map((order) => (
+                            orders.map((order, index) => (
                               <tr key={order.order_id} className="hover:bg-gray-50">
-                                <td className="px-4 py-4 text-sm text-gray-900">#{order.order_id}</td>
+                                <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900">#{order.order_id}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.order_title || '-'}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.user_email || '-'}</td>
@@ -244,7 +282,7 @@ useEffect(() => {
                                         : 'bg-red-100 text-red-800'
                                     }`}
                                   >
-                                    {order.status === 'draft' ? 'Draft' : order.status === 'submited' ? 'Submited' : order.status === 'accepted' ? 'Accepted' : order.status || 'Unknown'}
+                                    {order.status === 'draft' ? 'Draft' : order.status === 'submited' ? 'Submitted' : order.status === 'accepted' ? 'Accepted' : order.status || 'Unknown'}
                                   </span>
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900">
@@ -254,9 +292,15 @@ useEffect(() => {
                                   {new Date(order.created_at).toLocaleDateString() || '--'}
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900 flex flex-wrap gap-2">
-                                  <button
+                                  {/* <button
                                     className="text-yellow-600 hover:text-yellow-800 text-xs sm:text-sm touch-manipulation"
-                                    onClick={() => navigate(`/sales/editorder/${order.order_id}`)}
+                                    onClick={() => setSelectedOrder(order)}
+                                  >
+                                    View Details
+                                  </button> */}
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm touch-manipulation"
+                                    onClick={() => navigate(`/admin/editorder/${order.order_id}`)}
                                   >
                                     View
                                   </button>
@@ -300,7 +344,13 @@ useEffect(() => {
                             <div className="flex gap-2 mt-3">
                               <button
                                 className="text-yellow-600 hover:text-yellow-800 text-sm touch-manipulation"
-                                onClick={() => navigate(`/sales/editorder/${order.order_id}`)}
+                                onClick={() => setSelectedOrder(order)}
+                              >
+                                View Details
+                              </button>
+                              <button
+                                className="text-blue-600 hover:text-blue-800 text-sm touch-manipulation"
+                                onClick={() => navigate(`/admin/editorder/${order.order_id}`)}
                               >
                                 View
                               </button>

@@ -1,41 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch, FiBell, FiMessageSquare, FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../../utils/apiPath';
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const currentUser = {
-    name: 'Admin User',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-    role: 'admin',
-  };
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        setError('No authentication token found');
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${BASE_URL}/users/my-info`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+
+        const result = await response.json();
+        console.log('User Info API Response:', result);
+
+        if (response.ok && result.status_code === 200) {
+          setCurrentUser({
+            name: result.data.name || 'Unknown User',
+            avatar: result.data.avatar || '',
+            role: result.data.role || 'user',
+          });
+        } else {
+          throw new Error(result.message || 'Failed to fetch user info');
+        }
+      } catch (err) {
+        setError(err.message || 'An error occurred');
+        localStorage.removeItem('access_token');
+        navigate('/login');
+      }
+    };
+
+    fetchUserInfo();
+  }, [navigate]);
 
   const handleLogout = () => {
     // Clear localStorage
     localStorage.removeItem('access_token');
     localStorage.removeItem('createdOrderId');
 
-    // Optional: Server-side logout (uncomment if needed)
-    // try {
-    //   await fetch(`${BASE_URL}/auth/logout`, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-    //       'ngrok-skip-browser-warning': 'true',
-    //     },
-    //   });
-    // } catch (error) {
-    //   console.error('Server-side logout failed:', error);
-    // }
-
     // Close dropdown and navigate to login
     setIsDropdownOpen(false);
     navigate('/login');
   };
+
+  if (error) {
+    return null; // Navigate will handle redirection
+  }
+
+  if (!currentUser) {
+    return <div className="p-4 text-center text-gray-500">Loading user info...</div>;
+  }
+
+  // Xác định đường dẫn settings dựa trên role
+  const settingsPath = currentUser.role === 'admin' ? '/admin/settings' :
+                      currentUser.role === 'sales' ? '/sales/settings' :
+                      currentUser.role === 'channel' ? '/channel/settings' :
+                      '/profile'; // Mặc định nếu role không khớp
 
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between p-4 bg-white shadow-sm border-b border-gray-100">
@@ -46,7 +84,7 @@ const Header = () => {
             alt="3NestInvest Logo"
             className="h-8 w-auto"
             onError={(e) => {
-              e.target.src = ''; 
+              e.target.src = '';
               e.target.onerror = null;
             }}
           />
@@ -89,7 +127,7 @@ const Header = () => {
               alt="User avatar"
               className="w-8 h-8 rounded-full object-cover border-2 border-blue-500"
               onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/40?text=User'; // Fallback avatar
+                e.target.src = '';
                 e.target.onerror = null;
               }}
             />
@@ -106,19 +144,11 @@ const Header = () => {
               </div>
 
               <NavLink
-                to="/profile"
+                to={settingsPath}
                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => setIsDropdownOpen(false)}
               >
-                <FiUser className="mr-2" /> Profile
-              </NavLink>
-
-              <NavLink
-                to="/settings"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setIsDropdownOpen(false)}
-              >
-                <FiSettings className="mr-2" /> Settings
+                <FiSettings className="mr-2" /> Profile
               </NavLink>
 
               <button

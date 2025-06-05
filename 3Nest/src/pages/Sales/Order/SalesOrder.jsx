@@ -225,9 +225,9 @@ useEffect(() => {
                               </td>
                             </tr>
                           ) : (
-                            orders.map((order) => (
+                            orders.map((order, index) => (
                               <tr key={order.order_id} className="hover:bg-gray-50">
-                                <td className="px-4 py-4 text-sm text-gray-900">#{order.order_id}</td>
+                                <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900">#{order.order_id}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.order_title || '-'}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.user_email || '-'}</td>

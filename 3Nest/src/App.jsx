@@ -4,7 +4,6 @@ import Products from './pages/admin/Product/Products'
 import Categories from './pages/admin/Category/Categories'
 import Orders from './pages/admin/Order/Orders'
 import Reports from './pages/admin/Reports'
-import Settings from './pages/admin/User/Settings'
 import Logout from './pages/admin/Logout'
 import Users from './pages/admin/User/Users'
 import AddOrder from './pages/admin/Order/AddOder'
@@ -15,6 +14,10 @@ import SalesAddOrder from './pages/Sales/Order/AddOder'
 import AddUser from './pages/admin/User/AddUser';
 import EditUser from './pages/admin/User/EditUser';
 import UserDetail from './pages/admin/User/UserDetail';
+import ForgotPassword from './pages/Auth/ForgotPassword'
+import SalesSetting from './pages/Sales/User/SalesSetting'
+import Setting from './pages/admin/User/Setting'
+import ChannelSetting from './pages/Channel/User/ChannelSetting'
 
 
 const Root = () => {
@@ -44,12 +47,17 @@ const App = () => {
         <Route path="/users/add" element={<AddUser />} />
         <Route path="/users/edit/:userId" element={<EditUser />} />
         <Route path="/reports" element={<Reports />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/admin/settings" element={<Setting />} />
+        <Route path="/sales/settings" element={<SalesSetting />} />
+        <Route path="/channel/settings" element={<ChannelSetting />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/addorder" element={<AddOrder />} />
+        {/* <Route path="/addorder" element={<AddOrder />} /> */}
         <Route path="/sales/addorder" element={<SalesAddOrder />} />
+        <Route path="/admin/addorder" element={<AddOrder />} />
         <Route path="/sales/editorder/:order_id" element={<SalesAddOrder />} />
+        <Route path="/admin/editorder/:order_id" element={<AddOrder />} />
         <Route path="/users/detail/:userId" element={<UserDetail />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
       </Routes>
     </div>
   )
