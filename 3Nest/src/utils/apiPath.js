@@ -1,4 +1,4 @@
-export const BASE_URL = "https://1843-123-16-147-238.ngrok-free.app"
+export const BASE_URL = "http://localhost:8000"
 
 
 export const API_PATHS = {

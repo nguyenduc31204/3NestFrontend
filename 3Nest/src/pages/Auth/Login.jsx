@@ -31,7 +31,12 @@ const Login = () => {
       const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
         user_email,
         password
+      }, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
       })
+
 
       const { access_token } = response.data
       if (!access_token) {
