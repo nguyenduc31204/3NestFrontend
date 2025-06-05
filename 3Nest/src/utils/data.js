@@ -72,4 +72,13 @@ export const SIDE_MENU_DATA = [
     roles: ['admin', 'channel', 'sales'],
     ariaLabel: 'Navigate to reports',
   },
+  {
+  id: '07',
+  label: 'Types',
+  icon: ListTree, // Hoặc icon khác tùy bạn
+  path: '/admin/types',
+  roles: ['admin'],
+  ariaLabel: 'Navigate to types',
+  },
+
 ];

@@ -39,11 +39,11 @@ const EditUser = () => {
           });
           setLoading(false);
         } else {
-          setError('User không tồn tại!');
+          setError('User not existed!');
           setLoading(false);
         }
       } catch (err) {
-        setError('Lỗi khi tải dữ liệu người dùng');
+        setError('error loading user');
         setLoading(false);
       }
     };
@@ -76,15 +76,15 @@ const EditUser = () => {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error('Cập nhật thất bại!');
-      setSuccess('Cập nhật người dùng thành công!');
+      if (!res.ok) throw new Error('update failed!');
+      setSuccess('ok!');
       setTimeout(() => navigate('/users'), 1500);
     } catch (err) {
       setError(err.message);
     }
   };
 
-  if (loading) return <p className="p-4">Đang tải dữ liệu...</p>;
+  if (loading) return <p className="p-4">Loadinggg...</p>;
 
   return (
     <div className="max-w-xl mx-auto p-4">

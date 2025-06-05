@@ -14,10 +14,15 @@ import SalesAddOrder from './pages/Sales/Order/AddOder'
 import AddUser from './pages/admin/User/AddUser';
 import EditUser from './pages/admin/User/EditUser';
 import UserDetail from './pages/admin/User/UserDetail';
+
 import ForgotPassword from './pages/Auth/ForgotPassword'
 import SalesSetting from './pages/Sales/User/SalesSetting'
 import Setting from './pages/admin/User/Setting'
 import ChannelSetting from './pages/Channel/User/ChannelSetting'
+import AddType from './pages/admin/Type/AddType';
+import EditType from './pages/admin/Type/EditType';
+import TypeDetail from './pages/admin/Type/TypeDetail';
+
 
 
 const Root = () => {
@@ -57,7 +62,13 @@ const App = () => {
         <Route path="/sales/editorder/:order_id" element={<SalesAddOrder />} />
         <Route path="/admin/editorder/:order_id" element={<AddOrder />} />
         <Route path="/users/detail/:userId" element={<UserDetail />} />
+
         <Route path="/forgotPassword" element={<ForgotPassword />} />
+
+        <Route path='/admin/types' element={<TypeDetail />} />
+        <Route path='/admin/types/add' element={<AddType />} />
+        <Route path='/admin/types/edit/:id' element={<EditType />} />
+
       </Routes>
     </div>
   )
