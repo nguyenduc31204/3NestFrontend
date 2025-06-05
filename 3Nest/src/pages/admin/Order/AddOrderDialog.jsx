@@ -8,6 +8,9 @@ const AddOrderDialog = ({
   onSubmit,
   order_title,
   customer_name,
+  contact_name,
+  contact_email,
+  contact_phone,
   address,
   billing_address,
   existingDetails,
@@ -24,6 +27,14 @@ const AddOrderDialog = ({
     },
   });
   const { fields, append, remove, update } = useFieldArray({ control, name: 'details' });
+  const { fields: fields_tmp, remove: removeTmp,  replace: replaceTmp } = useFieldArray({
+    control,
+    name: 'tmp',
+  });
+  const copyToTmp = () => {
+    replaceTmp([...fields]); 
+  };
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [types, setTypes] = useState([]);
@@ -32,6 +43,7 @@ const AddOrderDialog = ({
   const [selectedTypeId, setSelectedTypeId] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [fileadd, setfilead] = useState()
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -120,12 +132,14 @@ const AddOrderDialog = ({
     }
 
     const existingDetailIndex = fields.findIndex(
-      (field) => field.product_id.toString() === product.product_id.toString()
+      (field) => field.product_id.toString() === product.product_id.toString(),
+      (fields_tmp) => fields_tmp.product_id.toString() === product.product_id.toString()
     );
 
     if (existingDetailIndex >= 0) {
       update(existingDetailIndex, {
         ...fields[existingDetailIndex],
+        ...fields_tmp[existingDetailIndex],
         quantity: (parseInt(fields[existingDetailIndex].quantity) || 0) + 1,
       });
     } else {
@@ -142,9 +156,12 @@ const AddOrderDialog = ({
     const submissionData = {
       order_title,
       customer_name,
+      contact_name,
+      contact_email,
+      contact_phone,
       address,
       billing_address,
-      status: 'draft',
+      status: '',
       details: data.details
         .filter((detail) => detail.product_id)
         .map((detail) => ({
@@ -161,6 +178,9 @@ const AddOrderDialog = ({
     }
 
     onSubmit(submissionData);
+      setTimeout(() => {
+        remove(); // Xoá tất cả items
+      }, 0);
     handleClose();
   };
 
@@ -265,10 +285,10 @@ const AddOrderDialog = ({
                     ${selectedProduct.price?.toLocaleString() || 'N/A'}
                   </p>
                 </div>
-                <div>
+                {/* <div>
                   <span className="font-medium text-gray-700">Max Discount:</span>
                   <p className="text-gray-900">{selectedProduct.maximum_discount || 0}%</p>
-                </div>
+                </div> */}
                 <div>
                   <span className="font-medium text-gray-700">Max Discount Price:</span>
                   <p className="text-gray-900 text-orange-600">
@@ -277,7 +297,7 @@ const AddOrderDialog = ({
                 </div>
                 <div className="col-span-2">
                   <span className="font-medium text-gray-700">Description:</span>
-                  <p className="text-gray-900 mt-1">{selectedProduct.desciption || 'No description available'}</p>
+                  <p className="text-gray-900 mt-1">{selectedProduct.description || 'No description available'}</p>
                 </div>
               </div>
             </div>
@@ -355,7 +375,7 @@ const AddOrderDialog = ({
                   onClick={() => remove(index)}
                   className="text-red-600 hover:text-red-800 font-semibold px-2 py-1 rounded hover:bg-red-50"
                 >
-                  Remove
+                  Clear
                 </button>
               </div>
             ))}
