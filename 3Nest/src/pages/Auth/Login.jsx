@@ -1,85 +1,92 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { decodeToken, validateEmail } from '../../utils/help'
-import { API_PATHS } from '../../utils/apiPath'
-import axiosInstance from '../../utils/axiosIntance'
-import Input from '../../components/input/Input'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { decodeToken, validateEmail } from '../../utils/help';
+import Input from '../../components/input/Input';
+import { API_PATHS, BASE_URL } from '../../utils/apiPath';
 
 const Login = () => {
-  const [user_email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
+  const [user_email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateEmail(user_email)) {
-      setError('Vui lòng nhập email hợp lệ')
-      return
+      setError('Vui lòng nhập email hợp lệ');
+      return;
     }
 
     if (!password) {
-      setError('Vui lòng nhập mật khẩu')
-      return
+      setError('Vui lòng nhập mật khẩu');
+      return;
     }
 
-    setError('')
+    setError('');
 
     try {
-      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
-        user_email,
-        password
-      }, {
+      const response = await fetch(`${BASE_URL}/users/login`, {
+        method: 'POST',
         headers: {
-          'ngrok-skip-browser-warning': 'true'
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify({
+          user_email,
+          password,
+        }),
+      });
+
+      const result = await response.json();
+      console.log('Login API Response:', result); 
+
+      if (response.ok) {
+        const { access_token } = result;
+        if (!access_token) {
+          setError('Đăng nhập không thành công. Token không tồn tại.');
+          return;
         }
-      })
 
+        const decoded = decodeToken(access_token);
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('role', decoded.role);
 
-      const { access_token } = response.data
-      if (!access_token) {
-        setError('Đăng nhập không thành công. Token không tồn tại.')
-        return
-      }
+        console.log('Decoded token:', decoded);
 
-      const decoded = decodeToken(access_token)
-      localStorage.setItem("access_token", access_token)
-      localStorage.setItem("role", decoded.role) 
-      
-      console.log("Decoded token:", decoded)
-      
-      if (response.status === 200) {
-        switch (decoded?.role?.toLowerCase()) { 
+        switch (decoded?.role?.toLowerCase()) {
           case 'admin':
-            navigate('/admin/dashboard')
-            break
+            navigate('/admin/dashboard');
+            break;
           case 'sales':
-            navigate('/sales/products')
-            break
+            navigate('/sales/products');
+            break;
           case 'channel':
-            navigate('/channel/products')
-            break
+            navigate('/channel/products');
+            break;
+          case 'manager':
+            navigate('/manager/products');
+            break;
           default:
-            navigate('/')
+            navigate('/');
         }
       } else {
-        setError('Đăng nhập không thành công. Vui lòng thử lại.')
+        setError(result.detail)
+        throw new Error(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
       }
-
     } catch (error) {
-      console.error("Login error:", error)
-      setError(error.response?.data?.message || 'Đăng nhập không thành công. Vui lòng thử lại.')
+      console.error('Login error:', error);
+      // setError(error.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
     }
-  }
+  };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10'>
-      <div className='w-full max-w-md bg-white shadow-md rounded-xl p-6 md:p-8'>
-        <h3 className='text-2xl font-bold text-gray-800 text-center'>Welcome</h3>
-        <p className='text-sm text-gray-600 text-center mt-1 mb-6'>Fill in the information to log in</p>
-        <form onSubmit={handleLogin} className='space-y-4'>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
+      <div className="w-full max-w-md bg-white shadow-md rounded-xl p-6 md:p-8">
+        <h3 className="text-2xl font-bold text-gray-800 text-center">Welcome</h3>
+        <p className="text-sm text-gray-600 text-center mt-1 mb-6">Fill in the information to log in</p>
+        <form onSubmit={handleLogin} className="space-y-4">
           <Input
             value={user_email}
             onChange={(e) => setEmail(e.target.value)}
@@ -92,28 +99,28 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Tối thiểu 8 ký tự"
-            label="password"
+            label="Password"
             type="password"
           />
 
           {error && (
-            <p className='text-red-500 text-sm'>{error}</p>
+            <p className="text-red-500 text-sm">{error}</p>
           )}
 
           <button
-            type='submit'
-            className='w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition duration-200'
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition duration-200"
           >
             Log in
           </button>
 
-          <p className='text-sm text-center text-gray-700'>
-            <Link to='/forgotPassword' className='text-blue-600 hover:underline ml-1'>Forgot Password?</Link>
+          <p className="text-sm text-center text-gray-700">
+            <Link to="/forgotpassword" className="text-blue-600 hover:underline ml-1">Forgot Password?</Link>
           </p>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

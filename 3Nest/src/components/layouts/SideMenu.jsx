@@ -33,7 +33,7 @@ const SideMenu = ({ activeMenu }) => {
             onClick={() => handleNavigation(item)}
             className={`w-full flex items-center gap-4 text-[15px] 
               ${
-                activeMenu === item.id // Sử dụng id thay vì label để so sánh chính xác hơn
+                activeMenu === item.id 
                   ? "text-white bg-primary"
                   : "text-gray-700 hover:bg-gray-100"
               } 

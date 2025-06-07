@@ -8,12 +8,12 @@ import AddOrderDialog from './AddOrderDialog';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
-const SalesAddOrder = () => {
+const ChannelAddOrder = () => {
   const navigate = useNavigate();
   const { order_id } = useParams();
   const location = useLocation();
   const [showConfirm, setShowConfirm] = useState(false);
-  const [activeRole, setActiveRole] = useState('sales');
+  const [activeRole, setActiveRole] = useState('channel');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
@@ -241,7 +241,7 @@ const SalesAddOrder = () => {
       setExistingDetails([]);
       setCreatedOrderId(null);
       localStorage.removeItem('createdOrderId');
-      navigate(`/sales/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
+      navigate(`/channel/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
     } catch (err) {
       setError(`Delete failed: ${err.message}`);
     }
@@ -323,7 +323,7 @@ const SalesAddOrder = () => {
       setExistingDetails([]);
       setCreatedOrderId(null);
       localStorage.removeItem('createdOrderId');
-      navigate(`/sales/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
+      navigate(`/channel/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
     } catch (err) {
       // setError(`Failed to save order: ${err.message}`);
     }
@@ -392,7 +392,7 @@ const SalesAddOrder = () => {
       setExistingDetails([]);
       setCreatedOrderId(null);
       localStorage.removeItem('createdOrderId');
-      navigate(`/sales/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
+      navigate(`/channel/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
     } catch (err) {
       setError(`Failed to submit order: ${err.message}`);
     }
@@ -531,24 +531,24 @@ const SalesAddOrder = () => {
             <div className="product-role flex space-x-2 bg-gray-50 p-4 rounded-md">
               <button
                 className={`px-4 py-2 text-sm font-medium rounded-md ${
-                  activeRole === 'sales'
+                  activeRole === 'channel'
                     ? 'bg-white shadow text-blue-600'
                     : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                 }`}
-                onClick={() => handleRoleChange('sales')}
+                onClick={() => handleRoleChange('channel')}
               >
-                Sales
+                Channel
               </button>
             </div>
 
-            {activeRole === 'sales' && (
+            {activeRole === 'channel' && (
               <div className="mt-6">
                 <div className="w-full max-w-4xl mx-auto">
-                  <h1 className="text-xl sm:text-2xl font-semibold mb-6">Order Sales</h1>
+                  <h1 className="text-xl sm:text-2xl font-semibold mb-6">Order Channel</h1>
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1 space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Username Sales</label>
+                        <label className="block text-sm font-medium text-gray-700">Username Channel</label>
                         <p className="text-base text-gray-800">{user?.user_name || '--'}</p>
                       </div>
                       <div>
@@ -776,4 +776,4 @@ const SalesAddOrder = () => {
   );
 };
 
-export default SalesAddOrder;
+export default ChannelAddOrder;
