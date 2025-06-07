@@ -27,7 +27,7 @@ import TypeDetailMana from './pages/Manager/Type/TypeDetail'
 import AddTypeMana from './pages/Manager/Type/AddType'
 import EditTypeMana from './pages/Manager/Type/EditType'
 import ProductsMana from './pages/Manager/Product/Products'
-import AddOrderMana from './pages/Manager/Order/AddOder'
+// import AddOrderMana from './pages/Manager/Order/AddOder'
 import OrdersMana from './pages/Manager/Order/Orders'
 import Deal from './pages/Sales/Deal/Deal'
 import AddDeal from './pages/Sales/Deal/AddDeal'
@@ -39,6 +39,9 @@ import DealChannel from './pages/Channel/Deal/Deal'
 import EditOrderChannel from './pages/Channel/Order/EditOrderChannel'
 import ChannelAddOrder from './pages/Channel/Order/ChannelAddOrder'
 import ChannelOrders from './pages/Channel/Order/ChannelOrders'
+import DealMana from './pages/Manager/Deal/Deal'
+import ManaEditDeal from './pages/Manager/Deal/Edit'
+import EditOrderMana from './pages/Manager/Order/EditOrder'
 
 
 
@@ -95,10 +98,13 @@ const App = () => {
 
         {/* manager */}
         <Route path="/manager/products" element={<ProductsMana />} />
-        <Route path="/manager/addorder" element={<AddOrderMana />} />
+        {/* <Route path="/manager/addorder" element={<AddOrderMana />} /> */}
         <Route path="/manager/orders" element={<OrdersMana />} />
         <Route path='/manager/types' element={<TypeDetailMana />} />
         <Route path='/manager/types/add' element={<AddTypeMana />} />
+        <Route path="/manager/editorder/:order_id" element={<EditOrderMana />} />
+        <Route path="/manager/deals" element={<DealMana />} />
+        <Route path="/manager/editdeals/:deal_id" element={<ManaEditDeal />} />
         <Route path='/manager/types/edit/:id' element={<EditTypeMana />} />
 
 
