@@ -29,7 +29,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      // Tạo query string với email và phone
+     
       const queryParams = new URLSearchParams({
         email: data.email,
         phone: data.phone,
@@ -42,11 +42,11 @@ const ForgotPassword = () => {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
         },
-        // Không gửi body vì dữ liệu được truyền qua query parameters
+        
       });
 
       const result = await response.json();
-      console.log('Reset Password API Response:', result); // Debug
+      console.log('Reset Password API Response:', result); 
 
       if (response.ok && result.status_code === 200) {
         setSuccess(result.message || 'Reset password link sent successfully. Check your email.');

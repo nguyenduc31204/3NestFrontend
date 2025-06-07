@@ -17,7 +17,7 @@ import { BASE_URL } from '../../../utils/apiPath';
 import { useNavigate } from 'react-router-dom';
 import { decodeToken } from '../../../utils/help';
 
-const SalesOrders = () => {
+const ChannelOrders = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [flattenedOrders, setFlattenedOrders] = useState([]);
@@ -133,14 +133,14 @@ const SalesOrders = () => {
           <div className="content py-6">
             <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
               <div className="page-title">
-                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Sales Orders Management</h1>
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Channel Orders Management</h1>
                 <div className="breadcrumb text-sm text-gray-500">
                   <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / My Orders
                 </div>
               </div>
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm sm:text-base flex items-center gap-2 touch-manipulation"
-                onClick={() => navigate('/sales/addorder')}
+                onClick={() => navigate('/channel/addorder')}
               >
                 <i className="fas fa-plus"></i> Add New Order
               </button>
@@ -264,7 +264,7 @@ const SalesOrders = () => {
                                   
                                   <button
                                     className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm touch-manipulation"
-                                    onClick={() => navigate(`/sales/editorder/${order.order_id}`)}
+                                    onClick={() => navigate(`/channel/editorder/${order.order_id}`)}
                                   >
                                     View
                                   </button>
@@ -311,7 +311,7 @@ const SalesOrders = () => {
                               {/*  */}
                               <button
                                 className="text-blue-600 hover:text-blue-800 text-sm touch-manipulation"
-                                onClick={() => navigate(`/sales/editorder/${order.order_id}`)}
+                                onClick={() => navigate(`/channel/editorder/${order.order_id}`)}
                               >
                                 View
                               </button>
@@ -369,4 +369,4 @@ const SalesOrders = () => {
   );
 };
 
-export default SalesOrders;
+export default ChannelOrders;

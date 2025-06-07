@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiSearch, FiBell, FiMessageSquare, FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../utils/apiPath';
-
+import logo from '../../assets/logo-3nestinvest.png';
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,37 +52,36 @@ const Header = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    // Clear localStorage
+
     localStorage.removeItem('access_token');
     localStorage.removeItem('createdOrderId');
 
-    // Close dropdown and navigate to login
     setIsDropdownOpen(false);
     navigate('/login');
   };
 
   if (error) {
-    return null; // Navigate will handle redirection
+    return null; 
   }
 
   if (!currentUser) {
     return <div className="p-4 text-center text-gray-500">Loading user info...</div>;
   }
 
-  // Xác định đường dẫn settings dựa trên role
+
   const settingsPath = currentUser.role === 'admin' ? '/admin/settings' :
                       currentUser.role === 'sales' ? '/sales/settings' :
                       currentUser.role === 'channel' ? '/channel/settings' :
-                      '/profile'; // Mặc định nếu role không khớp
+                      '/profile'; 
 
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between p-4 bg-white shadow-sm border-b border-gray-100">
       <div className="flex items-center space-x-4">
         <div className="flex items-center">
           <img
-            src="/logo.png" // Replace with your logo path
+            src={logo}
             alt="3NestInvest Logo"
-            className="h-8 w-auto"
+            className="h-10 w-auto mx-7"
             onError={(e) => {
               e.target.src = '';
               e.target.onerror = null;

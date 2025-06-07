@@ -41,7 +41,7 @@ const AddOrderDialog = ({
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedTypeId, setSelectedTypeId] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [fileadd, setfilead] = useState()
 
@@ -91,7 +91,6 @@ const AddOrderDialog = ({
     };
     fetchCategories();
   }, [selectedTypeId]);
-  console.log("selectedCategory", selectedCategory)
 
   useEffect(() => {
     if (!selectedCategory) return;
@@ -99,7 +98,7 @@ const AddOrderDialog = ({
       setLoading(true);
       try {
         const response = await fetch(
-          `${BASE_URL}/products/get-products-by-category-and-role?category_id=${((selectedCategory))}`,
+          `${BASE_URL}/products/get-products-by-role?category_name=${encodeURIComponent(selectedCategory)}`,
           {
             headers: {
               'Content-Type': 'application/json',
@@ -109,9 +108,9 @@ const AddOrderDialog = ({
           }
         );
         const result = await response.json();
-        // if (result.status_code !== 200 || !Array.isArray(result.data)) {
-        //   throw new Error(result.message || 'Invalid product data');
-        // }
+        if (result.status_code !== 200 || !Array.isArray(result.data)) {
+          throw new Error(result.message || 'Invalid product data');
+        }
         setProducts(result.data);
         setSelectedProduct(null);
       } catch (err) {
@@ -122,7 +121,6 @@ const AddOrderDialog = ({
     };
     fetchProducts();
   }, [selectedCategory]);
-  console.log('product', products)
 
   const handleProductChange = (productId) => {
     const product = products.find((p) => p.product_id.toString() === productId);
@@ -239,13 +237,13 @@ const AddOrderDialog = ({
               <label className="block text-sm font-medium">Category</label>
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(Number(e.target.value))}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-2 w-full"
                 disabled={loading || !selectedTypeId}
               >
                 <option value="">Select a category</option>
                 {categories.map((category) => (
-                  <option key={category.category_id} value={category.category_id}>
+                  <option key={category.category_id} value={category.category_name}>
                     {category.category_name}
                   </option>
                 ))}
@@ -257,7 +255,7 @@ const AddOrderDialog = ({
                 value={selectedProduct?.product_id || ''}
                 onChange={(e) => handleProductChange(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-2 w-full"
-                disabled={loading || !parseInt(selectedCategory)}
+                disabled={loading || !selectedCategory}
               >
                 <option value="">Select a product</option>
                 {products.map((product) => (

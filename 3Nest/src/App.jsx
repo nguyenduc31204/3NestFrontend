@@ -22,6 +22,23 @@ import ChannelSetting from './pages/Channel/User/ChannelSetting'
 import AddType from './pages/admin/Type/AddType';
 import EditType from './pages/admin/Type/EditType';
 import TypeDetail from './pages/admin/Type/TypeDetail';
+import ChannelProducts from './pages/Channel/Products/SalesProducts'
+import TypeDetailMana from './pages/Manager/Type/TypeDetail'
+import AddTypeMana from './pages/Manager/Type/AddType'
+import EditTypeMana from './pages/Manager/Type/EditType'
+import ProductsMana from './pages/Manager/Product/Products'
+import AddOrderMana from './pages/Manager/Order/AddOder'
+import OrdersMana from './pages/Manager/Order/Orders'
+import Deal from './pages/Sales/Deal/Deal'
+import AddDeal from './pages/Sales/Deal/AddDeal'
+import SalesEditDeal from './pages/Sales/Deal/Edit'
+import EditOrder from './pages/Sales/Order/EditOrder'
+import AddDealChannel from './pages/Channel/Deal/AddDeal'
+import ChannelEditDeal from './pages/Channel/Deal/Edit'
+import DealChannel from './pages/Channel/Deal/Deal'
+import EditOrderChannel from './pages/Channel/Order/EditOrderChannel'
+import ChannelAddOrder from './pages/Channel/Order/ChannelAddOrder'
+import ChannelOrders from './pages/Channel/Order/ChannelOrders'
 
 
 
@@ -41,33 +58,56 @@ const App = () => {
     <div>
       <Routes>
         <Route path="/" element={<Root />} />
-        <Route path="/admin/dashboard" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
+        <Route path="/logout" element={<Logout />} />
+
+        {/* admin */}
+        <Route path="/admin/dashboard" element={<Home />} />
         <Route path="/admin/products" element={<Products />} />
-        <Route path="/sales/products" element={<SalesProducts />} />
-        <Route path="/categories" element={<Categories />} />
         <Route path="/admin/orders" element={<Orders />} />
+        <Route path='/admin/types' element={<TypeDetail />} />
+        <Route path="/admin/settings" element={<Setting />} />
+        <Route path="/admin/addorder" element={<AddOrder />} />
+        <Route path="/admin/editorder/:order_id" element={<AddOrder />} />
+        <Route path='/admin/types/add' element={<AddType />} />
+        <Route path='/admin/types/edit/:id' element={<EditType />} />
+        {/* sales */}
+        <Route path="/sales/products" element={<SalesProducts />} />
         <Route path="/sales/orders" element={<SalesOrders />} />
+        <Route path="/sales/settings" element={<SalesSetting />} />
+        <Route path="/sales/addorder" element={<SalesAddOrder />} />
+        <Route path="/sales/orders/add" element={<SalesAddOrder />} />
+        <Route path="/sales/adddeals" element={<AddDeal />} />
+        <Route path="/sales/editorder/:order_id" element={<EditOrder />} />
+        <Route path="/sales/editdeals/:deal_id" element={<SalesEditDeal />} />
+        <Route path="/sales/deals" element={<Deal />} />
+        {/* channel */}
+        <Route path="/channel/products" element={<ChannelProducts />} />
+        <Route path="/channel/orders" element={<ChannelOrders />} />
+        <Route path="/channel/settings" element={<ChannelSetting />} />
+        <Route path="/channel/addorder" element={<ChannelAddOrder />} />
+        <Route path="/channel/orders/add" element={<ChannelAddOrder />} />
+        <Route path="/channel/adddeals" element={<AddDealChannel />} />
+        <Route path="/channel/deals" element={<DealChannel />} />
+        <Route path="/channel/editorder/:order_id" element={<EditOrderChannel />} />
+        <Route path="/channel/editdeals/:deal_id" element={<ChannelEditDeal />} />
+
+        {/* manager */}
+        <Route path="/manager/products" element={<ProductsMana />} />
+        <Route path="/manager/addorder" element={<AddOrderMana />} />
+        <Route path="/manager/orders" element={<OrdersMana />} />
+        <Route path='/manager/types' element={<TypeDetailMana />} />
+        <Route path='/manager/types/add' element={<AddTypeMana />} />
+        <Route path='/manager/types/edit/:id' element={<EditTypeMana />} />
+
+
+        <Route path="/categories" element={<Categories />} />
         <Route path="/users" element={<Users />} />
         <Route path="/users/add" element={<AddUser />} />
         <Route path="/users/edit/:userId" element={<EditUser />} />
         <Route path="/reports" element={<Reports />} />
-        <Route path="/admin/settings" element={<Setting />} />
-        <Route path="/sales/settings" element={<SalesSetting />} />
-        <Route path="/channel/settings" element={<ChannelSetting />} />
-        <Route path="/logout" element={<Logout />} />
-        {/* <Route path="/addorder" element={<AddOrder />} /> */}
-        <Route path="/sales/addorder" element={<SalesAddOrder />} />
-        <Route path="/admin/addorder" element={<AddOrder />} />
-        <Route path="/sales/editorder/:order_id" element={<SalesAddOrder />} />
-        <Route path="/admin/editorder/:order_id" element={<AddOrder />} />
         <Route path="/users/detail/:userId" element={<UserDetail />} />
-
-        <Route path="/forgotPassword" element={<ForgotPassword />} />
-
-        <Route path='/admin/types' element={<TypeDetail />} />
-        <Route path='/admin/types/add' element={<AddType />} />
-        <Route path='/admin/types/edit/:id' element={<EditType />} />
 
       </Routes>
     </div>

@@ -7,26 +7,16 @@ const Logout = () => {
   useEffect(() => {
     const handleLogout = async () => {
       try {
-        // Clear the access token from localStorage
         localStorage.removeItem('access_token');
-        localStorage.removeItem('createdOrderId'); // Clear any other stored data if needed
+        localStorage.removeItem('createdOrderId');
 
-        // Optional: Call a server-side logout endpoint if your API supports it
-        // const response = await fetch(`${BASE_URL}/auth/logout`, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //     'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        //     'ngrok-skip-browser-warning': 'true',
-        //   },
-        // });
-        // if (!response.ok) throw new Error('Logout failed');
+       
 
-        // Redirect to login page
+       
         navigate('/login');
       } catch (error) {
         console.error('Logout error:', error);
-        // Still redirect even if server-side logout fails
+        
         navigate('/login');
       }
     };
