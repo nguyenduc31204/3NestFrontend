@@ -41,7 +41,7 @@ const OrdersMana = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${BASE_URL}/orders/orders-by-role?role=admin`, {
+      const response = await fetch(`${BASE_URL}/orders/get-orders`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ const OrdersMana = () => {
         },
       });
       const result = await response.json();
-      console.log('Orders API Response:', result); // Debug
+      console.log('Orders API Response:', result); 
       if (result.status_code === 200 && Array.isArray(result.data)) {
         setOrders(result.data);
       } else {
@@ -118,6 +118,8 @@ const OrdersMana = () => {
     loadOrdersByRole();
   };
 
+  console.log("orders", orders)
+
   return (
     <div>
       <Header />
@@ -156,9 +158,9 @@ const OrdersMana = () => {
                   <LuPersonStanding className="w-5 h-5" />
                 </div>
                 <div className="stat-value text-xl font-bold text-gray-800">
-                  {orders.filter((order) => order.status === 'draft').length}
+                  {orders.filter((order) => order.status === 'submitted').length}
                 </div>
-                <div className="stat-label text-gray-500 text-sm">Draft Orders</div>
+                <div className="stat-label text-gray-500 text-sm">Submit Orders</div>
               </div>
             </div>
 
@@ -263,26 +265,11 @@ const OrdersMana = () => {
                                 <td className="px-4 py-3 text-sm text-gray-900 flex flex-wrap gap-2">
                                   <button
                                     className="text-yellow-600 hover:text-yellow-800 text-xs sm:text-sm touch-manipulation"
-                                    onClick={() => setSelectedOrder(order)}
+                                    onClick={() => navigate(`/manager/editorder/${order.order_id}`)}
                                   >
                                     View Details
                                   </button>
-                                  {order.status === 'submitted' && (
-                                    <>
-                                      <button
-                                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs sm:text-sm touch-manipulation"
-                                        onClick={() => handleStatusChange(order.order_id, 'accepted')}
-                                      >
-                                        Accept
-                                      </button>
-                                      <button
-                                        className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xs sm:text-sm touch-manipulation"
-                                        onClick={() => handleStatusChange(order.order_id, 'rejected')}
-                                      >
-                                        Reject
-                                      </button>
-                                    </>
-                                  )}
+                                  
                                 </td>
                               </tr>
                             ))
@@ -333,7 +320,7 @@ const OrdersMana = () => {
                             <div className="flex flex-wrap gap-2 mt-3">
                               <button
                                 className="text-yellow-600 hover:text-yellow-800 text-sm touch-manipulation"
-                                onClick={() => setSelectedOrder(order)}
+                                onClick={() => navigate(`/manager/editorder/${order.order_id}`)}
                               >
                                 View Details
                               </button>
@@ -387,116 +374,6 @@ const OrdersMana = () => {
                 </div>
               </div>
             </div>
-
-            {/* Order Detail Dialog */}
-            {selectedOrder && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
-                  <h2 className="text-lg sm:text-xl font-semibold mb-4">Order #{selectedOrder.order_id}</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Order Title:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.order_title || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Customer Name:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.customer_name || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Address:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.address || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Billing Address:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.billing_address || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Order Date:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">
-                        {new Date(selectedOrder.created_at).toLocaleDateString() || '-'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Status:</span>
-                      <p
-                        className={`inline-flex px-2 py-1 text-xs sm:text-sm font-semibold rounded-full ${
-                          selectedOrder.status === 'submitted'
-                            ? 'bg-blue-100 text-blue-800'
-                            : selectedOrder.status === 'draft'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : selectedOrder.status === 'accepted'
-                            ? 'bg-green-100 text-green-800'
-                            : selectedOrder.status === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {selectedOrder.status === 'draft'
-                          ? 'Draft'
-                          : selectedOrder.status === 'submitted'
-                          ? 'Submitted'
-                          : selectedOrder.status === 'accepted'
-                          ? 'Accepted'
-                          : selectedOrder.status === 'rejected'
-                          ? 'Rejected'
-                          : selectedOrder.status || 'Unknown'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <h3 className="text-base sm:text-lg font-semibold mb-4">Order Details</h3>
-                  <div className="table-responsive overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {products.length === 0 ? (
-                          <tr>
-                            <td colSpan="5" className="px-4 py-4 text-sm text-gray-500 text-center">
-                              No products found
-                            </td>
-                          </tr>
-                        ) : (
-                          products.map((detail, index) => (
-                            <tr key={index}>
-                              <td className="px-4 py-2 text-sm text-gray-900 truncate max-w-[120px] sm:max-w-[200px]">
-                                {detail.product_name || '-'}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{detail.quantity || 0}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                ${detail.price_for_customer?.toLocaleString() || '0'}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                {detail.service_contract_duration || 0} year
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                ${(detail.quantity * detail.price_for_customer || 0).toLocaleString()}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="flex justify-end mt-6">
-                    <button
-                      className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 text-sm sm:text-base touch-manipulation"
-                      onClick={() => setSelectedOrder(null)}
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </DashboardLayout>

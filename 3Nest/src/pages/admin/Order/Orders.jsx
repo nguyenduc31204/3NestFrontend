@@ -29,7 +29,7 @@ const Orders = () => {
   const token = localStorage.getItem('access_token');
   const decodedToken = decodeToken(token);
   const userId = decodedToken?.user_id;
-  const role = decodedToken?.role; // Assuming role is included in the decoded token
+  const role = decodedToken?.role; 
 
   useEffect(() => {
     loadOrdersByRole();
