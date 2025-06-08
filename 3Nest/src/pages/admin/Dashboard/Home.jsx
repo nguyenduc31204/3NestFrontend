@@ -52,15 +52,15 @@ const Home = () => {
         <div className='my-5 mx-auto'>
             <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
-                <div class="page-title">
+                <div className="page-title">
                     <h1 className='text-2xl font-semibold bg-#181c32 mb-2'>Dashboard Management</h1>
                     <div className="breadcrumb text-gray-500 text-sm hover:text-slate-500">
                         <a href="#" className='text-gray-500 '>Dashboard</a> / Product
                     </div>
                 </div>
                 <div className="action-buttons mb-2">
-                    <button class="btn btn-primary" onclick="openModal()">
-                        <i class="fas fa-plus"></i> Add new product
+                    <button className="btn btn-primary" onClick="openModal()">
+                        <i className="fas fa-plus"></i> Add new product
                     </button>
                 </div>
             </div>
@@ -116,11 +116,13 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* <div class="product-role">
-                <button class="button active" value="admin">Admin</button>
-                <button class="button" value="sales">Sales</button>
-                <button class="button" value="channels">Channels</button>
-            </div> */}
+
+            <div className="product-role">
+                <button className="button active" value="admin">Admin</button>
+                <button className="button" value="sales">Sales</button>
+                <button className="button" value="channels">Channels</button>
+            </div>
+
 
             <div className="card-body p-0">
                 <div className="table-responsive overflow-x-auto">

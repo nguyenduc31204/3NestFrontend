@@ -1,143 +1,184 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import {
-    LuCoins,
-    LuWalletMinimal,
-    LuPersonStanding,
-    LuChevronsLeft,
-    LuChevronLeft,
-    LuChevronRight,
-    LuChevronsRight,
-    LuArrowDownToLine,
-    LuArrowUpNarrowWide,
-    LuRefreshCcw
-} from "react-icons/lu"
+  LuCoins,
+  LuWalletMinimal,
+  LuPersonStanding,
+  LuChevronsLeft,
+  LuChevronLeft,
+  LuChevronRight,
+  LuChevronsRight,
+  LuArrowDownToLine,
+  LuArrowUpNarrowWide,
+  LuRefreshCcw,
+} from 'react-icons/lu';
 
-import Header from '../../../components/layouts/Header'
-import DasboardLayout from '../../../components/layouts/DashboardLayout'
-import { API_PATHS, BASE_URL } from '../../../utils/apiPath'
-import { useNavigate } from 'react-router-dom'
-import { decodeToken } from '../../../utils/help'
+import Header from '../../../components/layouts/Header';
+import DasboardLayout from '../../../components/layouts/DashboardLayout';
+import { BASE_URL } from '../../../utils/apiPath';
+import { useNavigate } from 'react-router-dom';
+import { decodeToken } from '../../../utils/help';
+import ProductModal from './ProductModal';
 
 const Products = () => {
-    const navigate = useNavigate();
-    const [types, setTypes] = useState([]);
-    const [selectedTypeId, setSelectedTypeId] = useState(1);
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const token = localStorage.getItem("access_token");
-    const decode = decodeToken(token);
-    const role = decode?.role || localStorage.getItem('role');
-    const [activeRole, setActiveRole] = useState(role === 'admin' ? 'admin' : role);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchTypes = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const url = `${BASE_URL}/types/get-types`;
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'ngrok-skip-browser-warning': 'true'
-                    },
-                });
 
-                const contentType = response.headers.get('content-type');
-                const responseBody = await response.text();
+  const [types, setTypes] = useState([]);
+  const [selectedTypeId, setSelectedTypeId] = useState(1);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-                console.log("Raw API Response:", responseBody); 
 
-                if (contentType && contentType.includes('text/html')) {
-                    throw new Error(`Server returned HTML instead of JSON. Status: ${response.status}`);
-                }
+  const token = localStorage.getItem('access_token');
+  const decode = decodeToken(token);
+  const role = decode?.role || localStorage.getItem('role');
+  const [activeRole, setActiveRole] = useState(
+    role === 'admin' ? 'admin' : role,
+  );
 
-                const result = JSON.parse(responseBody);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [modalKey, setModalKey] = useState(0);
 
-                if (!response.ok) {
-                    throw new Error(result.message || `HTTP error! status: ${response.status}`);
-                }
 
-                if (!result || typeof result !== 'object') {
-                    throw new Error('Invalid API response structure');
-                }
+  useEffect(() => {
+    const fetchTypes = async () => {
+      setLoading(true);
+      setError(null);
 
-                if (result.status_code === 200) {
-                    if (Array.isArray(result.data)) {
-                        setTypes(result.data);
-                        if (result.data.length > 0) {
-                            setSelectedTypeId(result.data[0].type_id);
-                        }
-                    } else {
-                        throw new Error('Data field is not an array');
-                    }
-                } else {
-                    throw new Error(result.message || "API request failed");
-                }
-            } catch (err) {
-                console.error("API Error:", err);
-                setError(err.message);
+      try {
+        const response = await fetch(`${BASE_URL}/types/get-types`, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
 
-                if (err.message.includes('401')) {
-                    navigate('/login');
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
+        const contentType = response.headers.get('content-type');
+        const responseBody = await response.text();
 
-        fetchTypes();
-    }, [BASE_URL, navigate]);
-
-    useEffect(() => {
-        if (selectedTypeId && activeRole) {
-            loadProductsByTypeAndRole(activeRole, selectedTypeId);
+        if (contentType && contentType.includes('text/html')) {
+          throw new Error(
+            `Server returned HTML instead of JSON. Status: ${response.status}`,
+          );
         }
-    }, [selectedTypeId, activeRole]);
 
-    const loadProductsByTypeAndRole = async (role, typeId) => {
-        try {
-            const url = `${BASE_URL}/products/get-products-by-role-and-type?role=${role}&type_id=${typeId}`;
-            console.log("Fetching products from:", url);
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-                    'ngrok-skip-browser-warning': 'true'
-                }
-            });
+        const result = JSON.parse(responseBody);
+        if (!response.ok)
+          throw new Error(
+            result.message || `HTTP error! status: ${response.status}`,
+          );
 
-            const result = await response.json();
-            console.log('Products API response:', result);
-
-            if (result.status_code === 200 && Array.isArray(result.data)) {
-                setProducts(result.data);
-            } else {
-                throw new Error(result.mess || "Invalid product data format");
-            }
-        } catch (err) {
-            console.error("API Error:", err);
-            setError(`Failed to load products: ${err.message}`);
+        if (result.status_code === 200) {
+          setTypes(result.data);
+          if (result.data.length > 0) {
+            setSelectedTypeId(result.data[0].type_id);
+          }
+        } else {
+          throw new Error(result.message || 'API request failed');
         }
+      } catch (err) {
+        setError(err.message);
+        if (err.message.includes('401')) navigate('/login');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleTypeChange = (e) => {
-        setSelectedTypeId(e.target.value);
+    fetchTypes();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (selectedTypeId && activeRole)
+      loadProductsByTypeAndRole(activeRole, selectedTypeId);
+  }, [selectedTypeId, activeRole]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/categories/get-categories`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const result = await res.json();
+        if (result.status_code === 200) {
+          setCategories(result.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      }
     };
 
-    const handleRoleChange = (newRole) => {
-        if (role === 'admin') {
-            setActiveRole(newRole);
-        }
-    };
+    fetchCategories();
+  }, []);
 
-    const handleRefresh = () => {
-        if (selectedTypeId && activeRole) {
-            loadProductsByTypeAndRole(activeRole, selectedTypeId);
-        }
-    };
+
+  const loadProductsByTypeAndRole = async (role, typeId) => {
+    try {
+      const url = `${BASE_URL}/products/get-products-by-role-and-type?role=${role}&type_id=${typeId}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const result = await response.json();
+      if (result.status_code === 200 && Array.isArray(result.data)) {
+        setProducts(result.data);
+      } else {
+        throw new Error(result.mess || 'Invalid product data format');
+      }
+    } catch (err) {
+      setError(`Failed to load products: ${err.message}`);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      const res = await fetch(`${BASE_URL}/products/delete-product?product_id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+
+      if (res.status === 204 || res.ok) {
+        handleRefresh();
+        return;
+      }
+
+      const result = await res.json();
+
+      if (result.status_code === 200) {
+        handleRefresh();
+      } else {
+        alert(result.message || 'Failed to delete product');
+      }
+    } catch (err) {
+      alert('Error deleting product');
+      console.error(err);
+    }
+  };
+
+
+  const handleTypeChange = (e) => setSelectedTypeId(e.target.value);
+  const handleRoleChange = (newRole) => {
+    if (role === 'admin') setActiveRole(newRole);
+  };
+  const handleRefresh = () => loadProductsByTypeAndRole(activeRole, selectedTypeId);
+
+
 
     return (
         <div>
@@ -152,12 +193,20 @@ const Products = () => {
                                     <a href="#" className='text-gray-500'>Dashboard</a> / Product
                                 </div>
                             </div>
-                            {/* Chỉ hiển thị nút Add new product cho admin */}
+                            
                             {role === 'admin' && (
                                 <div className="action-buttons mb-2">
-                                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                                    <button
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                                        onClick={() => {
+                                            setEditingProduct(null);
+                                            setModalKey(prev => prev + 1); // ⚡ reset modal
+                                            setIsModalOpen(true); 
+                                        }}
+                                        >
                                         <i className="fas fa-plus mr-2"></i> Add new product
                                     </button>
+
                                 </div>
                             )}
                         </div>
@@ -229,11 +278,12 @@ const Products = () => {
                                         <option key={type.type_id} value={type.type_id}>
                                             {type.type_name}
                                         </option>
+                                        
                                     ))}
                                 </select>
                             </div>
                             
-                            {/* Role Selector - Chỉ hiển thị cho admin */}
+                            
                             {role === 'admin' && (
                                 <div className="product-role flex space-x-2 p-4 bg-gray-50">
                                     <button
@@ -305,6 +355,8 @@ const Products = () => {
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Discount</th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Discount Price</th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
@@ -320,8 +372,17 @@ const Products = () => {
                                                         <td className="px-6 py-4 text-sm text-gray-900">{product.product_name || '-'}</td>
                                                         <td className="px-6 py-4 text-sm text-gray-900">{product.category_name || '-'}</td>
                                                         <td className="px-6 py-4 text-sm text-gray-900">
-                                                            {types.find(t => t.type_id === selectedTypeId)?.type_name || '-'}
+                                                            {(() => {
+                                                                const category = categories.find(
+                                                                c =>
+                                                                    c.category_id?.toString() === product.category_id?.toString() ||
+                                                                    c.category_name === product.category_name        // fallback
+                                                                );
+                                                                return category?.type_name || '-';
+                                                            })()}
                                                         </td>
+
+
                                                         <td className="px-6 py-4 text-sm text-gray-900">{product.sku_partnumber || '-'}</td>
                                                         <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title={product.description}>
                                                             {product.description || '-'}
@@ -344,7 +405,26 @@ const Products = () => {
                                                                 {product.status === true ? 'Active' : 'Inactive'}
                                                             </span>
                                                         </td>
+                                                        <td className="px-6 py-4 text-sm space-x-2">
+                                                            <button
+                                                                className="text-blue-600 hover:underline"
+                                                                onClick={() => {
+                                                                setEditingProduct(product);
+                                                                setIsModalOpen(true);
+                                                                }}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button
+                                                                className="text-red-600 hover:underline"
+                                                                onClick={() => handleDelete(product.product_id)}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </td>
+
                                                     </tr>
+                                                    
                                                 ))
                                             )}
                                         </tbody>
@@ -390,9 +470,19 @@ const Products = () => {
                         </div>
                     </div>
                 </div>
+                <ProductModal
+                    key={modalKey}
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={handleRefresh}
+                    product={editingProduct}
+                    types={types}
+                />
             </DasboardLayout>
         </div>
     )
+
+    
 }
 
 export default Products
