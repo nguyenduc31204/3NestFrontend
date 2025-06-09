@@ -27,7 +27,7 @@ const OrderDetailRow = ({ detail, index }) => (
   </tr>
 );
 
-const EditOrderMana = () => {
+const EditOrderAdmin = () => {
   const { order_id } = useParams();
   const navigate = useNavigate();
   const [deal, setDeal] = useState(null);
@@ -38,10 +38,13 @@ const EditOrderMana = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
-  const isSubmitted = order?.status === 'submitted';
   const isDraft = order?.status === 'draft';
-  const isViewOnly = order?.status !== 'submitted';
+  const isSubmitted = order?.status === 'submitted';
+  const isAccepted = order?.status === 'approved';
+  const isRejected = order?.status === 'rejected';
+  const isViewOnly = isAccepted || isRejected;
 
   const fetchData = useCallback(async () => {
     try {
@@ -69,7 +72,7 @@ const EditOrderMana = () => {
         if (!dealResponse.ok || dealResult.status_code !== 200) {
           throw new Error(dealResult.message || 'Failed to load deal data');
         }
-        setDeal(dealResult.data);
+        setDeal(dealResult.data.deal);
       }
 
       // Fetch order details
@@ -97,6 +100,48 @@ const EditOrderMana = () => {
     fetchData();
   }, [fetchData]);
 
+  const handleSubmitOrder = useCallback(async () => {
+    try {
+      setProcessing(true);
+      setError(null);
+      setSuccessMessage('');
+
+      const requestBody = {
+        order_id: parseInt(order_id),
+        order_title: order?.order_title || '',
+        status: 'submitted',
+        details: orderDetails.map(detail => ({
+          product_id: detail.product_id,
+          quantity: parseInt(detail.quantity),
+          price_for_customer: parseFloat(detail.price_for_customer),
+          service_contract_duration: parseInt(detail.service_contract_duration)
+        }))
+      };
+
+      const response = await fetch(`${BASE_URL}/orders/update-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+      if (!response.ok || result.status_code !== 200) {
+        throw new Error(result.message || 'Failed to update order');
+      }
+
+      await fetchData(); // Refresh data
+      setSuccessMessage('Order submitted successfully!');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setProcessing(false);
+    }
+  }, [order_id, order, orderDetails, fetchData]);
+
   const handleStatusChange = useCallback(
     async (newStatus) => {
       try {
@@ -118,11 +163,10 @@ const EditOrderMana = () => {
         });
 
         const result = await response.json();
-        // if (!response.ok || result.status_code !== 200) {
-        //   throw new Error(result.message || `Failed to ${newStatus} order`);
-        // }
+        if (!response.ok || result.status_code !== 200) {
+          throw new Error(result.message || `Failed to ${newStatus} order`);
+        }
 
-        // Refresh order data
         await fetchData();
         setSuccessMessage(`Order ${newStatus} successfully!`);
       } catch (err) {
@@ -134,16 +178,33 @@ const EditOrderMana = () => {
     [order_id, fetchData]
   );
 
-  if (isDraft && !loading) {
-    return (
-      <div>
-        <Header />
-        <DashboardLayout activeMenu="04">
-          <div className="p-4 text-center text-gray-500">Draft orders are not visible in this view.</div>
-        </DashboardLayout>
-      </div>
-    );
-  }
+  const handleDiscardOrder = useCallback(async () => {
+    try {
+      setProcessing(true);
+      setError(null);
+
+      const response = await fetch(`${BASE_URL}/orders/delete-order?order_id=${order_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+
+      const result = await response.json();
+      if (!response.ok || result.status_code !== 200) {
+        throw new Error(result.message || 'Failed to discard order');
+      }
+
+      navigate('/admin/orders');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setProcessing(false);
+      setShowDiscardConfirm(false);
+    }
+  }, [order_id, navigate]);
 
   if (loading) {
     return (
@@ -169,10 +230,10 @@ const EditOrderMana = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
               <div>
                 <h1 className="text-2xl font-semibold text-gray-800 mb-2">
-                  {isViewOnly ? 'View Order' : 'Review Order'} #{order_id}
+                  {isViewOnly ? 'View Order' : isDraft ? 'Edit Order' : 'Review Order'} #{order_id}
                 </h1>
                 <div className="text-sm text-gray-500">
-                  <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / Orders / {isViewOnly ? 'View' : 'Review'}
+                  <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / Orders / {isViewOnly ? 'View' : isDraft ? 'Edit' : 'Review'}
                 </div>
                 {successMessage && (
                   <div className="bg-green-100 text-green-800 px-4 py-2 rounded mb-4 text-sm border border-green-300">
@@ -230,13 +291,7 @@ const EditOrderMana = () => {
                     <label className="block text-sm font-medium text-gray-700">Status</label>
                     <p
                       className={`mt-1 text-sm capitalize ${
-                        order?.status === 'approved'
-                          ? 'text-green-800'
-                          : order?.status === 'rejected'
-                          ? 'text-red-800'
-                          : order?.status === 'submitted'
-                          ? 'text-blue-800'
-                          : 'text-gray-900'
+                        isAccepted ? 'text-green-800' : isRejected ? 'text-red-800' : isSubmitted ? 'text-blue-800' : 'text-gray-900'
                       }`}
                     >
                       {order?.status || '--'}
@@ -289,38 +344,62 @@ const EditOrderMana = () => {
             </div>
 
             <div className="flex justify-end space-x-4">
-              {!isViewOnly && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange('rejected')}
-                    disabled={processing}
-                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 ${
-                      processing ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {processing ? 'Processing...' : 'Reject'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange('approved')}
-                    disabled={processing}
-                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
-                      processing ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {processing ? 'Processing...' : 'Approve'}
-                  </button>
-                </>
+              {(isDraft || isRejected) && (
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardConfirm(true)}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Discard
+                </button>
+              )}
+              {isDraft && (
+                <button
+                  type="button"
+                  onClick={handleSubmitOrder}
+                  disabled={processing}
+                  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
+                    processing ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {processing ? 'Submitting...' : 'Submit Order'}
+                </button>
               )}
               <button
                 type="button"
                 onClick={() => navigate(-1)}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                disabled={processing}
               >
                 Back
               </button>
             </div>
+
+            {showDiscardConfirm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                  <h2 className="text-lg font-semibold mb-4">Confirm Discard</h2>
+                  <p className="mb-6">Are you sure you want to discard this order? This action cannot be undone.</p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowDiscardConfirm(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDiscardOrder}
+                      disabled={processing}
+                      className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 ${
+                        processing ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {processing ? 'Discarding...' : 'Discard'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </DashboardLayout>
@@ -328,4 +407,4 @@ const EditOrderMana = () => {
   );
 };
 
-export default EditOrderMana;
+export default EditOrderAdmin;
