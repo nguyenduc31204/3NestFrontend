@@ -229,8 +229,8 @@ const OrdersMana = () => {
                                 <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
                                 <td className="px-4 py-3 text-sm text-gray-900">#{order.order_id}</td>
                                 <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[150px]">{order.order_title || '-'}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[150px]">{order.user_email || '-'}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[120px]">{order.customer_name || '-'}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[150px]">{order.contact_email || '-'}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[120px]">{order.contact_name || '-'}</td>
                                 <td className="px-4 py-3 text-sm">
                                   <span
                                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

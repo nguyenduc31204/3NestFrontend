@@ -88,6 +88,7 @@ const DealMana = () => {
                   },
                 });
                 const userResult = await userResponse.json();
+                console.log("userResult",userResult)
                 if (userResult.status_code === 200 && userResult.data) {
                   return {
                     ...deal,
@@ -116,7 +117,7 @@ const DealMana = () => {
   useEffect(() => {
     loadDealsByUser();
   }, [loadDealsByUser]);
-
+console.log("deal", deals)
   return (
     <div>
       <Header />

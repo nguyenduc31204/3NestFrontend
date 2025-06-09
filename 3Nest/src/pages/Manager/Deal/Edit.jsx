@@ -37,8 +37,9 @@ const ManaEditDeal = () => {
           },
         });
         const result = await response.json();
+        console.log("deal_id", result)
         if (result.status_code === 200) {
-          setDealData(result.data);
+          setDealData(result.data.deal);
         } else {
           throw new Error(result.message || 'Failed to load deal data');
         }
@@ -107,6 +108,7 @@ const ManaEditDeal = () => {
         },
       });
       const updatedResult = await updatedResponse.json();
+      console.log("DealData", updatedResult)
       if (updatedResult.status_code === 200) {
         setDealData(updatedResult.data);
         setSuccessMessage(`Deal ${newStatus} successfully!`);
