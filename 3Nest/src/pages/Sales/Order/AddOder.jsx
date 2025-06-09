@@ -60,9 +60,9 @@ const SalesAddOrder = () => {
           });
           const result = await response.json();
           console.log("re", result)
-          if (result.status_code === 200 && result.data.status === 'approved') {
+          if (result.status_code === 200 && result.data.deal.status === 'approved') {
             setValue('deal_id', preSelectedDealId);
-            setDeals([result.data]); 
+            setDeals([result.data.deal]); 
           } else {
             setError('Selected deal is not approved or does not exist');
             setValue('deal_id', '');
@@ -75,6 +75,7 @@ const SalesAddOrder = () => {
       validatePreSelectedDeal();
     }
   }, [preSelectedDealId, setValue]);
+  console.log("deal", deals)
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
@@ -360,6 +361,7 @@ const SalesAddOrder = () => {
           },
           body: JSON.stringify({ order_id: orderIdToUse, ...updatedData }),
         });
+        
       } else {
         response = await fetch(`${BASE_URL}/orders/create-order`, {
           method: 'POST',
@@ -370,12 +372,13 @@ const SalesAddOrder = () => {
           },
           body: JSON.stringify(updatedData),
         });
+        
       }
 
       const result = await response.json();
-      if (!response.ok || result.status_code !== 200) {
-        throw new Error(result.message || 'Failed to submit order');
-      }
+      // if (!response.ok || result.status_code !== 200) {
+      //   throw new Error(result.message || 'Failed to submit order');
+      // }
 
       if (!orderIdToUse && result.data) {
         const newOrderId = result.data.order_id || result.data.id;

@@ -5,6 +5,7 @@ import { decodeToken } from '../../../utils/help';
 import { BASE_URL } from '../../../utils/apiPath';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AddDealChannel = () => {
   const navigate = useNavigate();
@@ -112,8 +113,8 @@ const AddDealChannel = () => {
       if (result.data && result.data.deal_id) {
         navigate(`/channel/editdeals/${result.data.deal_id}`);
       } else {
-        console.warn('No deal_id returned in response:', result.data);
-        navigate('/channel/editdeals/0');
+        // console.warn('No deal_id returned in response:', result.data);
+        toast.error('The tax identification number has been used.')
       }
     } catch (err) {
       // setError(`Failed to ${status === 'draft' ? 'save' : 'submit'} deal: ${err.message}`);
@@ -139,6 +140,8 @@ const AddDealChannel = () => {
   return (
     <div>
       <Header />
+      <Toaster position="top-right" reverseOrder={false} />
+      
       <DashboardLayout activeMenu="08">
         <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="content py-6">

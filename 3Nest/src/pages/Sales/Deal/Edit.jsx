@@ -37,7 +37,7 @@ const SalesEditDeal = () => {
         });
         const result = await response.json();
         if (result.status_code === 200) {
-          setDealData(result.data);
+          setDealData(result.data.deal);
         } else {
           throw new Error(result.message || 'Failed to load deal data');
         }
@@ -225,18 +225,18 @@ const SalesEditDeal = () => {
                       <label className="block text-sm font-medium text-gray-700">Tax Identification Number</label>
                       <p className="text-base text-gray-800">{dealData?.tax_indentification_number || '--'}</p>
                     </div>
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium text-gray-700">Domain Name</label>
                       <p className="text-base text-gray-800">{dealData?.domain_name || '--'}</p>
-                    </div>
+                    </div> */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Deal Type</label>
                       <p className="text-base text-gray-800">{dealData?.deal_type || '--'}</p>
                     </div>
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium text-gray-700">Status</label>
                       <p className="text-base text-gray-800">{dealData?.status || '--'}</p>
-                    </div>
+                    </div> */}
                   </div>
                   
                 </div>

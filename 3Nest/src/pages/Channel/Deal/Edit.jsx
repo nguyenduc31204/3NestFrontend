@@ -37,7 +37,7 @@ const ChannelEditDeal = () => {
         });
         const result = await response.json();
         if (result.status_code === 200) {
-          setDealData(result.data);
+          setDealData(result.data.deal);
         } else {
           throw new Error(result.message || 'Failed to load deal data');
         }
@@ -112,7 +112,7 @@ const ChannelEditDeal = () => {
     });
     const updatedResult = await updatedResponse.json();
     if (updatedResult.status_code === 200) {
-      setDealData(updatedResult.data);
+      setDealData(updatedResult.data.deal);
       setSuccessMessage('Deal submitted successfully!');
     }
   } catch (err) {

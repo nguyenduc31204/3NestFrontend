@@ -60,9 +60,9 @@ const ChannelAddOrder = () => {
           });
           const result = await response.json();
           console.log("re", result)
-          if (result.status_code === 200 && result.data.status === 'approved') {
+          if (result.status_code === 200 && result.data.deal.status === 'approved') {
             setValue('deal_id', preSelectedDealId);
-            setDeals([result.data]); 
+            setDeals([result.data.deal]); 
           } else {
             setError('Selected deal is not approved or does not exist');
             setValue('deal_id', '');

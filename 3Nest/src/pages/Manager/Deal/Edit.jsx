@@ -1,8 +1,8 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
 import Header from '../../../components/layouts/Header';
-import { decodeToken } from '../../../utils/help';
 import { BASE_URL } from '../../../utils/apiPath';
 
 const ManaEditDeal = () => {
@@ -15,18 +15,15 @@ const ManaEditDeal = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectError, setRejectError] = useState('');
 
   const isViewOnly = dealData?.status !== 'submitted';
   const isDraft = dealData?.status === 'draft';
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    // if (token) {
-    //   setUser(decodeToken(token));
-    // } else {
-    //   setError('No authentication token found');
-    // }
-
     const loadDealData = async () => {
       try {
         const response = await fetch(`${BASE_URL}/deals/get-deal?deal_id=${deal_id}`, {
@@ -37,7 +34,6 @@ const ManaEditDeal = () => {
           },
         });
         const result = await response.json();
-        console.log("deal_id", result)
         if (result.status_code === 200) {
           setDealData(result.data.deal);
         } else {
@@ -77,7 +73,30 @@ const ManaEditDeal = () => {
     loadData();
   }, [deal_id]);
 
-  const handleStatusChange = async (newStatus) => {
+  useEffect(() => {
+    const loadUser = async () => {
+      if (!dealData?.user_id) return;
+      try {
+        const response = await fetch(`${BASE_URL}/users/get-user?user_id=${dealData.user_id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const result = await response.json();
+        if (result.status_code === 200) {
+          setUser(result.data);
+        }
+      } catch (err) {
+        setError(`Failed to load user data: ${err.message}`);
+      }
+    };
+
+    loadUser();
+  }, [dealData?.user_id]);
+
+  const handleStatusChange = async (newStatus, description = '') => {
     setProcessing(true);
     setSuccessMessage('');
     setError('');
@@ -92,6 +111,7 @@ const ManaEditDeal = () => {
         body: JSON.stringify({
           deal_id: parseInt(deal_id),
           status: newStatus,
+          ...(description && { description }), // Include description only if provided
         }),
       });
 
@@ -108,44 +128,32 @@ const ManaEditDeal = () => {
         },
       });
       const updatedResult = await updatedResponse.json();
-      console.log("DealData", updatedResult)
       if (updatedResult.status_code === 200) {
-        setDealData(updatedResult.data);
+        setDealData(updatedResult.data.deal);
         setSuccessMessage(`Deal ${newStatus} successfully!`);
       }
-
-      
     } catch (err) {
       setError(`Failed to update deal status: ${err.message}`);
     } finally {
       setProcessing(false);
+      setShowApproveConfirm(false);
+      setShowRejectModal(false);
+      setRejectReason('');
+      setRejectError('');
     }
   };
 
+  const handleApprove = () => {
+    setShowApproveConfirm(true);
+  };
 
-  useEffect(() => {
-    const LoadUser = async () => {
-      try{
-        const response = await fetch(`${BASE_URL}/users/get-user?user_id=${dealData?.user_id}`,{
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true',
-          }
-        })
-
-        const result = await response.json();
-        setUser(result.data)
-      } catch (err) {
-        console.log(err)
-      }
+  const handleReject = () => {
+    if (!rejectReason.trim()) {
+      setRejectError('Please provide a reason for rejection.');
+      return;
     }
-
-    LoadUser()
-  }, [dealData?.user_id])
-
-
-  // console.log("user", user)
+    handleStatusChange('rejected', rejectReason);
+  };
 
   if (isDraft && !loading) {
     return (
@@ -195,7 +203,7 @@ const ManaEditDeal = () => {
                       <p className="text-base text-gray-800">{dealData?.deal_id || '--'}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">User name</label>
+                      <label className="block text-sm font-medium text-gray-700">User Name</label>
                       <p className="text-base text-gray-800">{user?.user_name || '--'}</p>
                     </div>
                     <div>
@@ -211,7 +219,7 @@ const ManaEditDeal = () => {
                       <p className="text-base text-gray-800">{user?.company_name || '--'}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Created at</label>
+                      <label className="block text-sm font-medium text-gray-700">Created At</label>
                       <p className="text-base text-gray-800">
                         {dealData?.created_at
                           ? new Date(dealData.created_at).toLocaleString('vi-VN', {
@@ -225,8 +233,6 @@ const ManaEditDeal = () => {
                           : '--'}
                       </p>
                     </div>
-                    
-                    
                   </div>
                   <div className="flex-1 space-y-4">
                     <div>
@@ -253,25 +259,24 @@ const ManaEditDeal = () => {
                       <label className="block text-sm font-medium text-gray-700">Address</label>
                       <p className="text-base text-gray-800">{dealData?.address || '--'}</p>
                     </div>
-                    {/* <div>
-                      <label className="block text-sm font-medium text-gray-700">Billing Address</label>
-                      <p className="text-base text-gray-800">{dealData?.billing_address || '--'}</p>
-                    </div> */}
-                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Description</label>
+                      <p className="text-base text-gray-800">{dealData?.description || '--'}</p>
+                    </div>
                   </div>
                 </div>
                 {!isViewOnly && (
                   <div className="flex gap-2 w-full justify-end mt-6">
                     <button
                       className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm flex items-center gap-2 touch-manipulation"
-                      onClick={() => handleStatusChange('rejected')}
+                      onClick={() => setShowRejectModal(true)}
                       disabled={processing}
                     >
                       Reject
                     </button>
                     <button
                       className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm flex items-center gap-2 touch-manipulation"
-                      onClick={() => handleStatusChange('approved')}
+                      onClick={handleApprove}
                       disabled={processing}
                     >
                       {processing ? 'Processing...' : 'Approve'}
@@ -308,15 +313,15 @@ const ManaEditDeal = () => {
                                   <span
                                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                                       order.status === 'submitted'
-                                        ? 'bg-green-100 text-green-800'
-                                        : order.status === 'approved'
                                         ? 'bg-blue-100 text-blue-800'
+                                        : order.status === 'approved'
+                                        ? 'bg-green-100 text-green-800'
                                         : 'bg-red-100 text-red-800'
                                     }`}
                                   >
-                                    {order.status === 'submitted' ? 'Submitted' : 
-                                    order.status === 'approved' ? 'Approved' : 
-                                    order.status || 'Unknown'}
+                                    {order.status === 'submitted' ? 'Submitted' :
+                                     order.status === 'approved' ? 'Approved' :
+                                     order.status || 'Unknown'}
                                   </span>
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900">
@@ -339,6 +344,75 @@ const ManaEditDeal = () => {
                       </table>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Approval Confirmation Modal */}
+            {showApproveConfirm && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+                  <h2 className="text-lg font-semibold mb-4">Confirm Approval</h2>
+                  <p className="mb-6 text-sm text-gray-600">Are you sure you want to approve this deal?</p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowApproveConfirm(false)}
+                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                      disabled={processing}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange('approved')}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                      disabled={processing}
+                    >
+                      {processing ? 'Processing...' : 'Confirm'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Rejection Reason Modal */}
+            {showRejectModal && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                  <h2 className="text-lg font-semibold mb-4">Reject Deal</h2>
+                  <p className="mb-4 text-sm text-gray-600">Please provide a reason for rejecting this deal.</p>
+                  <textarea
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                    rows="4"
+                    value={rejectReason}
+                    onChange={(e) => {
+                      setRejectReason(e.target.value);
+                      setRejectError('');
+                    }}
+                    placeholder="Enter rejection reason..."
+                  />
+                  {rejectError && (
+                    <p className="text-sm text-red-600 mt-2">{rejectError}</p>
+                  )}
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      onClick={() => {
+                        setShowRejectModal(false);
+                        setRejectReason('');
+                        setRejectError('');
+                      }}
+                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                      disabled={processing}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleReject}
+                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                      disabled={processing}
+                    >
+                      {processing ? 'Processing...' : 'Reject'}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

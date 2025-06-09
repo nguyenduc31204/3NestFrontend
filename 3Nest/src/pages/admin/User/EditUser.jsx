@@ -28,14 +28,15 @@ const EditUser = () => {
         });
         const result = await res.json();
         const found = result.data.find(u => u.user_id == userId);
+        console.log("fond", result)
   
         if (found) {
           setFormData({
-            user_id: found.user_id,
+            user_id: userId,
             user_name: found.user_name || '',
             company_name: found.company_name || '',
             phone: found.phone || '',
-            status: found.status ?? false,
+            status: found.status ?? true,
           });
           setLoading(false);
         } else {
@@ -68,7 +69,7 @@ const EditUser = () => {
 
     try {
       const res = await fetch(`${BASE_URL}/users/update-user`, {
-        method: 'POST', // đúng theo Swagger
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
@@ -85,6 +86,7 @@ const EditUser = () => {
   };
 
   if (loading) return <p className="p-4">Loadinggg...</p>;
+  console.log("userId", userId)
 
   return (
     <div className="max-w-xl mx-auto p-4">

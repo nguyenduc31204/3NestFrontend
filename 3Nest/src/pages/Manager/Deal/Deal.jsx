@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layouts/Header';
@@ -25,8 +26,13 @@ const DealRow = ({ deal, index, navigate }) => {
     default: 'bg-gray-100 text-gray-800',
   };
 
+  const rowBackgroundStyles = {
+    approved: 'bg-green-50',
+    submitted: 'bg-blue-50',
+  };
+
   return (
-    <tr className="hover:bg-gray-50">
+    <tr className={`hover:bg-gray-50 ${rowBackgroundStyles[deal.status] || ''}`}>
       <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
       <td className="px-4 py-4 text-sm text-gray-900">#{deal.deal_id}</td>
       <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{deal.user_email || '-'}</td>
@@ -88,7 +94,6 @@ const DealMana = () => {
                   },
                 });
                 const userResult = await userResponse.json();
-                console.log("userResult",userResult)
                 if (userResult.status_code === 200 && userResult.data) {
                   return {
                     ...deal,
@@ -117,7 +122,7 @@ const DealMana = () => {
   useEffect(() => {
     loadDealsByUser();
   }, [loadDealsByUser]);
-console.log("deal", deals)
+
   return (
     <div>
       <Header />
@@ -238,7 +243,13 @@ console.log("deal", deals)
                         <div className="p-4 text-center text-gray-500">No deals found</div>
                       ) : (
                         deals.map((deal, index) => (
-                          <div key={deal.deal_id} className="p-4 bg-white hover:bg-gray-50">
+                          <div
+                            key={deal.deal_id}
+                            className={`p-4 bg-white hover:bg-gray-50 ${
+                              deal.status === 'approved' ? 'bg-green-50' :
+                              deal.status === 'submitted' ? 'bg-blue-50' : ''
+                            }`}
+                          >
                             <div className="flex justify-between items-center mb-2">
                               <span className="font-medium text-gray-800">Deal #{deal.deal_id}</span>
                               <span
@@ -249,6 +260,8 @@ console.log("deal", deals)
                                     ? 'bg-yellow-100 text-yellow-800'
                                     : deal.status === 'rejected'
                                     ? 'bg-red-100 text-red-800'
+                                    : deal.status === 'submitted'
+                                    ? 'bg-blue-100 text-blue-800'
                                     : 'bg-gray-100 text-gray-800'
                                 }`}
                               >
@@ -259,7 +272,7 @@ console.log("deal", deals)
                               <p><strong>Email:</strong> {deal.user_email || '-'}</p>
                               <p><strong>Name:</strong> {deal.user_name || '-'}</p>
                               <p><strong>Customer:</strong> {deal.customer_name || '-'}</p>
-                              <p><strong>TIN:</strong> {deal.tax_identification_number || '-'}</p>
+                              <p><strong>TIN:</strong> {deal.tax_indentification_number || '-'}</p>
                               <p><strong>Date:</strong> {new Date(deal.created_at).toLocaleDateString() || '-'}</p>
                             </div>
                             <div className="flex gap-2 mt-3">
