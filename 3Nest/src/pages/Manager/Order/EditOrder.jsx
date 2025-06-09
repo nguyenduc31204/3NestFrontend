@@ -69,7 +69,7 @@ const EditOrderMana = () => {
         if (!dealResponse.ok || dealResult.status_code !== 200) {
           throw new Error(dealResult.message || 'Failed to load deal data');
         }
-        setDeal(dealResult.data);
+        setDeal(dealResult.data.deal);
       }
 
       // Fetch order details
