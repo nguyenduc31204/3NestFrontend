@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../../utils/axiosIntance';
+import Header from '../../../components/layouts/Header';
+import DashboardLayout from '../../../components/layouts/DashboardLayout';
 
 const EditType = () => {
   const { id } = useParams();
@@ -18,32 +20,27 @@ const EditType = () => {
 
   useEffect(() => {
     const fetchTypes = async () => {
-        try {
+      try {
         const res = await axiosInstance.get('/types/get-types');
         const allTypes = res.data?.data || [];
-
-   
         const found = allTypes.find(t => String(t.type_id) === String(id));
-
         if (found) {
-            setFormData({
+          setFormData({
             type_id: found.type_id,
             type_name: found.type_name || '',
             description: found.description || '',
-            });
+          });
         } else {
-            setError('Type not existed!');
+          setError('Type not existed!');
         }
-        } catch (err) {
-        setError('error loading type');
-        } finally {
+      } catch (err) {
+        setError('Error loading type');
+      } finally {
         setLoading(false);
-        }
+      }
     };
-
     fetchTypes();
-    }, [id]);
-
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,54 +57,78 @@ const EditType = () => {
 
     try {
       await axiosInstance.post('/types/update-type', formData);
-      setSuccess('successfull!');
+      setSuccess('Updated successfully!');
       setTimeout(() => navigate('/admin/types'), 1500);
     } catch (err) {
-      setError('update type error!');
+      setError('Update type error!');
     }
   };
 
-
-
-  if (loading) return <p className="p-4">Loadingg...</p>;
+  if (loading) return <p className="p-8 text-center text-blue-600">Loading type...</p>;
 
   return (
-    <div className="max-w-xl mx-auto p-4">
-      <h2 className="text-2xl font-semibold mb-4">Edit Type</h2>
+    <div>
+      <Header />
+      <DashboardLayout activeMenu="type">
+        <div className="my-5 mx-auto">
+          <div className="content p-20">
+            <div className="page-header flex justify-between items-center mb-10">
+              <div className="page-title">
+                <h1 className="text-2xl font-semibold text-gray-800 mb-2">Edit Type</h1>
+                <div className="breadcrumb text-gray-500 text-sm">
+                  <a href="#" className="hover:underline">Dashboard</a> / <a href="/admin/types" className="hover:underline">Types</a> / Edit
+                </div>
+              </div>
+            </div>
 
-      {error && <p className="text-red-600 mb-3">{error}</p>}
-      {success && <p className="text-green-600 mb-3">{success}</p>}
-
-      <form onSubmit={handleUpdate} className="space-y-4">
-        <input
-          type="text"
-          name="type_name"
-          placeholder="type"
-          value={formData.type_name}
-          onChange={handleChange}
-          className="w-full border border-gray-300 p-2 rounded"
-          required
-        />
-
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={formData.description}
-          onChange={handleChange}
-          className="w-full border border-gray-300 p-2 rounded"
-          rows={4}
-        />
-
-        <div className="flex space-x-2">
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Update
-          </button>
-          
+            <div className="card bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="card-body p-6">
+                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
+                <form onSubmit={handleUpdate} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium">Type Name</label>
+                    <input
+                      type="text"
+                      name="type_name"
+                      value={formData.type_name}
+                      onChange={handleChange}
+                      className="mt-1 block w-full border border-gray-300 rounded px-3 py-2"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">Description</label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      className="mt-1 block w-full border border-gray-300 rounded px-3 py-2"
+                      rows={4}
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/admin/types')}
+                      className="px-4 py-2 bg-gray-300 rounded"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+                    >
+                      Update Type
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
-      </form>
+      </DashboardLayout>
     </div>
   );
 };

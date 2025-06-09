@@ -149,7 +149,6 @@ const SalesAddOrder = () => {
           });
           const result = await response.json();
           if (result.status_code === 200 && Array.isArray(result.data)) {
-            // Filter deals with status 'accepted'
             const acceptedDeals = result.data.filter((deal) => deal.status === 'accepted');
             setDeals(acceptedDeals);
           } else {
@@ -199,7 +198,6 @@ const SalesAddOrder = () => {
       const idToUse = order_id ? Number(order_id) : createdOrderId;
       const matchedOrder = allOrders.find((order) => order.order_id === idToUse);
       if (matchedOrder) {
-        // Verify deal status for existing order
         const deal = deals.find((d) => d.deal_id === matchedOrder.deal_id);
         if (deal && deal.status === 'accepted') {
           setOrderData(matchedOrder);

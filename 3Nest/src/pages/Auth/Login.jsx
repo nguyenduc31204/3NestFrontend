@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { decodeToken, validateEmail } from '../../utils/help';
 import Input from '../../components/input/Input';
-import { API_PATHS, BASE_URL } from '../../utils/apiPath';
+import { BASE_URL } from '../../utils/apiPath';
 
 const Login = () => {
   const [user_email, setEmail] = useState('');
@@ -40,7 +40,7 @@ const Login = () => {
       });
 
       const result = await response.json();
-      console.log('Login API Response:', result); 
+      console.log('Login API Response:', result);
 
       if (response.ok) {
         const { access_token } = result;
@@ -72,12 +72,11 @@ const Login = () => {
             navigate('/');
         }
       } else {
-        setError(result.detail)
+        setError(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
         throw new Error(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      // setError(error.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
     }
   };
 

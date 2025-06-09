@@ -12,16 +12,17 @@ const OrderDetailRow = ({ detail, index }) => (
     <td className="px-4 py-4 text-sm text-gray-900">{detail.quantity || 0}</td>
     <td className="px-4 py-4 text-sm text-gray-900">${detail.price_for_customer?.toLocaleString() || '0'}</td>
     <td className="px-4 py-4 text-sm text-gray-900">{detail.service_contract_duration || 0} year(s)</td>
-    <td className="px-4 py-4 text-sm text-gray-900">${(() => {
+    <td className="px-4 py-4 text-sm text-gray-900">
+      ${(() => {
         const price = detail.price_for_customer || 0;
         const quantity = detail.quantity || 0;
         const years = detail.service_contract_duration || 1;
         let total = 0;
         for (let i = 0; i < years; i++) {
-            total += price * Math.pow(1.05, i);
+          total += price * Math.pow(1.05, i);
         }
         return Math.round(total * quantity).toLocaleString();
-        })()}
+      })()}
     </td>
   </tr>
 );
@@ -35,8 +36,15 @@ const EditOrder = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [processing, setProcessing] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  const isDraft = order?.status === 'draft';
   const isSubmitted = order?.status === 'submitted';
+  const isAccepted = order?.status === 'accepted';
+  const isRejected = order?.status === 'rejected';
+  const isViewOnly = isAccepted || isRejected;
 
   const fetchData = useCallback(async () => {
     try {
@@ -94,8 +102,9 @@ const EditOrder = () => {
 
   const handleSubmitOrder = useCallback(async () => {
     try {
-      setLoading(true);
+      setProcessing(true);
       setError(null);
+      setSuccessMessage('');
 
       const requestBody = {
         order_id: parseInt(order_id),
@@ -125,17 +134,55 @@ const EditOrder = () => {
       }
 
       await fetchData(); // Refresh data
+      setSuccessMessage('Order submitted successfully!');
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setProcessing(false);
     }
   }, [order_id, order, orderDetails, fetchData]);
-  console.log(orderDetails)
+
+  const handleStatusChange = useCallback(
+    async (newStatus) => {
+      try {
+        setProcessing(true);
+        setError(null);
+        setSuccessMessage('');
+
+        const response = await fetch(`${BASE_URL}/orders/change-status-of-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+          body: JSON.stringify({
+            order_id: parseInt(order_id),
+            status: newStatus,
+          }),
+        });
+
+        const result = await response.json();
+        if (!response.ok || result.status_code !== 200) {
+          throw new Error(result.message || `Failed to ${newStatus} order`);
+        }
+
+        await fetchData();
+        setSuccessMessage(`Order ${newStatus} successfully!`);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setProcessing(false);
+      }
+    },
+    [order_id, fetchData]
+  );
 
   const handleDiscardOrder = useCallback(async () => {
     try {
-      setLoading(true);
+      setProcessing(true);
+      setError(null);
+
       const response = await fetch(`${BASE_URL}/orders/delete-order?order_id=${order_id}`, {
         method: 'DELETE',
         headers: {
@@ -146,15 +193,15 @@ const EditOrder = () => {
       });
 
       const result = await response.json();
-    //   if (!response.ok || result.status_code !== 200) {
-    //     throw new Error(result.message || 'Failed to discard order');
-    //   }
+      if (!response.ok || result.status_code !== 200) {
+        throw new Error(result.message || 'Failed to discard order');
+      }
 
       navigate('/sales/orders');
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setProcessing(false);
       setShowDiscardConfirm(false);
     }
   }, [order_id, navigate]);
@@ -183,11 +230,16 @@ const EditOrder = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
               <div>
                 <h1 className="text-2xl font-semibold text-gray-800 mb-2">
-                  View Order #{order_id}
+                  {isViewOnly ? 'View Order' : isDraft ? 'Edit Order' : 'Review Order'} #{order_id}
                 </h1>
                 <div className="text-sm text-gray-500">
-                  <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / Orders / View
+                  <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / Orders / {isViewOnly ? 'View' : isDraft ? 'Edit' : 'Review'}
                 </div>
+                {successMessage && (
+                  <div className="bg-green-100 text-green-800 px-4 py-2 rounded mb-4 text-sm border border-green-300">
+                    {successMessage}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -237,7 +289,13 @@ const EditOrder = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Status</label>
-                    <p className="mt-1 text-sm text-gray-900 capitalize">{order?.status || 'draft'}</p>
+                    <p
+                      className={`mt-1 text-sm capitalize ${
+                        isAccepted ? 'text-green-800' : isRejected ? 'text-red-800' : isSubmitted ? 'text-blue-800' : 'text-gray-900'
+                      }`}
+                    >
+                      {order?.status || '--'}
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Total Budget</label>
@@ -273,11 +331,7 @@ const EditOrder = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {orderDetails.map((detail, index) => (
-                        <OrderDetailRow
-                          key={index}
-                          detail={detail}
-                          index={index}
-                        />
+                        <OrderDetailRow key={index} detail={detail} index={index} />
                       ))}
                     </tbody>
                   </table>
@@ -290,29 +344,32 @@ const EditOrder = () => {
             </div>
 
             <div className="flex justify-end space-x-4">
-              {!isSubmitted && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setShowDiscardConfirm(true)}
-                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    Discard
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSubmitOrder}
-                    disabled={loading}
-                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {loading ? 'Submitting...' : 'Submit Order'}
-                  </button>
-                </>
+              {(isDraft || isRejected) && (
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardConfirm(true)}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Discard
+                </button>
+              )}
+              {isDraft && (
+                <button
+                  type="button"
+                  onClick={handleSubmitOrder}
+                  disabled={processing}
+                  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
+                    processing ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {processing ? 'Submitting...' : 'Submit Order'}
+                </button>
               )}
               <button
                 type="button"
                 onClick={() => navigate(-1)}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                disabled={processing}
               >
                 Back
               </button>
@@ -332,10 +389,12 @@ const EditOrder = () => {
                     </button>
                     <button
                       onClick={handleDiscardOrder}
-                      disabled={loading}
-                      className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={processing}
+                      className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 ${
+                        processing ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
-                      {loading ? 'Discarding...' : 'Discard'}
+                      {processing ? 'Discarding...' : 'Discard'}
                     </button>
                   </div>
                 </div>

@@ -375,9 +375,9 @@ const ChannelAddOrder = () => {
       }
 
       const result = await response.json();
-      if (!response.ok || result.status_code !== 200) {
-        throw new Error(result.message || 'Failed to submit order');
-      }
+      // if (!response.ok || result.status_code !== 200) {
+      //   throw new Error(result.message || 'Failed to submit order');
+      // }
 
       if (!orderIdToUse && result.data) {
         const newOrderId = result.data.order_id || result.data.id;
@@ -394,7 +394,8 @@ const ChannelAddOrder = () => {
       localStorage.removeItem('createdOrderId');
       navigate(`/channel/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
     } catch (err) {
-      setError(`Failed to submit order: ${err.message}`);
+      // setError(`Failed to submit order: ${err.message}`);
+      console.log(err)
     }
   };
 
