@@ -60,11 +60,11 @@ const ChannelAddOrder = () => {
           });
           const result = await response.json();
           console.log("re", result)
-          if (result.status_code === 200 && result.data.status === 'accepted') {
+          if (result.status_code === 200 && result.data.status === 'approved') {
             setValue('deal_id', preSelectedDealId);
             setDeals([result.data]); 
           } else {
-            setError('Selected deal is not accepted or does not exist');
+            setError('Selected deal is not approved or does not exist');
             setValue('deal_id', '');
           }
         } catch (err) {
@@ -150,7 +150,7 @@ const ChannelAddOrder = () => {
           const result = await response.json();
           if (result.status_code === 200 && Array.isArray(result.data)) {
             // Filter deals with status 'accepted'
-            const acceptedDeals = result.data.filter((deal) => deal.status === 'accepted');
+            const acceptedDeals = result.data.filter((deal) => deal.status === 'approved');
             setDeals(acceptedDeals);
           } else {
             throw new Error(result.message || 'Failed to load deals');
@@ -201,12 +201,12 @@ const ChannelAddOrder = () => {
       if (matchedOrder) {
         // Verify deal status for existing order
         const deal = deals.find((d) => d.deal_id === matchedOrder.deal_id);
-        if (deal && deal.status === 'accepted') {
+        if (deal && deal.status === 'approved') {
           setOrderData(matchedOrder);
           setValue('order_title', matchedOrder.order_title || '');
           setValue('deal_id', matchedOrder.deal_id || preSelectedDealId || '');
         } else {
-          setError('The deal for this order is not accepted');
+          setError('The deal for this order is not approved');
         }
       } else if (allOrders.length > 0) {
         setError(`Order with ID ${idToUse} not found`);
@@ -250,8 +250,8 @@ const ChannelAddOrder = () => {
   const handleSaveOrder = async () => {
     // Validate deal status
     const selectedDeal = deals.find((deal) => deal.deal_id === Number(formValues.deal_id));
-    if (!selectedDeal || selectedDeal.status !== 'accepted') {
-      setError('Cannot save order: Selected deal is not accepted');
+    if (!selectedDeal || selectedDeal.status !== 'approved') {
+      setError('Cannot save order: Selected deal is not approved');
       return;
     }
 
@@ -332,8 +332,8 @@ const ChannelAddOrder = () => {
   const handleSubmitOrder = async () => {
     // Validate deal status
     const selectedDeal = deals.find((deal) => deal.deal_id === Number(formValues.deal_id));
-    if (!selectedDeal || selectedDeal.status !== 'accepted') {
-      setError('Cannot submit order: Selected deal is not accepted');
+    if (!selectedDeal || selectedDeal.status !== 'approved') {
+      setError('Cannot submit order: Selected deal is not approved');
       return;
     }
 
@@ -403,8 +403,8 @@ const ChannelAddOrder = () => {
     // Validate deal status before opening dialog
     const selectedDealId = Number(formValues.deal_id) || preSelectedDealId;
     const selectedDeal = deals.find((deal) => deal.deal_id === selectedDealId);
-    if (!selectedDeal || selectedDeal.status !== 'accepted') {
-      setError('Cannot add items: Please select an accepted deal');
+    if (!selectedDeal || selectedDeal.status !== 'approved') {
+      setError('Cannot add items: Please select an approved deal');
       return;
     }
     setIsDialogOpen(true);
@@ -485,7 +485,7 @@ const ChannelAddOrder = () => {
           const dealsResult = await dealsResponse.json();
           if (dealsResult.status_code === 200 && Array.isArray(dealsResult.data)) {
             // Filter accepted deals
-            const acceptedDeals = dealsResult.data.filter((deal) => deal.status === 'accepted');
+            const acceptedDeals = dealsResult.data.filter((deal) => deal.status === 'approved');
             setDeals(acceptedDeals);
           }
         }
@@ -615,7 +615,7 @@ const ChannelAddOrder = () => {
                   <div className="mt-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-medium text-gray-800">Order Details</h3>
-                      {!['submitted', 'accepted', 'draft'].includes(orderData?.status || '') && (
+                      {!['submitted', 'approved', 'draft'].includes(orderData?.status || '') && (
                         <button
                           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2 touch-manipulation"
                           onClick={handleAddOrderClick}

@@ -39,7 +39,7 @@ const Orders = () => {
   try {
     setLoading(true);
     setError(null);
-    const response = await fetch(`${BASE_URL}/orders/orders-by-role?role=${activeRole}`, {
+    const response = await fetch(`${BASE_URL}/orders/get-orders-by-role?role=${activeRole}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -63,26 +63,6 @@ const Orders = () => {
   }
 };
 
-  const updateOrderStatus = async (newStatus) => {
-    try {
-      const response = await fetch(`${BASE_URL}/orders/update-order`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          'ngrok-skip-browser-warning': 'true',
-        },
-        body: JSON.stringify(newStatus),
-      });
-      const result = await response.json();
-      if (!response.ok || result.status_code !== 200) {
-        throw new Error(result.message || 'Failed to update status');
-      }
-      loadOrdersByRole();
-    } catch (err) {
-      setError(`Failed to update status: ${err.message}`);
-    }
-  };
 
   const loadProductChoose = async (pro_id) => {
     try {
@@ -169,7 +149,7 @@ const Orders = () => {
 
             <div className="card bg-white rounded-lg shadow-md overflow-hidden mb-6">
               <div className="card-header flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-gray-200 gap-4">
-                <h2 className="text-lg font-semibold text-gray-800">Amin Orders</h2>
+                <h2 className="text-lg font-semibold text-gray-800">Admin Orders</h2>
                 <div className="flex flex-col gap-4">
                   {role === 'admin' && (
                     <div className="product-role flex space-x-2 bg-gray-50 p-2 rounded-md">
@@ -277,12 +257,12 @@ const Orders = () => {
                                         ? 'bg-green-100 text-green-800'
                                         : order.status === 'draft'
                                         ? 'bg-yellow-100 text-yellow-800'
-                                        : order.status === 'accepted'
+                                        : order.status === 'approved'
                                         ? 'bg-blue-100 text-blue-800'
                                         : 'bg-red-100 text-red-800'
                                     }`}
                                   >
-                                    {order.status === 'draft' ? 'Draft' : order.status === 'submited' ? 'Submitted' : order.status === 'accepted' ? 'Accepted' : order.status || 'Unknown'}
+                                    {order.status === 'draft' ? 'Draft' : order.status === 'submited' ? 'Submitted' : order.status === 'approved' ? 'Approved' : order.status || 'Unknown'}
                                   </span>
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900">
@@ -323,7 +303,7 @@ const Orders = () => {
                               <span className="font-medium text-gray-800">Order #{order.order_id}</span>
                               <span
                                 className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  order.status === 'accepted'
+                                  order.status === 'approved'
                                     ? 'bg-green-100 text-green-800'
                                     : order.status === 'draft'
                                     ? 'bg-yellow-100 text-yellow-800'

@@ -42,7 +42,7 @@ const EditOrder = () => {
 
   const isDraft = order?.status === 'draft';
   const isSubmitted = order?.status === 'submitted';
-  const isAccepted = order?.status === 'accepted';
+  const isAccepted = order?.status === 'approved';
   const isRejected = order?.status === 'rejected';
   const isViewOnly = isAccepted || isRejected;
 

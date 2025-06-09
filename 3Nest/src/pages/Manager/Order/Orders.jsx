@@ -149,9 +149,9 @@ const OrdersMana = () => {
                   <LuWalletMinimal className="w-5 h-5" />
                 </div>
                 <div className="stat-value text-xl font-bold text-gray-800">
-                  {orders.filter((order) => order.status === 'accepted').length}
+                  {orders.filter((order) => order.status === 'approved').length}
                 </div>
-                <div className="stat-label text-gray-500 text-sm">Accepted Orders</div>
+                <div className="stat-label text-gray-500 text-sm">Approved Orders</div>
               </div>
               <div className="stat-card rounded-lg p-4 shadow-md bg-white">
                 <div className="stat-icon bg-yellow-100 text-yellow-600 w-10 h-10 rounded-full flex items-center justify-center mb-3">
@@ -238,7 +238,7 @@ const OrdersMana = () => {
                                         ? 'bg-blue-100 text-blue-800'
                                         : order.status === 'draft'
                                         ? 'bg-yellow-100 text-yellow-800'
-                                        : order.status === 'accepted'
+                                        : order.status === 'approved'
                                         ? 'bg-green-100 text-green-800'
                                         : order.status === 'rejected'
                                         ? 'bg-red-100 text-red-800'
@@ -249,8 +249,8 @@ const OrdersMana = () => {
                                       ? 'Draft'
                                       : order.status === 'submitted'
                                       ? 'Submitted'
-                                      : order.status === 'accepted'
-                                      ? 'Accepted'
+                                      : order.status === 'approved'
+                                      ? 'Approved'
                                       : order.status === 'rejected'
                                       ? 'Rejected'
                                       : order.status || 'Unknown'}
@@ -293,7 +293,7 @@ const OrdersMana = () => {
                                     ? 'bg-blue-100 text-blue-800'
                                     : order.status === 'draft'
                                     ? 'bg-yellow-100 text-yellow-800'
-                                    : order.status === 'accepted'
+                                    : order.status === 'approved'
                                     ? 'bg-green-100 text-green-800'
                                     : order.status === 'rejected'
                                     ? 'bg-red-100 text-red-800'
@@ -304,8 +304,8 @@ const OrdersMana = () => {
                                   ? 'Draft'
                                   : order.status === 'submitted'
                                   ? 'Submitted'
-                                  : order.status === 'accepted'
-                                  ? 'Accepted'
+                                  : order.status === 'approved'
+                                  ? 'Approved'
                                   : order.status === 'rejected'
                                   ? 'Rejected'
                                   : order.status || 'Unknown'}
@@ -328,9 +328,9 @@ const OrdersMana = () => {
                                 <>
                                   <button
                                     className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm touch-manipulation"
-                                    onClick={() => handleStatusChange(order.order_id, 'accepted')}
+                                    onClick={() => handleStatusChange(order.order_id, 'approved')}
                                   >
-                                    Accept
+                                    Approve
                                   </button>
                                   <button
                                     className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm touch-manipulation"
