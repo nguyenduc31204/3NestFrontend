@@ -20,7 +20,7 @@ import {
 const DealRow = ({ deal, index, navigate }) => {
   const statusStyles = {
     draft: 'bg-yellow-100 text-yellow-800',
-    accepted: 'bg-green-100 text-green-800',
+    approved: 'bg-green-100 text-green-800',
     rejected: 'bg-red-100 text-red-800',
     default: 'bg-gray-100 text-gray-800',
   };
@@ -145,9 +145,9 @@ const DealMana = () => {
                   <LuWalletMinimal className="w-5 h-5" />
                 </div>
                 <div className="text-xl font-bold text-gray-800">
-                  {deals.filter((deal) => deal.status === 'accepted').length}
+                  {deals.filter((deal) => deal.status === 'approved').length}
                 </div>
-                <div className="text-gray-500 text-sm">Accepted Deals</div>
+                <div className="text-gray-500 text-sm">Approved Deals</div>
               </div>
               <div className="rounded-lg p-4 shadow-md bg-white">
                 <div className="bg-yellow-100 text-yellow-600 w-10 h-10 rounded-full flex items-center justify-center mb-3">
@@ -242,7 +242,7 @@ const DealMana = () => {
                               <span className="font-medium text-gray-800">Deal #{deal.deal_id}</span>
                               <span
                                 className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  deal.status === 'accepted'
+                                  deal.status === 'approved'
                                     ? 'bg-green-100 text-green-800'
                                     : deal.status === 'draft'
                                     ? 'bg-yellow-100 text-yellow-800'

@@ -243,14 +243,14 @@ const SalesOrders = () => {
                                         ? 'bg-green-100 text-green-800'
                                         : order.status === 'draft'
                                         ? 'bg-yellow-100 text-yellow-800'
-                                        : order.status === 'accepted'
+                                        : order.status === 'approved'
                                         ? 'bg-blue-100 text-blue-800'
                                         : 'bg-red-100 text-red-800'
                                     }`}
                                   >
                                     {order.status === 'draft' ? 'Draft' : 
                                      order.status === 'submitted' ? 'Submitted' : 
-                                     order.status === 'accepted' ? 'Accepted' : 
+                                     order.status === 'approved' ? 'Approved' : 
                                      order.status || 'Unknown'}
                                   </span>
                                 </td>
@@ -287,7 +287,7 @@ const SalesOrders = () => {
                               <span className="font-medium text-gray-800">Order #{order.order_id}</span>
                               <span
                                 className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  order.status === 'accepted'
+                                  order.status === 'approved'
                                     ? 'bg-green-100 text-green-800'
                                     : order.status === 'draft'
                                     ? 'bg-yellow-100 text-yellow-800'
@@ -298,7 +298,7 @@ const SalesOrders = () => {
                               >
                                 {order.status === 'draft' ? 'Draft' : 
                                  order.status === 'submitted' ? 'Submitted' : 
-                                 order.status === 'accepted' ? 'Accepted' : 
+                                 order.status === 'approved' ? 'Approved' : 
                                  order.status || 'Unknown'}
                               </span>
                             </div>

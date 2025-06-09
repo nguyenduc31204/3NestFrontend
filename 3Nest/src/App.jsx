@@ -42,6 +42,10 @@ import ChannelOrders from './pages/Channel/Order/ChannelOrders'
 import DealMana from './pages/Manager/Deal/Deal'
 import ManaEditDeal from './pages/Manager/Deal/Edit'
 import EditOrderMana from './pages/Manager/Order/EditOrder'
+import DealAdmin from './pages/admin/Deal/Deal'
+import AdminEditDeal from './pages/admin/Deal/Edit'
+import EditOrderAdmin from './pages/admin/Order/EditOrder'
+import AddDealAdmin from './pages/admin/Deal/AddDeal'
 
 
 
@@ -72,9 +76,15 @@ const App = () => {
         <Route path='/admin/types' element={<TypeDetail />} />
         <Route path="/admin/settings" element={<Setting />} />
         <Route path="/admin/addorder" element={<AddOrder />} />
-        <Route path="/admin/editorder/:order_id" element={<AddOrder />} />
+        <Route path="/admin/editorder/:order_id" element={<EditOrderAdmin />} />
         <Route path='/admin/types/add' element={<AddType />} />
         <Route path='/admin/types/edit/:id' element={<EditType />} />
+        <Route path="/admin/deals" element={<DealAdmin />} />
+        <Route path="/admin/editdeals/:deal_id" element={<AdminEditDeal />} />
+        <Route path="/admin/adddeals" element={<AddDealAdmin />} />
+
+
+
         {/* sales */}
         <Route path="/sales/products" element={<SalesProducts />} />
         <Route path="/sales/orders" element={<SalesOrders />} />

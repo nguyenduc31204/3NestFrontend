@@ -1,11 +1,9 @@
-import React, { useEffect } from 'react'
-import Header from '../../../components/layouts/Header'
-import { decodeToken } from '../../../utils/help';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BASE_URL } from '../../../utils/apiPath';
+import Header from '../../../components/layouts/Header';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
-
+import { decodeToken } from '../../../utils/help';
+import { BASE_URL } from '../../../utils/apiPath';
 import {
   LuCoins,
   LuWalletMinimal,
@@ -19,64 +17,70 @@ import {
   LuRefreshCcw,
 } from 'react-icons/lu';
 
-const Deal = () => {
+const DealAdmin = () => {
   const navigate = useNavigate();
   const [deals, setDeals] = useState([]);
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState(null); 
+  const [selectedDeal, setSelectedDeal] = useState(null);
+  const [activeRole, setActiveRole] = useState('admin');
 
   const token = localStorage.getItem('access_token');
   const decodedToken = decodeToken(token);
-  const userId = decodedToken?.user_id;
+  const role = decodedToken?.role;
 
-  console.log("decodedToken", decodedToken)
   useEffect(() => {
     loadDealsByUser();
-  }, []);
+  }, [activeRole]);
 
   const loadDealsByUser = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${BASE_URL}/deals/get-deals-by-user`, {
+      const response = await fetch(`${BASE_URL}/deals/get-deals-by-role?role=${activeRole}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${token}`,
         },
       });
+      if (!response.ok) throw new Error('Failed to fetch deals');
       const result = await response.json();
-      
-        setDeals(result.data);
+      setDeals(result.data || []);
     } catch (err) {
-      setError(`Failed to load orders: ${err.message}`);
+      setError(`Failed to load deals: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  console.log("deals",deals)
+  const handleRoleChange = (role) => {
+    setActiveRole(role);
+  };
+
+  const handleRefresh = () => {
+    loadDealsByUser();
+  };
 
 
   return (
     <div>
-      <Header/>
+      <Header />
       <DashboardLayout activeMenu="08">
         <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="content py-6">
             <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
               <div className="page-title">
-                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Sales Deals Management</h1>
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Admin Deals Management</h1>
                 <div className="breadcrumb text-sm text-gray-500">
                   <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / My Deals
                 </div>
               </div>
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm sm:text-base flex items-center gap-2 touch-manipulation"
-                onClick={() => navigate('/sales/adddeals')}
+                onClick={() => navigate('/admin/adddeals')}
               >
                 <i className="fas fa-plus"></i> Add New Deals
               </button>
@@ -95,16 +99,16 @@ const Deal = () => {
                   <LuWalletMinimal className="w-5 h-5" />
                 </div>
                 <div className="stat-value text-xl font-bold text-gray-800">
-                  {deals.filter((deals) => deals.status === 'approved').length}
+                  {deals.filter((deal) => deal.status === 'approved').length}
                 </div>
-                <div className="stat-label text-gray-500 text-sm">Approved Orders</div>
+                <div className="stat-label text-gray-500 text-sm">Approved Deals</div>
               </div>
               <div className="stat-card rounded-lg p-4 shadow-md bg-white">
                 <div className="stat-icon bg-yellow-100 text-yellow-600 w-10 h-10 rounded-full flex items-center justify-center mb-3">
                   <LuPersonStanding className="w-5 h-5" />
                 </div>
                 <div className="stat-value text-xl font-bold text-gray-800">
-                  {deals.filter((deals) => deals.status === 'draft').length}
+                  {deals.filter((deal) => deal.status === 'draft').length}
                 </div>
                 <div className="stat-label text-gray-500 text-sm">Draft Deals</div>
               </div>
@@ -114,6 +118,40 @@ const Deal = () => {
               <div className="card-header flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-gray-200 gap-4">
                 <h2 className="text-lg font-semibold text-gray-800">My Deals</h2>
                 <div className="tools flex space-x-2">
+                  {role === 'admin' && (
+                    <div className="product-role flex space-x-2 bg-gray-50 p-2 rounded-md">
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          activeRole === 'admin'
+                            ? 'bg-white shadow text-blue-600'
+                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleRoleChange('admin')}
+                      >
+                        Admin
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          activeRole === 'sales'
+                            ? 'bg-white shadow text-blue-600'
+                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleRoleChange('sales')}
+                      >
+                        Sales
+                      </button>
+                      <button
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          activeRole === 'channels'
+                            ? 'bg-white shadow text-blue-600'
+                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleRoleChange('channels')}
+                      >
+                        Channels
+                      </button>
+                    </div>
+                  )}
                   <button className="p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-md touch-manipulation">
                     <LuArrowDownToLine className="w-5 h-5" />
                   </button>
@@ -122,7 +160,7 @@ const Deal = () => {
                   </button>
                   <button
                     className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md touch-manipulation"
-                    // onClick={handleRefresh}
+                    onClick={handleRefresh}
                   >
                     <LuRefreshCcw className="w-5 h-5" />
                   </button>
@@ -139,7 +177,7 @@ const Deal = () => {
                 {loading && (
                   <div className="p-8 text-center">
                     <div className="inline-flex items-center px-4 py-2 font-semibold text-sm text-blue-500 bg-white shadow rounded-md">
-                      Loading orders...
+                      Loading deals...
                     </div>
                   </div>
                 )}
@@ -158,7 +196,6 @@ const Deal = () => {
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TIN</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th> */}
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                           </tr>
@@ -166,45 +203,41 @@ const Deal = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                           {deals.length === 0 ? (
                             <tr>
-                              <td colSpan="11" className="px-4 py-8 text-center text-gray-500">
-                                No orders found
+                              <td colSpan="9" className="px-4 py-8 text-center text-gray-500">
+                                No deals found
                               </td>
                             </tr>
                           ) : (
-                            deals.map((order, index) => (
-                              <tr key={order.order_id} className="hover:bg-gray-50">
+                            deals.map((deal, index) => (
+                              <tr key={deal.deal_id} className="hover:bg-gray-50">
                                 <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
-                                <td className="px-4 py-4 text-sm text-gray-900">#{order.deal_id}</td>
+                                <td className="px-4 py-4 text-sm text-gray-900">#{deal.deal_id}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900">{decodedToken.user_email}</td>
                                 <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{decodedToken.user_name || '-'}</td>
-                                <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.contact_name || '-'}</td>
-                                
-                                <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[120px]">{order.tax_indentification_number || '-'}</td>
+                                <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{deal.customer_name || '-'}</td>
+                                <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[120px]">{deal.tax_indentification_number || '-'}</td>
                                 <td className="px-4 py-4 text-sm">
                                   <span
                                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                      order.status === 'submited'
-                                        ? 'bg-green-100 text-green-800'
-                                        : order.status === 'draft'
-                                        ? 'bg-yellow-100 text-yellow-800'
-                                        : order.status === 'approved'
+                                      deal.status === 'submitted'
                                         ? 'bg-blue-100 text-blue-800'
+                                        : deal.status === 'draft'
+                                        ? 'bg-yellow-100 text-yellow-800'
+                                        : deal.status === 'approved'
+                                        ? 'bg-green-100 text-green-800'
                                         : 'bg-red-100 text-red-800'
                                     }`}
                                   >
-                                    {order.status === 'draft' ? 'Draft' : order.status === 'submited' ? 'Submited' : order.status === 'approved' ? 'Approved' : order.status || 'Unknown'}
+                                    {deal.status === 'draft' ? 'Draft' : deal.status === 'submitted' ? 'Submitted' : deal.status === 'approved' ? 'Approved' : deal.status || 'Unknown'}
                                   </span>
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900">
-                                  {new Date(order.created_at).toLocaleDateString() || '--'}
+                                  {new Date(deal.created_at).toLocaleDateString() || '--'}
                                 </td>
-                                {/* <td className="px-4 py-4 text-sm text-gray-900">
-                                  ${order.total_budget?.toLocaleString() || '0'}
-                                </td> */}
                                 <td className="px-4 py-4 text-sm text-gray-900 flex flex-wrap gap-2">
                                   <button
-                                    className="text-yellow-600 hover:text-yellow-800 text-xs sm:text-sm touch-manipulation"
-                                    onClick={() => navigate(`/sales/editdeals/${order.deal_id}`)}
+                                    className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm touch-manipulation"
+                                    onClick={() => navigate(`/admin/editdeals/${deal.deal_id}`)}
                                   >
                                     View
                                   </button>
@@ -219,36 +252,36 @@ const Deal = () => {
                     {/* Mobile Card Layout */}
                     <div className="block md:hidden divide-y divide-gray-200">
                       {deals.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">No orders found</div>
+                        <div className="p-4 text-center text-gray-500">No deals found</div>
                       ) : (
-                        deals.map((order) => (
-                          <div key={order.order_id} className="p-4 bg-white hover:bg-gray-50">
+                        deals.map((deal) => (
+                          <div key={deal.deal_id} className="p-4 bg-white hover:bg-gray-50">
                             <div className="flex justify-between items-center mb-2">
-                              <span className="font-medium text-gray-800">Order #{order.order_id}</span>
+                              <span className="font-medium text-gray-800">Deal #{deal.deal_id}</span>
                               <span
                                 className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  order.status === 'approved'
-                                    ? 'bg-green-100 text-green-800'
-                                    : order.status === 'draft'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : order.status === 'submited'
+                                  deal.status === 'submitted'
                                     ? 'bg-blue-100 text-blue-800'
+                                    : deal.status === 'draft'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : deal.status === 'approved'
+                                    ? 'bg-green-100 text-green-800'
                                     : 'bg-red-100 text-red-800'
                                 }`}
                               >
-                                {order.status === 'draft' ? 'Draft' : order.status === 'submited' ? 'Submitted' : order.status || 'Unknown'}
+                                {deal.status === 'draft' ? 'Draft' : deal.status === 'submitted' ? 'Submitted' : deal.status === 'approved' ? 'Approved' : deal.status || 'Unknown'}
                               </span>
                             </div>
                             <div className="text-sm text-gray-600 space-y-1">
-                              <p><strong>Title:</strong> {order.order_title || '-'}</p>
-                              <p><strong>Customer:</strong> {order.customer_name || '-'}</p>
-                              <p><strong>Total:</strong> ${order.total_budget?.toLocaleString() || '0'}</p>
-                              <p><strong>Date:</strong> {new Date(order.created_at).toLocaleDateString() || '--'}</p>
+                              <p><strong>Customer:</strong> {deal.customer_name || '-'}</p>
+                              <p><strong>TIN:</strong> {deal.tax_indentification_number || '-'}</p>
+                              <p><strong>Date:</strong> {new Date(deal.created_at).toLocaleDateString() || '--'}</p>
                             </div>
                             <div className="flex gap-2 mt-3">
+                              
                               <button
-                                className="text-yellow-600 hover:text-yellow-800 text-sm touch-manipulation"
-                                onClick={() => navigate(`/sales/editdeals/${order.order_id}`)}
+                                className="text-blue-600 hover:text-blue-800 text-sm touch-manipulation"
+                                onClick={() => navigate(`/admin/editdeals/${deal.deal_id}`)}
                               >
                                 View
                               </button>
@@ -286,123 +319,11 @@ const Deal = () => {
                 </div>
               </div>
             </div>
-
-            {/* Order Detail Dialog */}
-            {selectedOrder && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
-                  <h2 className="text-lg sm:text-xl font-semibold mb-4">Order #{selectedOrder.order_id}</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Order Title:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.order_title || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Customer Name:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.customer_name || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Contact Name:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.contact_name || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Contact Email:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.contact_email || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Contact Phone:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.contact_phone || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Address:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.address || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Billing Address:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.billing_address || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Order Date:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">
-                        {new Date(selectedOrder.created_at).toLocaleDateString() || '-'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Status:</span>
-                      <p
-                        className={`inline-flex px-2 py-1 text-xs sm:text-sm font-semibold rounded-full ${
-                          selectedOrder.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : selectedOrder.status === 'draft'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : selectedOrder.status === 'submited'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {selectedOrder.status === 'draft' ? 'Draft' : selectedOrder.status === 'submited' ? 'Submitted' : selectedOrder.status || 'Unknown'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <h3 className="text-base sm:text-lg font-semibold mb-4">Order Details</h3>
-                  <div className="table-responsive overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {products.length === 0 ? (
-                          <tr>
-                            <td colSpan="5" className="px-4 py-4 text-sm text-gray-500 text-center">
-                              No products found
-                            </td>
-                          </tr>
-                        ) : (
-                          products.map((detail, index) => (
-                            <tr key={index}>
-                              <td className="px-4 py-2 text-sm text-gray-900 truncate max-w-[120px] sm:max-w-[200px]">
-                                {detail.product_name || '-'}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{detail.quantity || 0}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                ${detail.price_for_customer?.toLocaleString() || '0'}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                {detail.service_contract_duration || 0} year
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                ${(detail.quantity * detail.price_for_customer || 0).toLocaleString()}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="flex justify-end mt-6">
-                    <button
-                      className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 text-sm sm:text-base touch-manipulation"
-                      onClick={() => setSelectedOrder(null)}
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
         </div>
       </DashboardLayout>
     </div>
-  )
-}
+  );
+};
 
-export default Deal
+export default DealAdmin;
