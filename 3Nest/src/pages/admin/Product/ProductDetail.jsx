@@ -1,149 +1,107 @@
+import React, { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { LuX } from 'react-icons/lu';
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../../utils/axiosIntance';
-import DasboardLayout from '../../../components/layouts/DashboardLayout';
-import Header from '../../../components/layouts/Header';
-import {
-  LuArrowDownToLine,
-  LuArrowUpNarrowWide,
-  LuRefreshCcw,
-} from "react-icons/lu";
-import ProductModal from './ProductModal';
+/* Re-usable field row */
+const Field = ({ label, value }) => (
+  <div className="grid grid-cols-3 gap-1 mb-3">
+    <dt className="text-sm font-medium text-gray-600 whitespace-nowrap">{label}</dt>
+    <dd className="text-sm text-gray-900 col-span-2 break-words">{value ?? '-'}</dd>
+  </div>
+);
 
-const ProductDetail = () => {
-  const [products, setProducts] = useState([]);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [types, setTypes] = useState([]);
-  const navigate = useNavigate();
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const res = await axiosInstance.get('/products/get-products');
-      setProducts(res.data?.data || []);
-    } catch (err) {
-      setError('Cannot load product list');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchTypes = async () => {
-    try {
-      const res = await axiosInstance.get('/types/get-types');
-      setTypes(res.data?.data || []);
-    } catch (err) {
-      console.error('Failed to fetch types');
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure to delete this product?')) return;
-    try {
-      await axiosInstance.delete(`/products/delete-product?product_id=${id}`);
-      fetchProducts();
-    } catch (err) {
-      alert('Delete failed!');
-    }
-  };
-
-  useEffect(() => {
-    fetchTypes();
-    fetchProducts();
-  }, []);
-
+/* Product detail modal (read-only) */
+const ProductDetail = ({ isOpen, onClose, product }) => {
   return (
-    <div>
-      <Header />
-      <DasboardLayout activeMenu="product">
-        <div className="my-5 mx-auto">
-          <div className="content p-20">
-            <div className="page-header flex justify-between items-center mb-10">
-              <div className="page-title">
-                <h1 className='text-2xl font-semibold text-gray-800 mb-2'>Product Management</h1>
-                <div className="breadcrumb text-gray-500 text-sm">
-                  <a href="#" className='text-gray-500'>Dashboard</a> / Product
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/30" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-xl transition-all">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <Dialog.Title className="text-lg font-medium leading-6 text-gray-900">
+                    Product Details
+                  </Dialog.Title>
+                  <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                    <LuX className="w-5 h-5" />
+                  </button>
                 </div>
-              </div>
-              <div className="action-buttons mb-2">
-                <button
-                  onClick={() => { setEditingProduct(null); setModalOpen(true); }}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
-                >
-                  + Add Product
-                </button>
-              </div>
-            </div>
 
-            <div className="card bg-white rounded-lg shadow-md overflow-hidden mb-6">
-              <div className="card-header flex items-center justify-between p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-800">Products</h2>
-                <div className="tools flex space-x-2">
-                  <button className="p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-md" title="Export Excel">
-                    <LuArrowDownToLine className="w-5 h-5" />
-                  </button>
-                  <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md" title="Filter">
-                    <LuArrowUpNarrowWide className="w-5 h-5" />
-                  </button>
-                  <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md" title="Refresh" onClick={fetchProducts}>
-                    <LuRefreshCcw className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="card-body p-0">
-                {error && <div className="p-4 bg-red-50 text-red-700">{error}</div>}
-
-                {loading ? (
-                  <div className="p-8 text-center text-blue-600">Loading products...</div>
+                {/* Body */}
+                {product ? (
+                  <dl className="divide-y divide-gray-100 max-h-[70vh] overflow-y-auto pr-1">
+                    <Field label="Product Name" value={product.product_name} />
+                    <Field label="Role" value={product.product_role ? product.product_role.charAt(0).toUpperCase() + product.product_role.slice(1) : null} />
+                    <Field label="Category" value={product.category_name} />
+                    <Field label="SKU / Part Number" value={product.sku_partnumber} />
+                    <Field label="Description" value={product.description} />
+                    <Field
+                      label="Price"
+                      value={product.price ? Number(product.price).toLocaleString() : null}
+                    />
+                    <Field
+                      label="Channel Cost"
+                      value={product.channel_cost ? Number(product.channel_cost).toLocaleString() : null}
+                    />
+                    <Field
+                      label="Max Discount %"
+                      value={product.maximum_discount ? `${product.maximum_discount}%` : null}
+                    />
+                    <Field
+                      label="Max Discount Price"
+                      value={
+                        product.maximum_discount_price
+                          ? Number(product.maximum_discount_price).toLocaleString()
+                          : null
+                      }
+                    />
+                    <Field label="Status" value={product.status ? 'Active' : 'Inactive'} />
+                    <Field
+                      label="Created At"
+                      value={product.created_at ? new Date(product.created_at).toLocaleString() : null}
+                    />
+                  </dl>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {products.map((product, index) => (
-                          <tr key={product.product_id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 text-sm">{index + 1}</td>
-                            <td className="px-6 py-4 text-sm">{product.product_name}</td>
-                            <td className="px-6 py-4 text-sm">{product.category_name}</td>
-                            <td className="px-6 py-4 text-sm">{product.sku_partnumber}</td>
-                            <td className="px-6 py-4 text-sm">{product.price}</td>
-                            <td className="px-6 py-4 text-sm space-x-2">
-                              <button onClick={() => { setEditingProduct(product); setModalOpen(true); }} className='text-blue-600'>Edit</button>
-                              <button onClick={() => handleDelete(product.product_id)} className='text-red-600'>Delete</button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <p className="text-sm text-gray-500">No product data.</p>
                 )}
-              </div>
-            </div>
+
+                {/* Footer */}
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={onClose}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                  >
+                    Close
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
         </div>
-        <ProductModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          product={editingProduct}
-          onSave={fetchProducts}
-          types={types}
-        />
-      </DasboardLayout>
-    </div>
+      </Dialog>
+    </Transition>
   );
 };
 
