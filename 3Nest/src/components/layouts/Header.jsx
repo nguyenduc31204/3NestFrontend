@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FiSearch, FiBell, FiMessageSquare, FiSettings, FiLogOut, FiX } from 'react-icons/fi';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../utils/apiPath';
-import logo from '../../assets/logo-3nestinvest.png';
+import logo from '../../assets/3nestv2.png';
 
 const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

@@ -46,6 +46,7 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
       } else {
         await axiosInstance.post(`${BASE_URL}/categories/create-category`, payload);
       }
+      console.log()
       onSubmitSuccess();
       onClose();
     } catch (error) {
