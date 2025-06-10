@@ -113,19 +113,21 @@ const Products = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           'ngrok-skip-browser-warning': 'true',
+          
         },
       });
       const result = await res.json();
-      if (result.status_code === 200 && Array.isArray(result.data)) {
+      console.log('Products API Response:', result);
+    //   if (result.status_code === 200 && Array.isArray(result.data)) {
         setProducts(result.data);
-      } else {
-        throw new Error(result.message || 'Invalid product data format');
-      }
+    //   } else {
+    //     throw new Error(result.message || 'Invalid product data format');
+    //   }
     } catch (err) {
       setError(`Failed to load products: ${err.message}`);
     }
   };
-
+console.log('Products:', products);
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
@@ -134,6 +136,7 @@ const Products = () => {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           'ngrok-skip-browser-warning': 'true',
+
         },
       });
       if (res.status === 204 || res.ok) {
@@ -227,7 +230,7 @@ const Products = () => {
                   <div className="flex items-end space-x-2">
                     <RoleButton current={activeRole} value="admin" onClick={handleRoleChange}>Admin</RoleButton>
                     <RoleButton current={activeRole} value="sales" onClick={handleRoleChange}>Sales</RoleButton>
-                    <RoleButton current={activeRole} value="channels" onClick={handleRoleChange}>Channels</RoleButton>
+                    <RoleButton current={activeRole} value="channel" onClick={handleRoleChange}>Channels</RoleButton>
                   </div>
                 )}
               </div>

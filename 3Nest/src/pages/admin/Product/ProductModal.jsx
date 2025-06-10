@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BASE_URL } from '../../../utils/apiPath';
 
-
 const formatNumber = (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 const ProductModal = ({ isOpen, onClose, onSave, product }) => {
-  
   const [formData, setFormData] = useState({
     product_name: '',
     product_role: 'admin',
@@ -19,7 +17,17 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   const [categories, setCategories] = useState([]);
   const [discountErr, setDiscountErr] = useState('');
 
- 
+  const isFieldEnabled = (field) => {
+    const role = formData.product_role;
+    if (field === 'price') return true;
+    const enabledFields = {
+      admin: [],
+      sales: ['maximum_discount'],
+      channel: ['channel_cost'],
+    };
+    return enabledFields[role]?.includes(field);
+  };
+
   const loadCategories = useCallback(async () => {
     try {
       const res = await fetch(`${BASE_URL}/categories/get-categories`, {
@@ -41,9 +49,12 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   }, [loadCategories]);
 
   useEffect(() => {
+    if (categories.length === 0) return;
+
     if (product) {
       setFormData({
         ...product,
+        category_id: product.category_id?.toString() || '',
         price: product.price ? String(product.price) : '',
         maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
         channel_cost: product.channel_cost ? String(product.channel_cost) : '',
@@ -51,12 +62,11 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     } else {
       setFormData((prev) => ({
         ...prev,
-        category_id: categories[0]?.category_id || '',
+        category_id: categories[0]?.category_id?.toString() || '',
       }));
     }
   }, [product, categories]);
 
- 
   const handleNumberChange = (name, raw) => {
     const digits = raw.replace(/[^0-9]/g, '');
     if (digits === '') {
@@ -66,16 +76,14 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     }
 
     const num = Number(digits);
-
     if (name === 'maximum_discount') {
       if (num > 100) {
         setDiscountErr('Discount must be in 0‑100');
-        return; 
+        return;
       }
       setDiscountErr('');
     }
 
-    
     if (['price', 'channel_cost'].includes(name) && num === 0) return;
 
     setFormData((p) => ({ ...p, [name]: String(num) }));
@@ -90,29 +98,42 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     }
   };
 
- 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-   
-    const priceNum = Number(formData.price);
-    const channelNum = Number(formData.channel_cost);
-    const discountNum = Number(formData.maximum_discount || 0);
-    if (priceNum <= 0 || channelNum <= 0) {
-      alert('Price và Channel cost phải > 0');
+    if (isFieldEnabled('price') && Number(formData.price) <= 0) {
+      alert('Price phải > 0');
       return;
     }
-    if (discountNum < 0 || discountNum > 100) {
+
+    if (isFieldEnabled('channel_cost') && Number(formData.channel_cost) <= 0) {
+      alert('Channel cost phải > 0');
+      return;
+    }
+
+    const discountNum = Number(formData.maximum_discount || 0);
+    if (
+      isFieldEnabled('maximum_discount') &&
+      (discountNum < 0 || discountNum > 100)
+    ) {
       alert('Discount must be in 0‑100');
       return;
     }
 
     const cleaned = {
-      ...formData,
+      ...(product ? { product_id: product.product_id } : {}),
+      product_name: formData.product_name,
+      product_role: formData.product_role,
       category_id: parseInt(formData.category_id, 10),
-      price: priceNum,
-      maximum_discount: discountNum,
-      channel_cost: channelNum,
+      sku_partnumber: formData.sku_partnumber,
+      description: formData.description,
+      price: formData.price !== '' ? Number(formData.price) : 0,
+      maximum_discount: formData.maximum_discount !== ''
+        ? Number(formData.maximum_discount)
+        : 0,
+      channel_cost: formData.channel_cost !== ''
+        ? Number(formData.channel_cost)
+        : 0,
     };
 
     const endpoint = product ? '/products/update-product' : '/products/create-product';
@@ -127,19 +148,24 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
         },
         body: JSON.stringify(cleaned),
       });
+
       const result = await res.json();
       if ([200, 201].includes(result.status_code)) {
         onSave();
         onClose();
-      } else alert(result.message || 'Failed to save product');
+      } else {
+        alert(result.message || 'Failed to save product');
+      }
     } catch {
       alert('Error saving product');
     }
   };
+  console.log('category_id:', formData.category_id, 'typeof:', typeof formData.category_id);
+  console.log('categories:', categories);
+
 
   if (!isOpen) return null;
 
-  
   return (
     <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
@@ -163,7 +189,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             className="border p-2"
             required
           >
-            {['admin', 'sales', 'channels'].map((r) => (
+            {['admin', 'sales', 'channel'].map((r) => (
               <option key={r} value={r}>
                 {r.charAt(0).toUpperCase() + r.slice(1)}
               </option>
@@ -171,19 +197,20 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
           </select>
 
           <select
-            name="category_id"
-            value={formData.category_id}
-            onChange={handleChange}
-            className="border p-2"
-            required
-          >
-            <option value="">Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat.category_id} value={cat.category_id}>
-                {cat.category_name}
-              </option>
-            ))}
-          </select>
+          name="category_id"
+          value={formData.category_id}
+          onChange={handleChange}
+          className="border p-2"
+          required
+        >
+          <option value="">Select a category</option>
+          {categories.map((cat) => (
+            <option key={cat.category_id} value={cat.category_id.toString()}>
+              {cat.category_name}
+            </option>
+          ))}
+        </select>
+
 
           <input
             name="sku_partnumber"
@@ -192,8 +219,6 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             onChange={handleChange}
             className="border p-2"
           />
-
-         
           <div className="relative col-span-1">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             <input
@@ -203,8 +228,11 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
               min="1"
               value={formData.price === '' ? '' : formatNumber(formData.price)}
               onChange={handleChange}
-              className="border p-2 pl-6 w-full"
-              required
+              disabled={!isFieldEnabled('price')}
+              required={isFieldEnabled('price')}
+              className={`border p-2 pl-6 w-full ${
+                isFieldEnabled('price') ? 'font-semibold text-black' : 'text-gray-400 bg-gray-100'
+              }`}
             />
           </div>
 
@@ -217,7 +245,11 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
               max="100"
               value={formData.maximum_discount}
               onChange={handleChange}
-              className="border p-2 w-full"
+              disabled={!isFieldEnabled('maximum_discount')}
+              required={isFieldEnabled('maximum_discount')}
+              className={`border p-2 w-full ${
+                isFieldEnabled('maximum_discount') ? 'font-semibold text-black' : 'text-gray-400 bg-gray-100'
+              }`}
             />
             {discountErr && (
               <p className="text-red-600 text-xs mt-1">{discountErr}</p>
@@ -233,8 +265,11 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
               min="1"
               value={formData.channel_cost === '' ? '' : formatNumber(formData.channel_cost)}
               onChange={handleChange}
-              className="border p-2 pl-6 w-full"
-              required
+              disabled={!isFieldEnabled('channel_cost')}
+              required={isFieldEnabled('channel_cost')}
+              className={`border p-2 pl-6 w-full ${
+                isFieldEnabled('channel_cost') ? 'font-semibold text-black' : 'text-gray-400 bg-gray-100'
+              }`}
             />
           </div>
 
