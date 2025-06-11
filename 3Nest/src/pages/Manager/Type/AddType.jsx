@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../../utils/axiosIntance';
+import axiosInstance from '../../../utils/axiosInstance';
 import { API_PATHS } from '../../../utils/apiPath';
 
 const AddTypeMana = () => {

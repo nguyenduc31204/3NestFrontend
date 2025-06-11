@@ -248,11 +248,11 @@ const Products = () => {
                         <tr>
                             <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
                             <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Category Name</th>
-                            <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Type Name</th>
+                            {/* <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Type Name</th> */}
                             <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">SKU/Part Number</th>
                             <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Description</th>
                             <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                            <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Max Discount</th>
+                            {/* <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Max Discount</th> */}
                             <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Max Discount Price</th>
                             <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         </tr>
@@ -269,9 +269,9 @@ const Products = () => {
                             <tr key={product.product_id || index} className="hover:bg-gray-50">
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 truncate max-w-[120px] sm:max-w-[200px]">{product.product_name || '-'}</td>
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 hidden sm:table-cell">{product.category_name || '-'}</td>
-                                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 hidden md:table-cell">
+                                {/* <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 hidden md:table-cell">
                                 {types.find(t => t.type_id === selectedTypeId)?.type_name || '-'}
-                                </td>
+                                </td> */}
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 hidden sm:table-cell">{product.sku_partnumber || '-'}</td>
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 max-w-[100px] sm:max-w-xs truncate hidden lg:table-cell" title={product.desciption}>
                                 {product.description || '-'}
@@ -279,9 +279,9 @@ const Products = () => {
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900">
                                 {product.price ? `${parseFloat(product.price).toLocaleString()}` : '-'}
                                 </td>
-                                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 hidden md:table-cell">
+                                {/* <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 hidden md:table-cell">
                                 {product.maximum_discount ? `${product.maximum_discount}%` : '-'}
-                                </td>
+                                </td> */}
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900 hidden lg:table-cell">
                                 {product.maximum_discount_price ? `${parseFloat(product.maximum_discount_price).toLocaleString()}` : '-'}
                                 </td>

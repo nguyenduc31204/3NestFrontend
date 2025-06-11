@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axiosInstance from '../../../utils/axiosIntance';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const EditTypeMana = () => {
   const { id } = useParams();

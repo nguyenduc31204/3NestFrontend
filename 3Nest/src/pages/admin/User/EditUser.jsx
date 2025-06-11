@@ -1,58 +1,61 @@
+// src/pages/admin/EditUser.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import Header from '../../../components/layouts/Header';
+import DasboardLayout from '../../../components/layouts/DashboardLayout';
 import { BASE_URL } from '../../../utils/apiPath';
 
 const EditUser = () => {
-  const { userId } = useParams(); // lấy từ URL
+  const { userId } = useParams();
   const navigate = useNavigate();
 
+ 
   const [formData, setFormData] = useState({
     user_id: '',
     user_name: '',
     company_name: '',
-    status: false,
     phone: '',
+    status: false,
   });
-
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    const fetchUserList = async () => {
+    const fetchUser = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/users/get-users`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          },
-        });
+        const res = await fetch(
+          `${BASE_URL}/users/get-user?user_id=${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            },
+          }
+        );
         const result = await res.json();
-        const found = result.data.find(u => u.user_id == userId);
-        console.log("fond", result)
-  
-        if (found) {
+        if (res.ok && result.status_code === 200 && result.data) {
+          const u = result.data;
           setFormData({
-            user_id: userId,
-            user_name: found.user_name || '',
-            company_name: found.company_name || '',
-            phone: found.phone || '',
-            status: found.status ?? true,
+            user_id: u.user_id,
+            user_name: u.user_name || '',
+            company_name: u.company_name || '',
+            phone: u.phone || '',
+            status: u.status === true,
           });
           setLoading(false);
         } else {
-          setError('User not existed!');
+          setError('User not found');
           setLoading(false);
         }
       } catch (err) {
-        setError('error loading user');
+        setError('Error loading user');
         setLoading(false);
       }
     };
-  
-    fetchUserList();
+    fetchUser();
   }, [userId]);
-  
-  
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -64,9 +67,7 @@ const EditUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess(null);
-    setError(null);
-
+    setError(''); setSuccess('');
     try {
       const res = await fetch(`${BASE_URL}/users/update-user`, {
         method: 'POST',
@@ -76,72 +77,90 @@ const EditUser = () => {
         },
         body: JSON.stringify(formData),
       });
-
-      if (!res.ok) throw new Error('update failed!');
-      setSuccess('ok!');
-      setTimeout(() => navigate('/users'), 1500);
+      const result = await res.json();
+      if (res.ok && result.status_code === 200) {
+        setSuccess('User updated successfully');
+        setTimeout(() => navigate('/users'), 1000);
+      } else {
+        throw new Error(result.message || 'Update failed');
+      }
     } catch (err) {
       setError(err.message);
     }
   };
 
+
   if (loading) return <p className="p-4">Loadinggg...</p>;
   console.log("userId", userId)
 
   return (
-    <div className="max-w-xl mx-auto p-4">
-      <h2 className="text-2xl font-semibold mb-4">Update User</h2>
+    <>
+      <Header />
+      <DasboardLayout activeMenu="04">
+        <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md">
+          <h2 className="text-2xl font-semibold mb-4">Update User</h2>
+          {loading ? (
+            <p className="text-gray-500">Loading...</p>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && <p className="text-red-600">{error}</p>}
+              {success && <p className="text-green-600">{success}</p>}
 
-      {error && <p className="text-red-600 mb-3">{error}</p>}
-      {success && <p className="text-green-600 mb-3">{success}</p>}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input
+                  name="user_name"
+                  value={formData.user_name}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 p-2 rounded"
+                  required
+                />
+              </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="user_name"
-          placeholder="Username"
-          value={formData.user_name}
-          onChange={handleChange}
-          className="w-full border border-gray-300 p-2 rounded"
-          required
-        />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                <input
+                  name="company_name"
+                  value={formData.company_name}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 p-2 rounded"
+                />
+              </div>
 
-        <input
-          type="text"
-          name="company_name"
-          placeholder="Company"
-          value={formData.company_name}
-          onChange={handleChange}
-          className="w-full border border-gray-300 p-2 rounded"
-        />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 p-2 rounded"
+                />
+              </div>
 
-        <input
-          type="text"
-          name="phone"
-          placeholder="Phone"
-          value={formData.phone}
-          onChange={handleChange}
-          className="w-full border border-gray-300 p-2 rounded"
-        />
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name="status"
+                  checked={formData.status}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600"
+                />
+                <label className="text-sm text-gray-700">Active</label>
+              </div>
 
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            name="status"
-            checked={formData.status}
-            onChange={handleChange}
-          />
-          <span>Active</span>
-        </label>
-
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Update
-        </button>
-      </form>
-    </div>
+              <div className="text-right">
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                >
+                  Update
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </DasboardLayout>
+    </>
   );
 };
 

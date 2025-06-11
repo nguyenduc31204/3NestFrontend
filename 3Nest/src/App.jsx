@@ -22,7 +22,7 @@ import ChannelSetting from './pages/Channel/User/ChannelSetting'
 import AddType from './pages/admin/Type/AddType';
 import EditType from './pages/admin/Type/EditType';
 import TypeDetail from './pages/admin/Type/TypeDetail';
-import ChannelProducts from './pages/Channel/Products/SalesProducts'
+import ChannelProducts from './pages/Channel/Products/ChanelProducts'
 import TypeDetailMana from './pages/Manager/Type/TypeDetail'
 import AddTypeMana from './pages/Manager/Type/AddType'
 import EditTypeMana from './pages/Manager/Type/EditType'

@@ -24,7 +24,7 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Roles: all, admin, manager, sales, channels
+  
   const [activeRole, setActiveRole] = useState('all');
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const Users = () => {
   // Map plural to possible backend values
   const roleMap = {
     sales: ['sales', 'sale'],
-    channels: ['channels', 'channel'],
+    channel: ['channel', 'channel'],
   };
 
   // Filter users by role, or show all
@@ -104,9 +104,7 @@ const Users = () => {
             <div className="page-header flex justify-between items-center mb-10">
               <div className="page-title">
                 <h1 className="text-2xl font-semibold text-gray-800 mb-2">User Management</h1>
-                <div className="breadcrumb text-gray-500 text-sm hover:underline">
-                  <a href="#">Dashboard</a> / Users
-                </div>
+                
               </div>
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
@@ -142,7 +140,7 @@ const Users = () => {
                     <RoleButton current={activeRole} value="admin" onClick={() => handleRoleChange('admin')}>Admin</RoleButton>
                     <RoleButton current={activeRole} value="manager" onClick={() => handleRoleChange('manager')}>Manager</RoleButton>
                     <RoleButton current={activeRole} value="sales" onClick={() => handleRoleChange('sales')}>Sales</RoleButton>
-                    <RoleButton current={activeRole} value="channels" onClick={() => handleRoleChange('channels')}>Channels</RoleButton>
+                    <RoleButton current={activeRole} value="channel" onClick={() => handleRoleChange('channel')}>Channels</RoleButton>
                   </div>
                 </div>
               </div>

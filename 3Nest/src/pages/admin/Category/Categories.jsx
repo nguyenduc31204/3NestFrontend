@@ -1,4 +1,4 @@
-// ✅ FILE: src/pages/Categories.jsx
+
 import React, { useEffect, useState } from 'react'
 import {
     LuCoins,
@@ -18,7 +18,7 @@ import DasboardLayout from '../../../components/layouts/DashboardLayout'
 import { API_PATHS, BASE_URL } from '../../../utils/apiPath'
 import { useNavigate } from 'react-router-dom'
 import CategoryModal from './CategoryModal';
-import axiosInstance from '../../../utils/axiosIntance';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ const Categories = () => {
   const handleDelete = async (category_id) => {
     if (!window.confirm('Are you sure you want to delete this category?')) return;
     try {
-      await axiosInstance.delete(`${BASE_URL}/categories/delete-category?category_id=${category_id}`);
+      await axiosInstance.delete(`/categories/delete-category?category_id=${category_id}`);
       loadProductsByTypeAndRole();
     } catch (err) {
       console.error("Delete error", err);

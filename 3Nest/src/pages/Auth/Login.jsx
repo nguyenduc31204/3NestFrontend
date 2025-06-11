@@ -5,6 +5,7 @@ import Input from '../../components/input/Input';
 import { BASE_URL } from '../../utils/apiPath';
 import CryptoJS from 'crypto-js';
 
+
 const Login = () => {
   const [user_email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,10 +43,11 @@ const Login = () => {
       });
 
       const result = await response.json();
-      console.log('Login API Response:', result);
+      //console.log('Login API Response:', result);
 
       if (response.ok) {
         const { access_token } = result;
+        setPassword(''); 
         if (!access_token) {
           setError('Đăng nhập không thành công. Token không tồn tại.');
           return;
@@ -55,7 +57,7 @@ const Login = () => {
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('role', decoded.role);
 
-        console.log('Decoded token:', decoded);
+        //console.log('Decoded token:', decoded);
 
         switch (decoded?.role?.toLowerCase()) {
           case 'admin':

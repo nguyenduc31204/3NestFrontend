@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axiosInstance from '../../../utils/axiosIntance';
+import axiosInstance from '../../../utils/axiosInstance';
 import Header from '../../../components/layouts/Header';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
 
