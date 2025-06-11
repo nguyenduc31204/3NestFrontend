@@ -38,10 +38,12 @@ const EditOrderMana = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [processing, setProcessing] = useState(false);
-
   const isSubmitted = order?.status === 'submitted';
   const isDraft = order?.status === 'draft';
   const isViewOnly = order?.status !== 'submitted';
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectError, setRejectError] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
@@ -96,9 +98,15 @@ const EditOrderMana = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
+  const handleReject = () => {
+    if (!rejectReason.trim()) {
+      setRejectError('Please provide a reason for rejection.');
+      return;
+    }
+    handleStatusChange('rejected', rejectReason);
+  };
   const handleStatusChange = useCallback(
-    async (newStatus) => {
+    async (newStatus, reason) => {
       try {
         setProcessing(true);
         setError(null);
@@ -114,6 +122,7 @@ const EditOrderMana = () => {
           body: JSON.stringify({
             order_id: parseInt(order_id),
             status: newStatus,
+            reason: reason,
           }),
         });
 
@@ -129,10 +138,15 @@ const EditOrderMana = () => {
         setError(err.message);
       } finally {
         setProcessing(false);
+        setShowRejectModal(false);
+        setRejectReason('');
+        setRejectError('');
       }
     },
     [order_id, fetchData]
   );
+
+  
 
   if (isDraft && !loading) {
     return (
@@ -317,14 +331,11 @@ const EditOrderMana = () => {
               {!isViewOnly && (
                 <>
                   <button
-                    type="button"
-                    onClick={() => handleStatusChange('rejected')}
-                    disabled={processing}
-                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 ${
-                      processing ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {processing ? 'Processing...' : 'Reject'}
+                      className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm flex items-center gap-2 touch-manipulation"
+                      onClick={() => setShowRejectModal(true)}
+                      disabled={processing}
+                    >
+                      Reject
                   </button>
                   <button
                     type="button"
@@ -349,6 +360,47 @@ const EditOrderMana = () => {
           </div>
         </div>
       </DashboardLayout>
+      {showRejectModal && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                  <h2 className="text-lg font-semibold mb-4">Reject Deal</h2>
+                  <p className="mb-4 text-sm text-gray-600">Please provide a reason for rejecting this deal.</p>
+                  <textarea
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                    rows="4"
+                    value={rejectReason}
+                    onChange={(e) => {
+                      setRejectReason(e.target.value);
+                      setRejectError('');
+                    }}
+                    placeholder="Enter rejection reason..."
+                  />
+                  {rejectError && (
+                    <p className="text-sm text-red-600 mt-2">{rejectError}</p>
+                  )}
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      onClick={() => {
+                        setShowRejectModal(false);
+                        setRejectReason('');
+                        setRejectError('');
+                      }}
+                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                      disabled={processing}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleReject}
+                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                      disabled={processing}
+                    >
+                      {processing ? 'Processing...' : 'Reject'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
     </div>
   );
 };

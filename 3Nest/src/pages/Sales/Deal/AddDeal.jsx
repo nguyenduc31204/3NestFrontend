@@ -14,6 +14,8 @@ const AddDeal = () => {
   const [tinError, setTinError] = useState(null);
   const [loadingTin, setLoadingTin] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
+  
 
   const {
     register,
@@ -354,7 +356,7 @@ const AddDeal = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={handleSubmit(onSubmit)}
+                    onClick={() => setShowSubmitConfirm(true)}
                     disabled={loadingSubmit || loadingTin}
                     className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm sm:text-base touch-manipulation ${
                       loadingSubmit || loadingTin ? 'opacity-50 cursor-not-allowed' : ''
@@ -367,6 +369,31 @@ const AddDeal = () => {
             </div>
           </div>
         </div>
+        {showSubmitConfirm && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+              <h2 className="text-lg font-semibold mb-4">Confirm Submit</h2>
+              <p className="mb-6">Are you sure submit this deal?</p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowSubmitConfirm(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    handleSubmit(onSubmit)();
+                    setShowSubmitConfirm(false);
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </DashboardLayout>
     </div>
   );

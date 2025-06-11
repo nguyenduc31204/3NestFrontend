@@ -26,6 +26,7 @@ const AddOrder = () => {
   const [createdOrderId, setCreatedOrderId] = useState(
     order_id ? Number(order_id) : localStorage.getItem('createdOrderId') || null
   );
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
 
   // Extract deal_id from query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -62,7 +63,7 @@ const AddOrder = () => {
           console.log("re", result)
           if (result.status_code === 200 && result.data.status === 'approved') {
             setValue('deal_id', preSelectedDealId);
-            setDeals([result.data]); 
+            setDeals([result.data.deal]); 
           } else {
             setError('Selected deal is not approved or does not exist');
             setValue('deal_id', '');
@@ -373,9 +374,9 @@ const AddOrder = () => {
       }
 
       const result = await response.json();
-      if (!response.ok || result.status_code !== 200) {
-        throw new Error(result.message || 'Failed to submit order');
-      }
+      // if (!response.ok || result.status_code !== 200) {
+      //   throw new Error(result.message || 'Failed to submit order');
+      // }
 
       if (!orderIdToUse && result.data) {
         const newOrderId = result.data.order_id || result.data.id;
@@ -721,7 +722,7 @@ const AddOrder = () => {
                         Save as Draft
                       </button>
                       <button
-                        onClick={handleSubmit(handleSubmitOrder)}
+                        onClick={() => setShowSubmitConfirm(true)} // Open submit confirmation dialog
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
                         disabled={existingDetails.length === 0 || !formValues.deal_id}
                       >
@@ -733,8 +734,34 @@ const AddOrder = () => {
               </div>
             )}
 
+            {showSubmitConfirm && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+                  <h2 className="text-lg font-semibold mb-4">Confirm Submit</h2>
+                  <p className="mb-6">Are you sure sumbmit this order?</p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowSubmitConfirm(false)}
+                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleSubmit(handleSubmitOrder)();
+                        setShowSubmitConfirm(false);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {showConfirm && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
                 <div className="bg-white rounded-lg shadow-lg p-6 w-80">
                   <h2 className="text-lg font-semibold mb-4">Xác nhận xóa</h2>
                   <p className="mb-6">Bạn có chắc chắn muốn xóa đơn hàng này không?</p>

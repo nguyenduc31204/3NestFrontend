@@ -63,6 +63,8 @@ const OrdersMana = () => {
     }
   };
 
+  
+
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const response = await fetch(
@@ -78,10 +80,11 @@ const OrdersMana = () => {
       );
       const result = await response.json();
       console.log('Change Status API Response:', result); // Debug
-      if (!response.ok || result.status_code !== 200) {
-        throw new Error(result.message || `Failed to update order status to ${newStatus}`);
-      }
+      // if (!response.ok || result.status_code !== 200) {
+      //   throw new Error(result.message || `Failed to update order status to ${newStatus}`);
+      // }
       loadOrdersByRole();
+      
     } catch (err) {
       setError(`Failed to update status: ${err.message}`);
     }

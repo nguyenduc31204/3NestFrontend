@@ -39,6 +39,8 @@ const EditOrderChannel = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [processing, setProcessing] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
+
 
   const isDraft = order?.status === 'draft';
   const isSubmitted = order?.status === 'submitted';
@@ -346,7 +348,7 @@ const EditOrderChannel = () => {
               {isDraft && (
                 <button
                   type="button"
-                  onClick={handleSubmitOrder}
+                  onClick={() => setShowSubmitConfirm(true)}
                   disabled={processing}
                   className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
                     processing ? 'opacity-50 cursor-not-allowed' : ''
@@ -364,6 +366,32 @@ const EditOrderChannel = () => {
                 Back
               </button>
             </div>
+
+            {showSubmitConfirm && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+                  <h2 className="text-lg font-semibold mb-4">Confirm Submit</h2>
+                  <p className="mb-6">Are you sure submit this order?</p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowSubmitConfirm(false)}
+                      className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleSubmitOrder();
+                        setShowSubmitConfirm(false);
+                      }}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                    >
+                      Gửi
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {showDiscardConfirm && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

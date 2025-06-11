@@ -16,6 +16,8 @@ const ChannelEditDeal = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
+  
 
 
   useEffect(() => {
@@ -252,7 +254,7 @@ const ChannelEditDeal = () => {
                       </button>
                       <button
                         className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2 touch-manipulation"
-                        onClick={handleSubmitDeal}
+                        onClick={() => setShowSubmitConfirm(true)}
                         disabled={processing}
                       >
                         {processing ? 'Submitting...' : 'Submit'}
@@ -334,6 +336,32 @@ const ChannelEditDeal = () => {
             )}
           </div>
         </div>
+
+        {showSubmitConfirm && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+              <h2 className="text-lg font-semibold mb-4">Confirm submit</h2>
+              <p className="mb-6">Are you sure submit this deal?</p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowSubmitConfirm(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    handleSubmitDeal();
+                    setShowSubmitConfirm(false);
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Discard Confirmation Dialog */}
         {showConfirm && (

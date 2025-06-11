@@ -249,8 +249,8 @@ const EditOrderAdmin = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
                 <h2 className="text-lg font-semibold mb-4">Deal Information</h2>
                 <div className='grid grid-cols-2 gap-6 mb-8'>
                   <div className=''>
@@ -305,7 +305,7 @@ const EditOrderAdmin = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-lg shadow-md p-6 lg:col-span-1">
                 <h2 className="text-lg font-semibold mb-4">Order Information</h2>
                 <div className="space-y-4">
                   <div>
@@ -401,7 +401,7 @@ const EditOrderAdmin = () => {
             </div>
 
             {showDiscardConfirm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                   <h2 className="text-lg font-semibold mb-4">Confirm Discard</h2>
                   <p className="mb-6">Are you sure you want to discard this order? This action cannot be undone.</p>

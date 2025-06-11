@@ -96,7 +96,7 @@ const ManaEditDeal = () => {
     loadUser();
   }, [dealData?.user_id]);
 
-  const handleStatusChange = async (newStatus, description = '') => {
+  const handleStatusChange = async (newStatus, reason = '') => {
     setProcessing(true);
     setSuccessMessage('');
     setError('');
@@ -111,7 +111,7 @@ const ManaEditDeal = () => {
         body: JSON.stringify({
           deal_id: parseInt(deal_id),
           status: newStatus,
-          ...(description && { description }), // Include description only if provided
+          reason: reason,
         }),
       });
 
@@ -350,7 +350,7 @@ const ManaEditDeal = () => {
 
             {/* Approval Confirmation Modal */}
             {showApproveConfirm && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
                 <div className="bg-white rounded-lg shadow-lg p-6 w-80">
                   <h2 className="text-lg font-semibold mb-4">Confirm Approval</h2>
                   <p className="mb-6 text-sm text-gray-600">Are you sure you want to approve this deal?</p>
@@ -376,7 +376,7 @@ const ManaEditDeal = () => {
 
             {/* Rejection Reason Modal */}
             {showRejectModal && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
                 <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                   <h2 className="text-lg font-semibold mb-4">Reject Deal</h2>
                   <p className="mb-4 text-sm text-gray-600">Please provide a reason for rejecting this deal.</p>
