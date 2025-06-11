@@ -89,6 +89,10 @@ const EditUser = () => {
     }
   };
 
+
+  if (loading) return <p className="p-4">Loadinggg...</p>;
+  console.log("userId", userId)
+
   return (
     <>
       <Header />

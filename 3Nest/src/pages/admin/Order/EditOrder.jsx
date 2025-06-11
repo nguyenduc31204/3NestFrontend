@@ -249,38 +249,63 @@ const EditOrderAdmin = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
                 <h2 className="text-lg font-semibold mb-4">Deal Information</h2>
-                {deal ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Deal ID</label>
-                      <p className="mt-1 text-sm text-gray-900">{deal.deal_id || '--'}</p>
+                <div className='grid grid-cols-2 gap-6 mb-8'>
+                  <div className=''>
+                    {deal ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Deal ID</label>
+                        <p className="mt-1 text-sm text-gray-900">{deal.deal_id || '--'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Customer Name</label>
+                        <p className="mt-1 text-sm text-gray-900">{deal.customer_name || '--'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Contact Name</label>
+                        <p className="mt-1 text-sm text-gray-900">{deal.contact_name || '--'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Contact Email</label>
+                        <p className="mt-1 text-sm text-gray-900">{deal.contact_email || '--'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Contact Phone</label>
+                        <p className="mt-1 text-sm text-gray-900">{deal.contact_phone || '--'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Customer Name</label>
-                      <p className="mt-1 text-sm text-gray-900">{deal.customer_name || '--'}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Contact Name</label>
-                      <p className="mt-1 text-sm text-gray-900">{deal.contact_name || '--'}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Contact Email</label>
-                      <p className="mt-1 text-sm text-gray-900">{deal.contact_email || '--'}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Contact Phone</label>
-                      <p className="mt-1 text-sm text-gray-900">{deal.contact_phone || '--'}</p>
-                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No deal information available</p>
+                  )}  
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No deal information available</p>
-                )}
+                  <div className=''>
+                    {deal ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">TIN</label>
+                        <p className="mt-1 text-sm text-gray-900">{deal.tax_indentification_number || '--'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Address</label>
+                        <p className="mt-1 text-sm text-gray-900">{deal.address || '--'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Builling Address</label>
+                        <p className="mt-1 text-sm text-gray-900">{deal.billing_address || '--'}</p>
+                      </div>
+                      
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No deal information available</p>
+                  )}  
+                  </div>
+                </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-lg shadow-md p-6 lg:col-span-1">
                 <h2 className="text-lg font-semibold mb-4">Order Information</h2>
                 <div className="space-y-4">
                   <div>
@@ -376,7 +401,7 @@ const EditOrderAdmin = () => {
             </div>
 
             {showDiscardConfirm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                   <h2 className="text-lg font-semibold mb-4">Confirm Discard</h2>
                   <p className="mb-6">Are you sure you want to discard this order? This action cannot be undone.</p>

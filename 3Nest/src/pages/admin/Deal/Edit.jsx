@@ -279,7 +279,6 @@ const AdminEditDeal = () => {
                     <p className="text-gray-500 text-sm">No orders associated with this deal.</p>
                   ) : (
                     <div className="mt-6">
-                    <h3 className="text-lg font-medium text-gray-800 mb-4">Orders for Deal</h3>
                     {orders.filter(order => order.status !== 'draft').length === 0 ? (
                       <p className="text-gray-500 text-sm">No non-draft orders associated with this deal.</p>
                     ) : (
@@ -349,7 +348,7 @@ const AdminEditDeal = () => {
 
         {/* Discard Confirmation Dialog */}
         {showConfirm && isEditable && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-80">
               <h2 className="text-lg font-semibold mb-4">Confirm Discard</h2>
               <p className="mb-6">Are you sure you want to discard this deal? This action cannot be undone.</p>

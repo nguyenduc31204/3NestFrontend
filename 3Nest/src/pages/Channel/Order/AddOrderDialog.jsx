@@ -44,6 +44,7 @@ const AddOrderDialog = ({
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [fileadd, setfilead] = useState()
+  
 
   useEffect(() => {
     const fetchTypes = async () => {

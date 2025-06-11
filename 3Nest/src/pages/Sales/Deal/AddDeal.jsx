@@ -5,6 +5,7 @@ import { decodeToken } from '../../../utils/help';
 import { BASE_URL } from '../../../utils/apiPath';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AddDeal = () => {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ const AddDeal = () => {
   const [tinError, setTinError] = useState(null);
   const [loadingTin, setLoadingTin] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
+  
 
   const {
     register,
@@ -113,7 +116,7 @@ const AddDeal = () => {
         navigate(`/sales/editdeals/${result.data.deal_id}`);
       } else {
         console.warn('No deal_id returned in response:', result.data);
-        navigate('/sales/editdeals/0');
+        toast.error("The tax identification number has been used.")
       }
     } catch (err) {
       // setError(`Failed to ${status === 'draft' ? 'save' : 'submit'} deal: ${err.message}`);
@@ -139,6 +142,7 @@ const AddDeal = () => {
   return (
     <div>
       <Header />
+      <Toaster position="top-right" reverseOrder={false} />
       <DashboardLayout activeMenu="08">
         <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="content py-6">
@@ -172,7 +176,7 @@ const AddDeal = () => {
                             required: 'Tax identification number is required',
                             minLength: {
                               value: 10,
-                              message: 'Tax identification number must be at least 10 digits',
+                              message: '',
                             },
                           })}
                           className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base ${
@@ -290,14 +294,14 @@ const AddDeal = () => {
                         <p className="text-red-600 text-sm mt-1">{errors.contact_email.message}</p>
                       )}
                     </div>
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium text-gray-700">Deal Type</label>
                       <input
                         {...register('deal_type')}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                         placeholder="Enter deal type"
                       />
-                    </div>
+                    </div> */}
                   </div>
                   <div className="flex-1 space-y-4">
                     {/* <div>
@@ -331,7 +335,7 @@ const AddDeal = () => {
                       <label className="block text-sm font-medium text-gray-700">Description</label>
                       <textarea
                         {...register('description')}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
+                        className="mt-1 block w-full h-37 border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                         placeholder="Enter description"
                         rows="4"
                       />
@@ -352,7 +356,7 @@ const AddDeal = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={handleSubmit(onSubmit)}
+                    onClick={() => setShowSubmitConfirm(true)}
                     disabled={loadingSubmit || loadingTin}
                     className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm sm:text-base touch-manipulation ${
                       loadingSubmit || loadingTin ? 'opacity-50 cursor-not-allowed' : ''
@@ -365,6 +369,31 @@ const AddDeal = () => {
             </div>
           </div>
         </div>
+        {showSubmitConfirm && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-80">
+              <h2 className="text-lg font-semibold mb-4">Confirm Submit</h2>
+              <p className="mb-6">Are you sure submit this deal?</p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowSubmitConfirm(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    handleSubmit(onSubmit)();
+                    setShowSubmitConfirm(false);
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </DashboardLayout>
     </div>
   );
