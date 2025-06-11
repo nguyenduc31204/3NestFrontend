@@ -185,7 +185,7 @@ const ChannelProducts = () => {
                       <td className="p-3 text-sm">{product.category_name}</td>
                       <td className="p-3 text-sm">{product.sku_partnumber}</td>
                       <td className="p-3 text-sm">{product.price?.toLocaleString() || '-'}</td>
-                      <td className="p-3 text-sm">{product.maximum_discount_price?.toLocaleString() || '-'}</td>
+                      <td className="p-3 text-sm">{product.channel_cost?.toLocaleString() || '-'}</td>
                       <td className="p-3 text-sm">{product.description || '-'}</td>
                       <td className="p-3 text-sm">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

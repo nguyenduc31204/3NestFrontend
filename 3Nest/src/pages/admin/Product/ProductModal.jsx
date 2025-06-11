@@ -3,6 +3,7 @@ import { BASE_URL } from '../../../utils/apiPath';
 
 const formatNumber = (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
+
 const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   const [formData, setFormData] = useState({
     product_name: '',
@@ -154,8 +155,13 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
         onSave();
         onClose();
       } else {
-        alert(result.message || 'Failed to save product');
-      }
+    console.error('Error response:', result); 
+    if (result.message?.toLowerCase().includes('product') && result.message?.toLowerCase().includes('exist')) {
+      alert('Tên sản phẩm đã tồn tại. Vui lòng chọn tên khác.');
+    } else {
+      alert(result.message || 'Failed to save product');
+    }
+  }
     } catch {
       alert('Error saving product');
     }
