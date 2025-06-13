@@ -76,7 +76,8 @@ const UserDetail = () => {
                 <p><strong>Company:</strong> {user.company_name}</p>
                 <p><strong>Phone:</strong> {user.phone}</p>
                 <p><strong>Role:</strong> {user.role}</p>
-                <p><strong>Status:</strong> {user.status ? 'Active' : 'Inactive'}</p>
+                <p><strong>Status:</strong> {user.status === true ? 'Active' : 'Inactive'}</p>
+
                 <p><strong>Created At:</strong> {user.created_at}</p>
               </div>
             )}
