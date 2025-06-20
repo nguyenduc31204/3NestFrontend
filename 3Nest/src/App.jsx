@@ -52,6 +52,12 @@ import DealAdmin from './pages/admin/Deal/Deal'
 import AdminEditDeal from './pages/admin/Deal/Edit'
 import EditOrderAdmin from './pages/admin/Order/EditOrder'
 import AddDealAdmin from './pages/admin/Deal/AddDeal'
+import AddPermission from './pages/admin/PermissionType/AddPermission'
+import PermissionTypePage from './pages/admin/PermissionType'
+import { Toaster } from 'react-hot-toast'
+import UnauthorizedPage from './pages/UnauthorizedPage'
+import ProtectedRoute from './pages/Auth/ProtectedRoute'
+import DashboardLayout from './components/layouts/DashboardLayout'
 
 
 
@@ -69,11 +75,47 @@ const Root = () => {
 const App = () => {
   return (
     <div>
+      <Toaster 
+        position="top-right" 
+        reverseOrder={false} 
+        gutter={8} 
+        containerClassName="p-4" 
+        toastOptions={{
+          duration: 3000, // Thời gian tự động đóng
+          className: 'min-w-[250px] max-w-[350px] p-4 text-base font-semibold rounded-lg shadow-lg flex items-center justify-between',
+          style: {
+            background: '#fff',
+            color: '#374151', 
+          },
+          success: {
+            duration: 3000, 
+            className: 'bg-green-100 border border-green-400 text-green-800',
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 3000, 
+            className: 'bg-red-100 border border-red-400 text-red-800',
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+          loading: {
+            className: 'bg-blue-100 border border-blue-400 text-blue-800',
+            iconTheme: {
+              primary: '#3B82F6',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <Routes>
-        <Route path="/" element={<Root />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/logout" element={<Logout />} />
+<<<<<<< HEAD
 
         {/* admin */}
         <Route path="/admin/dashboard" element={<Home />} />
@@ -96,49 +138,129 @@ const App = () => {
         <Route path="/admin/deals" element={<DealAdmin />} />
         <Route path="/admin/editdeals/:deal_id" element={<AdminEditDeal />} />
         <Route path="/admin/adddeals" element={<AddDealAdmin />} />
+=======
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        
+        <Route path="/" element={<Navigate to="/products" replace />} />
+>>>>>>> 879804afee4b20d2a49ad9767c72066a7e7e5122
 
 
+        
+        {/* Dashboard */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute permission="dashboard:view">
+            {/* <DashboardLayout activeMenu="dashboard"><DashboardHomePage /></DashboardLayout> */}
+          </ProtectedRoute>
+        }/>
 
-        {/* sales */}
-        <Route path="/sales/products" element={<SalesProducts />} />
-        <Route path="/sales/orders" element={<SalesOrders />} />
-        <Route path="/sales/settings" element={<SalesSetting />} />
-        <Route path="/sales/addorder" element={<SalesAddOrder />} />
-        <Route path="/sales/orders/add" element={<SalesAddOrder />} />
-        <Route path="/sales/adddeals" element={<AddDeal />} />
-        <Route path="/sales/editorder/:order_id" element={<EditOrder />} />
-        <Route path="/sales/editdeals/:deal_id" element={<SalesEditDeal />} />
-        <Route path="/sales/deals" element={<Deal />} />
-        {/* channel */}
-        <Route path="/channel/products" element={<ChannelProducts />} />
-        <Route path="/channel/orders" element={<ChannelOrders />} />
-        <Route path="/channel/settings" element={<ChannelSetting />} />
-        <Route path="/channel/addorder" element={<ChannelAddOrder />} />
-        <Route path="/channel/orders/add" element={<ChannelAddOrder />} />
-        <Route path="/channel/adddeals" element={<AddDealChannel />} />
-        <Route path="/channel/deals" element={<DealChannel />} />
-        <Route path="/channel/editorder/:order_id" element={<EditOrderChannel />} />
-        <Route path="/channel/editdeals/:deal_id" element={<ChannelEditDeal />} />
+        {/* Products */}
+        <Route path="/products" element={
+          <ProtectedRoute permission="product:view">
+              <Products />
+          </ProtectedRoute>
+        }/>
 
-        {/* manager */}
-        <Route path="/manager/products" element={<ProductsMana />} />
-        {/* <Route path="/manager/addorder" element={<AddOrderMana />} /> */}
-        <Route path="/manager/orders" element={<OrdersMana />} />
-        <Route path='/manager/types' element={<TypeDetailMana />} />
-        <Route path='/manager/types/add' element={<AddTypeMana />} />
-        <Route path="/manager/editorder/:order_id" element={<EditOrderMana />} />
-        <Route path="/manager/deals" element={<DealMana />} />
-        <Route path="/manager/editdeals/:deal_id" element={<ManaEditDeal />} />
-        <Route path='/manager/types/edit/:id' element={<EditTypeMana />} />
+        {/* Orders */}
+        <Route path="/orders" element={
+          <ProtectedRoute permission="order:manage">
+            <Orders />
+          </ProtectedRoute>
+        }/>
+        <Route path="/orders/add" element={
+          <ProtectedRoute permission="order:manage">
+            <AddOrder />
+          </ProtectedRoute>
+        }/>
+        <Route path="/orders/edit/:order_id" element={
+          <ProtectedRoute permission="order:manage">
+            <EditOrderAdmin />
+          </ProtectedRoute>
+        }/>
 
+        {/* Categories */}
+        <Route path="/categories" element={
+          <ProtectedRoute>
+            <Categories />
+          </ProtectedRoute>
+        }/>
+        
+        {/* Users */}
+        <Route path="/users" element={
+          <ProtectedRoute permission="user:view">
+            <Users />
+          </ProtectedRoute>
+        }/>
+        <Route path="/users/add" element={
+          <ProtectedRoute >
+            <AddUser />
+          </ProtectedRoute>
+        }/>
+        <Route path="/users/edit/:userId" element={
+          <ProtectedRoute >
+            <EditUser />
+          </ProtectedRoute>
+        }/>
+        <Route path="/users/detail/:userId" element={
+          <ProtectedRoute >
+            <UserDetail />
+          </ProtectedRoute>
+        }/>
 
-        <Route path="/categories" element={<Categories />} />
-        <Route path="/users" element={<Users />} />
-        <Route path="/users/add" element={<AddUser />} />
-        <Route path="/users/edit/:userId" element={<EditUser />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/users/detail/:userId" element={<UserDetail />} />
+        {/* Deals */}
+        <Route path="/deals" element={
+          <ProtectedRoute permission="deal:view">
+            <DealAdmin />
+          </ProtectedRoute>
+        }/>
+        <Route path="/deals/add" element={
+          <ProtectedRoute permission="deal:manage">
+            <AddDealAdmin />
+          </ProtectedRoute>
+        }/>
+        <Route path="/deals/edit/:deal_id" element={
+          <ProtectedRoute permission="deal:manage">
+            <AdminEditDeal />
+          </ProtectedRoute>
+        }/>
 
+        {/* Types */}
+        <Route path="/types" element={
+          <ProtectedRoute permission="type:view">
+            <TypeDetail />
+          </ProtectedRoute>
+        }/>
+        <Route path="/types/add" element={
+          <ProtectedRoute>
+            <AddType />
+          </ProtectedRoute>
+        }/>
+        <Route path="/types/edit/:id" element={
+          <ProtectedRoute>
+            <EditType />
+          </ProtectedRoute>
+        }/>
+        
+        {/* Permission Type */}
+        <Route path="/pertype" element={
+          <ProtectedRoute>
+            <PermissionTypePage />
+          </ProtectedRoute>
+        }/>
+        <Route path="/pertype/add" element={
+          <ProtectedRoute>
+            <AddPermission />
+          </ProtectedRoute>
+        }/>
+
+        {/* Reports */}
+        <Route path="/reports" element={
+          <ProtectedRoute permission="report:view">
+            <Reports />
+          </ProtectedRoute>
+        }/>
+
+        <Route path="*" element={<div><h1>404 Not Found</h1></div>} />
       </Routes>
     </div>
   )

@@ -50,7 +50,7 @@ const TypeDetail = () => {
   return (
     <div>
       <Header />
-      <DasboardLayout activeMenu="type">
+      <DasboardLayout activeMenu="07">
         <div className="my-5 mx-auto">
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">

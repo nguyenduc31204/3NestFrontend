@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { BASE_URL } from '../../../utils/apiPath';
+import { toast, Toaster } from 'react-hot-toast'; 
 
 const AddOrderDialog = ({
   open,
@@ -18,73 +19,104 @@ const AddOrderDialog = ({
   const {
     register,
     control,
+    watch,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      details: existingDetails || [],
+      details: existingDetails && existingDetails.length > 0 
+                ? existingDetails 
+                : []
     },
+    mode: "onBlur" 
   });
+
   const { fields, append, remove, update } = useFieldArray({ control, name: 'details' });
-  const { fields: fields_tmp, remove: removeTmp,  replace: replaceTmp } = useFieldArray({
-    control,
-    name: 'tmp',
-  });
-  const copyToTmp = () => {
-    replaceTmp([...fields]); 
-  };
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [requestError, setRequestError] = useState(null); 
   const [types, setTypes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedTypeId, setSelectedTypeId] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [fileadd, setfilead] = useState()
 
   useEffect(() => {
-    const fetchTypes = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`${BASE_URL}/types/get-types`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true',
-          },
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message || 'Failed to fetch types');
-        setTypes(result.data || []);
-        if (result.data?.length > 0) setSelectedTypeId(result.data[0].type_id);
-      } catch (err) {
-        setError(`Failed to load types: ${err.message}`);
-      } finally {
-        setLoading(false);
+    if (open) {
+      reset({ details: [] });
+      setSelectedTypeId('');
+      setSelectedCategory('');
+      setProducts([]);
+      setSelectedProduct(null);
+      setRequestError(null); 
+      fetchTypes(); 
+    } else {
+      reset({ details: [] }); 
+      setSelectedTypeId('');
+      setSelectedCategory('');
+      setProducts([]);
+      setSelectedProduct(null);
+      setRequestError(null);
+    }
+  }, [open, reset, existingDetails]);
+
+  const fetchTypes = async () => {
+    setLoading(true);
+    setRequestError(null);
+    try {
+      const response = await fetch(`${BASE_URL}/types/get-types`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Failed to fetch types');
+      setTypes(result.data || []);
+      if (result.data?.length > 0) {
+        setSelectedTypeId(result.data[0].type_id.toString()); 
+      } else {
+        setSelectedTypeId('');
       }
-    };
-    fetchTypes();
-  }, []);
+    } catch (err) {
+      setRequestError(`Failed to load types: ${err.message}`);
+      toast.error(`Không thể tải loại: ${err.message}`); 
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!selectedTypeId) return;
+    if (!selectedTypeId) {
+      setCategories([]);
+      setSelectedCategory('');
+      setProducts([]);
+      setSelectedProduct(null);
+      return;
+    }
     const fetchCategories = async () => {
       setLoading(true);
+      setRequestError(null);
       try {
         const response = await fetch(
           `${BASE_URL}/categories/get-categories-by-type?type_id=${selectedTypeId}`,
-          { headers: { 'ngrok-skip-browser-warning': 'true' } }
+          { headers: { 'ngrok-skip-browser-warning': 'true',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+           } }
         );
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Failed to fetch categories');
         setCategories(result.data || []);
-        setSelectedCategory('');
+        setSelectedCategory(''); 
         setProducts([]);
         setSelectedProduct(null);
       } catch (err) {
-        setError(`Failed to load categories: ${err.message}`);
+        setRequestError(`Failed to load categories: ${err.message}`);
+        toast.error(`Unable to load catalog: ${err.message}`); 
       } finally {
         setLoading(false);
       }
@@ -93,9 +125,14 @@ const AddOrderDialog = ({
   }, [selectedTypeId]);
 
   useEffect(() => {
-    if (!selectedCategory) return;
+    if (!selectedCategory) {
+      setProducts([]);
+      setSelectedProduct(null);
+      return;
+    }
     const fetchProducts = async () => {
       setLoading(true);
+      setRequestError(null);
       try {
         const response = await fetch(
           `${BASE_URL}/products/get-products-by-role?category_name=${encodeURIComponent(selectedCategory)}`,
@@ -112,9 +149,10 @@ const AddOrderDialog = ({
           throw new Error(result.message || 'Invalid product data');
         }
         setProducts(result.data);
-        setSelectedProduct(null);
+        setSelectedProduct(null); 
       } catch (err) {
-        setError(`Failed to load products: ${err.message}`);
+        setRequestError(`Failed to load products: ${err.message}`);
+        toast.error(`Unable to load product: ${err.message}`); // <<< toast.error từ react-hot-toast
       } finally {
         setLoading(false);
       }
@@ -123,36 +161,42 @@ const AddOrderDialog = ({
   }, [selectedCategory]);
 
   const handleProductChange = (productId) => {
-    const product = products.find((p) => p.product_id.toString() === productId);
-    setSelectedProduct(product || null);
+    const product = products.find((p) => p.product_id?.toString() === productId);
+    setSelectedProduct(product || null); 
 
     if (!product) {
-      setError('Please select a valid product.');
+      setRequestError('Please select a valid product.');
+      toast.error('Please select a valid product.'); // <<< toast.error từ react-hot-toast
       return;
     }
+    setRequestError(null); 
 
     const existingDetailIndex = fields.findIndex(
-      (field) => field.product_id.toString() === product.product_id.toString(),
-      (fields_tmp) => fields_tmp.product_id.toString() === product.product_id.toString()
+      (field) => field.product_id?.toString() === product.product_id?.toString()
     );
 
     if (existingDetailIndex >= 0) {
       update(existingDetailIndex, {
         ...fields[existingDetailIndex],
-        ...fields_tmp[existingDetailIndex],
         quantity: (parseInt(fields[existingDetailIndex].quantity) || 0) + 1,
       });
     } else {
       append({
         product_id: product.product_id,
         quantity: 1,
-        price_for_customer: product.price || 0,
-        service_contract_duration: 0,
+        price_for_customer: product.price || 0, 
+        service_contract_duration: 1, 
       });
     }
   };
 
   const submitHandler = (data) => {
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please check the fields again."); 
+      console.log("Form errors:", errors); 
+      return; 
+    }
+
     const submissionData = {
       order_title,
       customer_name,
@@ -161,9 +205,9 @@ const AddOrderDialog = ({
       contact_phone,
       address,
       billing_address,
-      status: '',
+      status: '', 
       details: data.details
-        .filter((detail) => detail.product_id)
+        .filter((detail) => detail.product_id) 
         .map((detail) => ({
           product_id: parseInt(detail.product_id) || 0,
           quantity: parseInt(detail.quantity) || 0,
@@ -173,27 +217,20 @@ const AddOrderDialog = ({
     };
 
     if (submissionData.details.length === 0) {
-      setError('At least one product is required.');
+      setRequestError('At least one product is required.');
+      toast.error('Please add at least one product to your order.'); 
       return;
     }
 
     onSubmit(submissionData);
-      setTimeout(() => {
-        remove(); // Xoá tất cả items
-      }, 0);
+    toast.success('Order added successfully!'); 
     handleClose();
   };
 
   const handleClose = () => {
-    setSelectedTypeId('');
-    setSelectedCategory('');
-    setProducts([]);
-    setSelectedProduct(null);
-    reset({ details: existingDetails || [] });
-    setError(null);
     onClose();
   };
-
+  
   if (!open) return null;
 
   return (
@@ -201,15 +238,16 @@ const AddOrderDialog = ({
       className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleClose}
     >
+
       <div
         className="bg-white rounded-lg shadow-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-semibold mb-4">Add Order Details</h2>
 
-        {error && (
+        {requestError && (
           <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-400 text-sm text-red-700">
-            {error}
+            {requestError}
           </div>
         )}
 
@@ -255,7 +293,7 @@ const AddOrderDialog = ({
                 value={selectedProduct?.product_id || ''}
                 onChange={(e) => handleProductChange(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-2 w-full"
-                disabled={loading || !selectedCategory}
+                disabled={loading || !selectedCategory || products.length === 0}
               >
                 <option value="">Select a product</option>
                 {products.map((product) => (
@@ -280,17 +318,13 @@ const AddOrderDialog = ({
                   <p className="text-gray-900">{selectedProduct.sku_partnumber}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Price:</span>
+                  <span className="font-medium text-gray-700">Original Price:</span>
                   <p className="text-gray-900 font-semibold text-green-600">
                     ${selectedProduct.price?.toLocaleString() || 'N/A'}
                   </p>
                 </div>
-                {/* <div>
-                  <span className="font-medium text-gray-700">Max Discount:</span>
-                  <p className="text-gray-900">{selectedProduct.maximum_discount || 0}%</p>
-                </div> */}
                 <div>
-                  <span className="font-medium text-gray-700">Max Discount Price:</span>
+                  <span className="font-medium text-gray-700">Min Price (Max Discount):</span>
                   <p className="text-gray-900 text-orange-600">
                     ${selectedProduct.maximum_discount_price?.toLocaleString() || 'N/A'}
                   </p>
@@ -305,80 +339,127 @@ const AddOrderDialog = ({
 
           <div>
             <h3 className="font-medium mb-2">Order Details</h3>
-            {fields.length === 0 && <p className="text-gray-500 text-sm mb-2">No products added yet.</p>}
-            {fields.map((field, index) => (
-              <div key={field.id} className="grid grid-cols-5 gap-2 mb-2 items-end">
-                <div>
-                  <span className="font-medium text-gray-700">Product:</span>
-                  <p className="text-gray-900">
-                    {products.find((p) => p.product_id.toString() === field.product_id.toString())?.product_name ||
-                      'Unknown'}
-                  </p>
-                  <input
-                    {...register(`details.${index}.product_id`, { required: 'Product ID is required' })}
-                    type="hidden"
-                    value={field.product_id}
-                  />
+            {fields.length === 0 && (
+                <p className="text-gray-500 text-sm mb-2">
+                    Please select type, category and product to add to order.
+                </p>
+            )}
+            {fields.map((field, index) => {
+              const quantity = watch(`details.${index}.quantity`) || field.quantity || 0;
+              const priceForCustomer = watch(`details.${index}.price_for_customer`); 
+              const years = Number(watch(`details.${index}.service_contract_duration`)) || field.service_contract_duration || 1;
+
+              const productInfo = products.find((p) => p.product_id?.toString() === field.product_id?.toString());
+              const originalPrice = productInfo?.price || 0;
+              const maxDiscountPrice = productInfo?.maximum_discount_price || 0;
+
+              let total = 0;
+              for (let i = 0; i < years; i++) {
+                total += priceForCustomer * Math.pow(1.05, i); 
+              }
+              const subtotal = Math.round(total * quantity).toLocaleString();
+
+              return (
+                <div key={field.id} className="grid grid-cols-5 gap-2 mb-2 items-end p-4 border border-gray-200 rounded-lg shadow-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Product:</span>
+                    <p className="text-gray-900">
+                      {productInfo?.product_name || 'Unknown Product'}
+                    </p>
+                    <input
+                      {...register(`details.${index}.product_id`, { required: 'Product ID is required' })}
+                      type="hidden"
+                      defaultValue={field.product_id}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">Quantity</label>
+                    <input
+                      {...register(`details.${index}.quantity`, {
+                        required: 'Quantity is required',
+                        min: { value: 1, message: 'Quantity must be at least 1' },
+                        valueAsNumber: true,
+                      })}
+                      type="number"
+                      min="1"
+                      className="border border-gray-300 rounded px-2 py-1 w-full"
+                      defaultValue={field.quantity}
+                    />
+                    {errors.details?.[index]?.quantity && (
+                      <p className="text-red-600 text-sm mt-1">{errors.details[index].quantity.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">Price (Customer)</label>
+                    <input
+                      {...register(`details.${index}.price_for_customer`, {
+                        required: 'Price is required',
+                        min: { value: 0, message: 'Price cannot be negative' },
+                        valueAsNumber: true,
+                        validate: {
+                          range: (value) => {
+                            const numValue = parseFloat(value); 
+                            if (isNaN(numValue) || !productInfo) {
+                                return 'Invalid price or product information missing.'; 
+                            }
+
+                            if (numValue > originalPrice) {
+                                const errorMessage = `Price cannot exceed original price ($${originalPrice.toLocaleString()}).`;
+                                toast.error(errorMessage); 
+                                return errorMessage; 
+                            }
+                            if (numValue < maxDiscountPrice) {
+                                const errorMessage = `Price cannot be lower than minimum discount price ($${maxDiscountPrice.toLocaleString()}).`;
+                                toast.error(errorMessage); 
+                                return errorMessage;
+                            }
+                            return true; 
+                          }
+                        }
+                      })}
+                      type="number"
+                      step="0.01"
+                      className="border border-gray-300 rounded px-2 py-1 w-full"
+                      defaultValue={field.price_for_customer}
+                    />
+                    
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">Contract Duration</label>
+                    <select
+                      {...register(`details.${index}.service_contract_duration`, {
+                        required: 'Contract duration is required',
+                        valueAsNumber: true, 
+                      })}
+                      className="border border-gray-300 rounded px-2 py-1 w-full"
+                      defaultValue={field.service_contract_duration}
+                    >
+                      <option value="">Select duration</option>
+                      <option value="1">1 year</option>
+                      <option value="3">3 years</option>
+                      <option value="5">5 years</option>
+                    </select>
+                    {errors.details?.[index]?.service_contract_duration && (
+                      <p className="text-red-600 text-sm mt-1">{errors.details[index].service_contract_duration.message}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="text-red-600 hover:text-red-800 font-semibold px-4 py-2 rounded hover:bg-red-50 transition duration-200"
+                    >
+                      Clear
+                    </button>
+                    <div className="ml-auto">
+                      <p className="text-sm text-gray-900 font-bold">
+                        Subtotal: ${subtotal}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium">Quantity</label>
-                  <input
-                    {...register(`details.${index}.quantity`, {
-                      required: 'Quantity is required',
-                      min: { value: 1, message: 'Quantity must be at least 1' },
-                    })}
-                    type="number"
-                    min="1"
-                    className="border border-gray-300 rounded px-2 py-1 w-full"
-                    defaultValue={field.quantity}
-                  />
-                  {errors.details?.[index]?.quantity && (
-                    <p className="text-red-600 text-sm mt-1">{errors.details[index].quantity.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">Price</label>
-                  <input
-                    {...register(`details.${index}.price_for_customer`, {
-                      required: 'Price is required',
-                      min: { value: 0, message: 'Price cannot be negative' },
-                    })}
-                    type="number"
-                    step="0.01"
-                    className="border border-gray-300 rounded px-2 py-1 w-full"
-                    defaultValue={field.price_for_customer}
-                  />
-                  {errors.details?.[index]?.price_for_customer && (
-                    <p className="text-red-600 text-sm mt-1">{errors.details[index].price_for_customer.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">Contract Duration</label>
-                  <select
-                    {...register(`details.${index}.service_contract_duration`, {
-                      required: 'Contract duration is required',
-                    })}
-                    className="border border-gray-300 rounded px-2 py-1 w-full"
-                    defaultValue={field.service_contract_duration}
-                  >
-                    <option value="">Select duration</option>
-                    <option value="1">1 year</option>
-                    <option value="3">3 years</option>
-                    <option value="5">5 years</option>
-                  </select>
-                  {errors.details?.[index]?.service_contract_duration && (
-                    <p className="text-red-600 text-sm mt-1">{errors.details[index].service_contract_duration.message}</p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => remove(index)}
-                  className="text-red-600 hover:text-red-800 font-semibold px-2 py-1 rounded hover:bg-red-50"
-                >
-                  Clear
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex justify-end space-x-2 mt-6">
@@ -394,7 +475,7 @@ const AddOrderDialog = ({
               className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
               disabled={loading || fields.length === 0}
             >
-              Add
+              Add Order
             </button>
           </div>
         </form>

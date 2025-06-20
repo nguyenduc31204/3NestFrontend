@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layouts/Header';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
@@ -24,21 +24,25 @@ const DealAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDeal, setSelectedDeal] = useState(null);
-  const [activeRole, setActiveRole] = useState('admin');
+  const [activeRole, setActiveRole] = useState(1);
+  const [roles, setRoles] = useState([]);
 
   const token = localStorage.getItem('access_token');
   const decodedToken = decodeToken(token);
-  const role = decodedToken?.role;
-
+  const role = decodedToken?.role_id;
+  console.log('Decoded Token:', decodedToken);
   useEffect(() => {
     loadDealsByUser();
   }, [activeRole]);
+  useEffect(() => {
+    loadRoles();
+  }, []);
 
   const loadDealsByUser = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${BASE_URL}/deals/get-deals-by-role?role=${activeRole}`, {
+      const response = await fetch(`${BASE_URL}/deals/get-deals-by-role?role_id=${activeRole}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -48,6 +52,7 @@ const DealAdmin = () => {
       });
       if (!response.ok) throw new Error('Failed to fetch deals');
       const result = await response.json();
+      console.log('Deals fetched:', result);
       setDeals(result.data || []);
     } catch (err) {
       setError(`Failed to load deals: ${err.message}`);
@@ -56,8 +61,28 @@ const DealAdmin = () => {
     }
   };
 
-  const handleRoleChange = (role) => {
-    setActiveRole(role);
+  const loadRoles = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/roles/get-roles`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch roles');
+      const result = await response.json();
+      setRoles(result.data || []);
+    } catch (err) {
+      console.error('Error loading roles:', err);
+      setError(`Failed to load roles: ${err.message}`);
+    }
+  }
+  console.log('Available roles:', roles);
+
+  const handleRoleChange = (role_id) => {
+    setActiveRole(role_id);
   };
 
   const handleRefresh = () => {
@@ -118,40 +143,19 @@ const DealAdmin = () => {
               <div className="card-header flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-gray-200 gap-4">
                 <h2 className="text-lg font-semibold text-gray-800">My Deals</h2>
                 <div className="tools flex space-x-2">
-                  {role === 'admin' && (
-                    <div className="product-role flex space-x-2 bg-gray-50 p-2 rounded-md">
-                      <button
-                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                          activeRole === 'admin'
-                            ? 'bg-white shadow text-blue-600'
-                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                        }`}
-                        onClick={() => handleRoleChange('admin')}
-                      >
-                        Admin
-                      </button>
-                      <button
-                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                          activeRole === 'sales'
-                            ? 'bg-white shadow text-blue-600'
-                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                        }`}
-                        onClick={() => handleRoleChange('sales')}
-                      >
-                        Sales
-                      </button>
-                      <button
-                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                          activeRole === 'channels'
-                            ? 'bg-white shadow text-blue-600'
-                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                        }`}
-                        onClick={() => handleRoleChange('channels')}
-                      >
-                        Channels
-                      </button>
-                    </div>
-                  )}
+                  {roles.map((role) => (
+                    <button
+                      key={role.role_id} 
+                      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        activeRole === role.role_id 
+                          ? 'bg-white shadow text-blue-600'
+                          : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                      }`}
+                      onClick={() => handleRoleChange(role.role_id)} 
+                    >
+                      {role.role_name} 
+                    </button>
+                  ))}
                   <button className="p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-md touch-manipulation">
                     <LuArrowDownToLine className="w-5 h-5" />
                   </button>
