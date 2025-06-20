@@ -14,6 +14,7 @@ import SalesAddOrder from './pages/Sales/Order/AddOder'
 import AddUser from './pages/admin/User/AddUser';
 import EditUser from './pages/admin/User/EditUser';
 import UserDetail from './pages/admin/User/UserDetail';
+import ProductDetail from './pages/admin/Product/ProductDetail'
 
 import RoleList from './pages/admin/Role/RoleList';
 import AddRole from './pages/admin/Role/AddRole';
@@ -115,11 +116,12 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
-<<<<<<< HEAD
+
 
         {/* admin */}
         <Route path="/admin/dashboard" element={<Home />} />
         <Route path="/admin/products" element={<Products />} />
+    
         <Route path="/admin/orders" element={<Orders />} />
         <Route path='/admin/types' element={<TypeDetail />} />
         <Route path="/admin/settings" element={<Setting />} />
@@ -138,12 +140,12 @@ const App = () => {
         <Route path="/admin/deals" element={<DealAdmin />} />
         <Route path="/admin/editdeals/:deal_id" element={<AdminEditDeal />} />
         <Route path="/admin/adddeals" element={<AddDealAdmin />} />
-=======
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         
         <Route path="/" element={<Navigate to="/products" replace />} />
->>>>>>> 879804afee4b20d2a49ad9767c72066a7e7e5122
+
 
 
         
@@ -156,7 +158,7 @@ const App = () => {
 
         {/* Products */}
         <Route path="/products" element={
-          <ProtectedRoute permission="product:view">
+          <ProtectedRoute permission="product:manage">
               <Products />
           </ProtectedRoute>
         }/>
@@ -180,10 +182,11 @@ const App = () => {
 
         {/* Categories */}
         <Route path="/categories" element={
-          <ProtectedRoute>
+          <ProtectedRoute permission="category:manage">
             <Categories />
           </ProtectedRoute>
         }/>
+        
         
         {/* Users */}
         <Route path="/users" element={
@@ -192,17 +195,17 @@ const App = () => {
           </ProtectedRoute>
         }/>
         <Route path="/users/add" element={
-          <ProtectedRoute >
+          <ProtectedRoute permission="user:manage">
             <AddUser />
           </ProtectedRoute>
         }/>
         <Route path="/users/edit/:userId" element={
-          <ProtectedRoute >
+          <ProtectedRoute permission="user:manage">
             <EditUser />
           </ProtectedRoute>
         }/>
         <Route path="/users/detail/:userId" element={
-          <ProtectedRoute >
+          <ProtectedRoute permission="user:view">
             <UserDetail />
           </ProtectedRoute>
         }/>

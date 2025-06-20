@@ -11,7 +11,12 @@ const Field = ({ label, value }) => (
 );
 
 /* Product detail modal (read-only) */
-const ProductDetail = ({ isOpen, onClose, product }) => {
+const ProductDetail = ({ isOpen, onClose, product, roles = [] }) => {
+  const getRoleName = (roleId) => {
+    const found = roles.find((r) => r.role_id === Number(roleId));
+    return found ? found.role_name.charAt(0).toUpperCase() + found.role_name.slice(1) : '-';
+  };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -53,7 +58,7 @@ const ProductDetail = ({ isOpen, onClose, product }) => {
                 {product ? (
                   <dl className="divide-y divide-gray-100 max-h-[70vh] overflow-y-auto pr-1">
                     <Field label="Product Name" value={product.product_name} />
-                    <Field label="Role" value={product.product_role ? product.product_role.charAt(0).toUpperCase() + product.product_role.slice(1) : null} />
+                    <Field label="Role" value={getRoleName(product.product_role)} />
                     <Field label="Category" value={product.category_name} />
                     <Field label="SKU / Part Number" value={product.sku_partnumber} />
                     <Field label="Description" value={product.description} />
