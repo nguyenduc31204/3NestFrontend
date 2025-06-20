@@ -60,15 +60,16 @@ const EditOrderAdmin = () => {
       // Fetch order data
       const orderResponse = await fetch(`${BASE_URL}/orders/get-order?order_id=${order_id}`, { headers });
       const orderResult = await orderResponse.json();
+      console.log('Order Result:', orderResult);
       if (!orderResponse.ok || orderResult.status_code !== 200) {
         throw new Error(orderResult.message || 'Failed to load order data');
       }
       setOrder(orderResult.data);
 
-      // Fetch deal data if order has deal_id
       if (orderResult.data.deal_id) {
         const dealResponse = await fetch(`${BASE_URL}/deals/get-deal?deal_id=${orderResult.data.deal_id}`, { headers });
         const dealResult = await dealResponse.json();
+        console.log('Deal Result:', dealResult);
         if (!dealResponse.ok || dealResult.status_code !== 200) {
           throw new Error(dealResult.message || 'Failed to load deal data');
         }
@@ -251,7 +252,7 @@ const EditOrderAdmin = () => {
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">TIN</label>
-                        <p className="mt-1 text-sm text-gray-900">{deal.tax_indentification_number || '--'}</p>
+                        <p className="mt-1 text-sm text-gray-900">{deal.tax_identification_number || '--'}</p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Address</label>
