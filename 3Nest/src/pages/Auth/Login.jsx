@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { decodeToken, validateEmail } from '../../utils/help';
 import Input from '../../components/input/Input';
 import { BASE_URL } from '../../utils/apiPath';
-import CryptoJS from 'crypto-js';
+
 
 
 const Login = () => {

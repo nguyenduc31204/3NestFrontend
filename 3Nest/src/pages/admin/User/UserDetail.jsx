@@ -70,7 +70,7 @@ const UserDetail = () => {
             {error && <p className="text-red-600">{error}</p>}
             {!loading && !error && user && (
               <div className="space-y-4 text-gray-800">
-                <p><strong>User ID:</strong> {user.user_id}</p>
+                {/* <p><strong>User ID:</strong> {user.user_id}</p> */}
                 <p><strong>Username:</strong> {user.user_name}</p>
                 <p><strong>Email:</strong> {user.user_email}</p>
                 <p><strong>Company:</strong> {user.company_name}</p>
