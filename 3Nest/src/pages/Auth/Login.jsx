@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { decodeToken, validateEmail } from '../../utils/help';
 import Input from '../../components/input/Input';
 import { BASE_URL } from '../../utils/apiPath';
-import CryptoJS from 'crypto-js';
+
 
 
 const Login = () => {
@@ -33,6 +33,7 @@ const Login = () => {
       const response = await fetch(`${BASE_URL}/users/login`, {
         method: 'POST',
         headers: {
+          
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
         },
@@ -43,7 +44,7 @@ const Login = () => {
       });
 
       const result = await response.json();
-      //console.log('Login API Response:', result);
+      console.log('Login API Response:', result);
 
       if (response.ok) {
         const { access_token } = result;
@@ -76,8 +77,12 @@ const Login = () => {
         localStorage.setItem('user', JSON.stringify(userForStorage))
         localStorage.setItem('role', decoded.role);
 
+
+        console.log('Decoded token:', decoded);
+
         //console.log('Decoded token:', decoded);
-         navigate('/orders'); 
+         navigate('/orders');
+
 
         // switch (decoded?.role?.toLowerCase()) {
         //   case 'admin':

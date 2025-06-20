@@ -42,7 +42,7 @@ const EditUser = () => {
             user_name: u.user_name || '',
             company_name: u.company_name || '',
             phone: u.phone || '',
-            status: u.status === true,
+            status: u.status === false,
           });
           setLoading(false);
         } else {
@@ -67,7 +67,20 @@ const EditUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    setError('');
+    setSuccess('');
+
+    const payload = {
+      user_id: formData.user_id,
+      user_name: formData.user_name,
+      company_name: formData.company_name,
+      phone: formData.phone,
+      status: !!formData.status  
+    };
+
+    console.log('Submitting payload:', payload);  
+    
+
     try {
       const res = await fetch(`${BASE_URL}/users/update-user`, {
         method: 'POST',
@@ -75,9 +88,12 @@ const EditUser = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       const result = await res.json();
+      console.log("Update user response:", result);
+
+      
       if (res.ok && result.status_code === 200) {
         setSuccess('User updated successfully');
         setTimeout(() => navigate('/users'), 1000);
@@ -87,7 +103,10 @@ const EditUser = () => {
     } catch (err) {
       setError(err.message);
     }
+    
   };
+  
+
 
 
   if (loading) return <p className="p-4">Loadinggg...</p>;
