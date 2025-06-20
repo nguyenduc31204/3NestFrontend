@@ -114,35 +114,12 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
-<<<<<<< HEAD
 
-        {/* admin */}
-        <Route path="/admin/dashboard" element={<Home />} />
-        <Route path="/admin/products" element={<Products />} />
-        <Route path="/admin/orders" element={<Orders />} />
-        <Route path='/admin/types' element={<TypeDetail />} />
-        <Route path="/admin/settings" element={<Setting />} />
-        <Route path="/admin/addorder" element={<AddOrder />} />
-        <Route path="/admin/editorder/:order_id" element={<EditOrderAdmin />} />
-        <Route path='/admin/types/add' element={<AddType />} />
-        <Route path='/admin/types/edit/:id' element={<EditType />} />
-        <Route path="/admin/orders/add" element={<AddOrder />} />
-
-        <Route path="/admin/roles" element={<RoleList />} />
-        <Route path="/admin/roles/add" element={<AddRole />} />
-        <Route path="/admin/roles/edit/:id" element={<EditRole />} />
-        <Route path="/admin/roles/detail/:id" element={<RoleDetail />} />
-
-
-        <Route path="/admin/deals" element={<DealAdmin />} />
-        <Route path="/admin/editdeals/:deal_id" element={<AdminEditDeal />} />
-        <Route path="/admin/adddeals" element={<AddDealAdmin />} />
-=======
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         
         <Route path="/" element={<Navigate to="/products" replace />} />
->>>>>>> 879804afee4b20d2a49ad9767c72066a7e7e5122
+
 
 
         

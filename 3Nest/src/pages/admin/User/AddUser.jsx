@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-=======
-// src/pages/admin/AddUser.jsx
+
 import React, { useEffect, useState } from 'react';
->>>>>>> 879804afee4b20d2a49ad9767c72066a7e7e5122
+
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layouts/Header';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
@@ -16,11 +13,9 @@ const AddUser = () => {
     user_email: '',
     company_name: '',
     password: '',
-<<<<<<< HEAD
-    role_id: '',
-=======
+
     role_id: 0
->>>>>>> 879804afee4b20d2a49ad9767c72066a7e7e5122
+
   });
   const [roles, setRoles] = useState([]);
   const [error, setError] = useState(null);
@@ -80,29 +75,9 @@ const AddUser = () => {
   console.log('Available roles:', role);
 
   const handleSubmit = async (e) => {
-<<<<<<< HEAD
-    e.preventDefault();
-=======
   e.preventDefault();
   setError(null);
 
-
-
-  try {
-    const res = await fetch(`${BASE_URL}/users/create-user`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-      },
-      body: JSON.stringify(formData),
-    });
-    console.log('Create-user API Response:', formData);
-
-    const resultText = await res.text();
-    let resultJson;
->>>>>>> 879804afee4b20d2a49ad9767c72066a7e7e5122
     try {
       const res = await fetch(`${BASE_URL}/users/create-user`, {
         method: 'POST',
@@ -120,30 +95,11 @@ const AddUser = () => {
     }
   };
 
+
   return (
     <>
       <Header />
-<<<<<<< HEAD
-      <DashboardLayout activeMenu="06">
-        <div className="max-w-2xl mx-auto my-8">
-          <h1 className="text-xl font-semibold mb-4">Add User</h1>
-          {error && <div className="text-red-600 mb-4">{error}</div>}
-          <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded shadow">
-            <input name="user_name" value={formData.user_name} onChange={handleChange} placeholder="User Name" className="w-full border px-3 py-2 rounded" required />
-            <input name="user_email" value={formData.user_email} onChange={handleChange} placeholder="Email" className="w-full border px-3 py-2 rounded" required />
-            <input name="company_name" value={formData.company_name} onChange={handleChange} placeholder="Company Name" className="w-full border px-3 py-2 rounded" />
-            <input name="password" type="password" value={formData.password} onChange={handleChange} placeholder="Password" className="w-full border px-3 py-2 rounded" required />
-            <select name="role_id" value={formData.role_id} onChange={handleChange} className="w-full border px-3 py-2 rounded" required>
-              <option value="">Select Role</option>
-              {roles.map(role => <option key={role.role_id} value={role.role_id}>{role.role_name}</option>)}
-            </select>
-            <div className="flex justify-end space-x-2">
-              <button type="button" onClick={() => navigate('/users')} className="px-4 py-2 bg-gray-300 text-gray-700 rounded">Cancel</button>
-              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Create</button>
-            </div>
-          </form>
-=======
-      <DasboardLayout activeMenu="05">
+      {/* <DasboardLayout activeMenu="05"> */}
         <div className="my-5 mx-auto max-w-3xl">
           {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
@@ -247,9 +203,8 @@ const AddUser = () => {
               </div>
             </form>
           </div>
->>>>>>> 879804afee4b20d2a49ad9767c72066a7e7e5122
         </div>
-      </DashboardLayout>
+      {/* </DashboardLayout> */}
     </>
   );
 };
