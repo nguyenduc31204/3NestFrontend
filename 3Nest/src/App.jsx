@@ -37,7 +37,6 @@ import ProductsMana from './pages/Manager/Product/Products'
 // import AddOrderMana from './pages/Manager/Order/AddOder'
 import OrdersMana from './pages/Manager/Order/Orders'
 import Deal from './pages/Sales/Deal/Deal'
-import AddDeal from './pages/Sales/Deal/AddDeal'
 import SalesEditDeal from './pages/Sales/Deal/Edit'
 import EditOrder from './pages/Sales/Order/EditOrder'
 import AddDealChannel from './pages/Channel/Deal/AddDeal'
@@ -52,13 +51,13 @@ import EditOrderMana from './pages/Manager/Order/EditOrder'
 import DealAdmin from './pages/admin/Deal/Deal'
 import AdminEditDeal from './pages/admin/Deal/Edit'
 import EditOrderAdmin from './pages/admin/Order/EditOrder'
-import AddDealAdmin from './pages/admin/Deal/AddDeal'
 import AddPermission from './pages/admin/PermissionType/AddPermission'
 import PermissionTypePage from './pages/admin/PermissionType'
 import { Toaster } from 'react-hot-toast'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import ProtectedRoute from './pages/Auth/ProtectedRoute'
 import DashboardLayout from './components/layouts/DashboardLayout'
+import AddDealPage from './pages/Sales/Deal/AddDeal'
 
 
 
@@ -212,13 +211,13 @@ const App = () => {
 
         {/* Deals */}
         <Route path="/deals" element={
-          <ProtectedRoute permission="deal:view">
+          <ProtectedRoute permission="deal:manage">
             <DealAdmin />
           </ProtectedRoute>
         }/>
         <Route path="/deals/add" element={
           <ProtectedRoute permission="deal:manage">
-            <AddDealAdmin />
+            <AddDealPage />
           </ProtectedRoute>
         }/>
         <Route path="/deals/edit/:deal_id" element={

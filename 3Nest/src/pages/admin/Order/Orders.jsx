@@ -243,7 +243,7 @@ const OrdersPage = () => {
                                   className="text-blue-600 hover:underline font-medium"
                                   onClick={() => navigate(`/orders/edit/${order.order_id}`)}
                                 >
-                                  View/Edit
+                                  View
                                 </button>
                               )}
                               {/* {hasPermission(user, 'order:delete') && (

@@ -8,9 +8,6 @@ import { decodeToken } from '../../utils/help';
 
 const DashboardLayout = ({ children, activeMenu }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [role, setRole] = useState();
   const decode = decodeToken(localStorage.getItem('access_token')); 
   console.log('Decoded Token:', decode);
   const loadPermission = async () => {

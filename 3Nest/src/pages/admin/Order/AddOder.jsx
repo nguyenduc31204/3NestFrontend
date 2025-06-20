@@ -96,6 +96,7 @@ const AddOrder = () => {
           },
         });
         const result = await response.json();
+        console.log("re", result)
 
         setUser(result.data);
       } catch (err) {
@@ -240,7 +241,7 @@ const AddOrder = () => {
       setExistingDetails([]);
       setCreatedOrderId(null);
       localStorage.removeItem('createdOrderId');
-      navigate(`/admin/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
+      navigate(`/deals/edit/${formValues.deal_id || preSelectedDealId || 0}`);
     } catch (err) {
       setError(`Delete failed: ${err.message}`);
     }
@@ -320,7 +321,7 @@ const AddOrder = () => {
       setExistingDetails([]);
       setCreatedOrderId(null);
       localStorage.removeItem('createdOrderId');
-      navigate(`/admin/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
+      navigate(`/deals/edit/${formValues.deal_id || preSelectedDealId || 0}`);
     } catch (err) {
       // setError(`Failed to save order: ${err.message}`);
       console.log(err)
@@ -388,7 +389,7 @@ const AddOrder = () => {
       setExistingDetails([]);
       setCreatedOrderId(null);
       localStorage.removeItem('createdOrderId');
-      navigate(`/admin/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
+      navigate(`/deals/edit/${formValues.deal_id || preSelectedDealId || 0}`);
     } catch (err) {
       setError(`Failed to submit order: ${err.message}`);
     }

@@ -151,6 +151,8 @@ const SalesEditDeal = () => {
   }
 };
 
+console.log('Deal Data:', dealData);
+
   return (
     <div>
       <Header />
