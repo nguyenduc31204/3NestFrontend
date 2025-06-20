@@ -90,8 +90,10 @@ const EditUser = () => {
         },
         body: JSON.stringify(payload),
       });
-
       const result = await res.json();
+      console.log("Update user response:", result);
+
+      
       if (res.ok && result.status_code === 200) {
         setSuccess('User updated successfully');
         setTimeout(() => navigate('/users'), 1000);

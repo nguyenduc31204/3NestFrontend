@@ -52,6 +52,7 @@ const Products = () => {
         const res = await fetch(`${BASE_URL}/types/get-types`, {
           method: 'GET',
           headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
             Accept: 'application/json',
             'ngrok-skip-browser-warning': 'true',
           },
@@ -94,7 +95,7 @@ const Products = () => {
     .then(res => res.json())
     .then(result => {
       if (result.status_code === 200) {
-        setCategories(result.data);    // ← bỏ hẳn ký tự “…” ở đây
+        setCategories(result.data);    
       }
     })
     .catch(err => console.error(err));
@@ -284,7 +285,7 @@ console.log('Products:', products);
                 </table>
               </div>
 
-              {/* Simple pagination placeholder (static) */}
+              
               <div className="flex items-center justify-between p-4 border-t text-sm text-gray-500 bg-gray-50">
                 Showing 1‑{products.length} of {products.length} results
                 <div className="flex space-x-1">

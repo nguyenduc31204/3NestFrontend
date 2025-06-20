@@ -46,6 +46,7 @@ const Categories = () => {
       const response = await fetch(`${BASE_URL}/categories/get-categories`, {
         method: 'GET',
         headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
         },
@@ -65,10 +66,12 @@ const Categories = () => {
     try {
       await axiosInstance.delete(`/categories/delete-category?category_id=${category_id}`);
       loadProductsByTypeAndRole();
+      
     } catch (err) {
       console.error("Delete error", err);
       alert("Error deleting category");
     }
+    
   };
 
   const handleRefresh = () => {

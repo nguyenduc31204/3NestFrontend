@@ -33,6 +33,7 @@ const Login = () => {
       const response = await fetch(`${BASE_URL}/users/login`, {
         method: 'POST',
         headers: {
+          
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
         },
@@ -43,7 +44,7 @@ const Login = () => {
       });
 
       const result = await response.json();
-      //console.log('Login API Response:', result);
+      console.log('Login API Response:', result);
 
       if (response.ok) {
         const { access_token } = result;
@@ -57,7 +58,7 @@ const Login = () => {
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('role', decoded.role);
 
-        //console.log('Decoded token:', decoded);
+        console.log('Decoded token:', decoded);
 
         switch (decoded?.role?.toLowerCase()) {
           case 'admin':

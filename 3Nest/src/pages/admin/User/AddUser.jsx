@@ -1,8 +1,7 @@
-// src/pages/admin/AddUser.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layouts/Header';
-import DasboardLayout from '../../../components/layouts/DashboardLayout';
+import DashboardLayout from '../../../components/layouts/DashboardLayout';
 import { BASE_URL } from '../../../utils/apiPath';
 
 const AddUser = () => {
@@ -12,9 +11,28 @@ const AddUser = () => {
     user_email: '',
     company_name: '',
     password: '',
-    role: ''
+    role_id: '',
   });
+  const [roles, setRoles] = useState([]);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/roles/get-roles`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            'ngrok-skip-browser-warning': 'true',
+          },
+        });
+        const data = await res.json();
+        if (data.status_code === 200) setRoles(data.data);
+      } catch (err) {
+        setError('Failed to load roles');
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,155 +40,47 @@ const AddUser = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(null);
-
-  try {
-    const res = await fetch(`${BASE_URL}/users/create-user`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-      },
-      body: JSON.stringify(formData),
-    });
-
-    // Đọc luôn body trả về, dù res.ok hay không
-    const resultText = await res.text();
-    let resultJson;
+    e.preventDefault();
     try {
-      resultJson = JSON.parse(resultText);
-    } catch {
-      console.error('Non-JSON response:', resultText);
+      const res = await fetch(`${BASE_URL}/users/create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('Failed to create user');
+      navigate('/users');
+    } catch (err) {
+      setError(err.message);
     }
-
-    if (!res.ok) {
-      console.error('Create-user failed', res.status, resultJson || resultText);
-      // Hiển thị message của backend nếu có
-      setError(
-        resultJson?.message ||
-        resultJson?.msg ||
-        `Server returned ${res.status}`
-      );
-      return;
-    }
-
-  
-    navigate('/users');
-  } catch (err) {
-    console.error('Network or unexpected error', err);
-    setError(err.message);
-  }
-};
-
+  };
 
   return (
     <>
       <Header />
-      <DasboardLayout activeMenu="04">
-        <div className="my-5 mx-auto max-w-3xl">
-          {/* Page Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-800">User Management</h1>
-              <div className="text-gray-500 text-sm">
-                <a href="/" className="hover:underline">Dashboard</a> / <a href="/users" className="hover:underline">Users</a> / Add User
-              </div>
+      <DashboardLayout activeMenu="06">
+        <div className="max-w-2xl mx-auto my-8">
+          <h1 className="text-xl font-semibold mb-4">Add User</h1>
+          {error && <div className="text-red-600 mb-4">{error}</div>}
+          <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded shadow">
+            <input name="user_name" value={formData.user_name} onChange={handleChange} placeholder="User Name" className="w-full border px-3 py-2 rounded" required />
+            <input name="user_email" value={formData.user_email} onChange={handleChange} placeholder="Email" className="w-full border px-3 py-2 rounded" required />
+            <input name="company_name" value={formData.company_name} onChange={handleChange} placeholder="Company Name" className="w-full border px-3 py-2 rounded" />
+            <input name="password" type="password" value={formData.password} onChange={handleChange} placeholder="Password" className="w-full border px-3 py-2 rounded" required />
+            <select name="role_id" value={formData.role_id} onChange={handleChange} className="w-full border px-3 py-2 rounded" required>
+              <option value="">Select Role</option>
+              {roles.map(role => <option key={role.role_id} value={role.role_id}>{role.role_name}</option>)}
+            </select>
+            <div className="flex justify-end space-x-2">
+              <button type="button" onClick={() => navigate('/users')} className="px-4 py-2 bg-gray-300 text-gray-700 rounded">Cancel</button>
+              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Create</button>
             </div>
-          </div>
-
-          {/* Form Card */}
-          <div className="bg-white shadow rounded-lg p-6">
-            {error && (
-              <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
-                {error}
-              </div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">User Name</label>
-                <input
-                  name="user_name"
-                  value={formData.user_name}
-                  onChange={handleChange}
-                  placeholder="Enter user name"
-                  required
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  name="user_email"
-                  type="email"
-                  value={formData.user_email}
-                  onChange={handleChange}
-                  placeholder="Enter email"
-                  required
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-                <input
-                  name="company_name"
-                  value={formData.company_name}
-                  onChange={handleChange}
-                  placeholder="Enter company"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter password"
-                  required
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select role</option>
-                  <option value="manager">Manager</option>
-                  <option value="sales">Sales</option>
-                  <option value="channel">Channel</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => navigate('/users')}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Create User
-                </button>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
-      </DasboardLayout>
+      </DashboardLayout>
     </>
   );
 };
