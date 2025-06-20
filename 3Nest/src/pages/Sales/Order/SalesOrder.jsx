@@ -351,13 +351,11 @@ const SalesOrders = () => {
               </div>
             </div>
 
-            {/* Order Detail Dialog */}
             {selectedOrder && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
                   <h2 className="text-lg sm:text-xl font-semibold mb-4">Order #{selectedOrder.order_id}</h2>
                   
-                  {/* ... (rest of the dialog content remains the same) ... */}
                   
                 </div>
               </div>

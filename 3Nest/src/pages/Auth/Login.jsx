@@ -54,27 +54,47 @@ const Login = () => {
         }
 
         const decoded = decodeToken(access_token);
+
+        const permissionResponse = await fetch(`${BASE_URL}/permissions/get-permisisons-by-role?role_id=${decoded.role_id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+            Authorization: `Bearer ${access_token}`,
+          },
+        })
+
+        const permissionResult = await permissionResponse.json();
+        console.log('Permissions:', permissionResult);
+
+        const userForStorage = {
+          role_name: permissionResult.data.role_name,
+          permissions: permissionResult.data.permissions || [],
+        };
+
         localStorage.setItem('access_token', access_token);
+        localStorage.setItem('user', JSON.stringify(userForStorage))
         localStorage.setItem('role', decoded.role);
 
         //console.log('Decoded token:', decoded);
+         navigate('/orders'); 
 
-        switch (decoded?.role?.toLowerCase()) {
-          case 'admin':
-            navigate('/admin/dashboard');
-            break;
-          case 'sales':
-            navigate('/sales/products');
-            break;
-          case 'channel':
-            navigate('/channel/products');
-            break;
-          case 'manager':
-            navigate('/manager/products');
-            break;
-          default:
-            navigate('/');
-        }
+        // switch (decoded?.role?.toLowerCase()) {
+        //   case 'admin':
+        //     navigate('/admin/dashboard');
+        //     break;
+        //   case 'sales':
+        //     navigate('/sales/products');
+        //     break;
+        //   case 'channel':
+        //     navigate('/channel/products');
+        //     break;
+        //   case 'manager':
+        //     navigate('/manager/products');
+        //     break;
+        //   default:
+        //     navigate('/');
+        // }
       } else {
         setError(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
         throw new Error(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
@@ -83,6 +103,8 @@ const Login = () => {
       console.error('Login error:', error);
     }
   };
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">

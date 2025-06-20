@@ -17,6 +17,7 @@ const AdminEditDeal = () => {
   const [processing, setProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [isEditable, setIsEditable] = useState(false);
+  const role = decodeToken(localStorage.getItem('access_token'))?.role;
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -41,7 +42,7 @@ const AdminEditDeal = () => {
         console.log("re", result)
         if (result.status_code === 200) {
           setDealData(result.data.deal);
-          setIsEditable(result.data.role === 'admin');
+          setIsEditable(result.data.role.role_name);
         } else {
           throw new Error(result.message || 'Failed to load deal data');
         }
@@ -60,6 +61,8 @@ const AdminEditDeal = () => {
           },
         });
         const result = await response.json();
+          console.log("Orders:", result);
+
         if (result.status_code === 200 && Array.isArray(result.data)) {
           setOrders(result.data);
         } else {

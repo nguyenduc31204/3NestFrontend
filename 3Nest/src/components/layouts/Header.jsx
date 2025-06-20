@@ -16,11 +16,11 @@ const Header = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       const token = localStorage.getItem('access_token');
-      if (!token) {
-        setError('No authentication token found');
-        navigate('/login');
-        return;
-      }
+      // if (!token) {
+      //   setError('No authentication token found');
+      //   navigate('/login');
+      //   return;
+      // }
 
       try {
         const response = await fetch(`${BASE_URL}/users/my-info`, {
@@ -32,7 +32,9 @@ const Header = () => {
           },
         });
 
+        
         const result = await response.json();
+        console.log('User Info Response:', result);
         if (response.ok && result.status_code === 200) {
           setCurrentUser({
             name: result.data.name || 'Unknown User',
@@ -65,7 +67,7 @@ const Header = () => {
                       '/profile';
 
   if (error) {
-    return null; // Rely on navigate('/login') in useEffect to handle errors
+    return null;
   }
 
   if (!currentUser) {

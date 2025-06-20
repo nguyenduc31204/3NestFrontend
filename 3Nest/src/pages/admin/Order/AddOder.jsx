@@ -7,6 +7,7 @@ import { LuRefreshCcw } from 'react-icons/lu';
 import AddOrderDialog from './AddOrderDialog';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const AddOrder = () => {
   const navigate = useNavigate();
@@ -61,11 +62,12 @@ const AddOrder = () => {
           });
           const result = await response.json();
           console.log("re", result)
-          if (result.status_code === 200 && result.data.status === 'approved') {
+          if (result.status_code === 200 && result.data.deal.status === 'approved') {
             setValue('deal_id', preSelectedDealId);
             setDeals([result.data.deal]); 
           } else {
             setError('Selected deal is not approved or does not exist');
+            toast.error('Selected deal is not approved or does not exist');
             setValue('deal_id', '');
           }
         } catch (err) {
@@ -94,9 +96,7 @@ const AddOrder = () => {
           },
         });
         const result = await response.json();
-        // if (result.status_code !== 200 || !Array.isArray(result.data)) {
-        //   throw new Error(result.message || 'Invalid product data');
-        // }
+
         setUser(result.data);
       } catch (err) {
         setError(`Failed to load products: ${err.message}`);
@@ -305,10 +305,8 @@ const AddOrder = () => {
       }
 
       const result = await response.json();
-      // if (!response.ok || result.status_code !== 200) {
-      //   throw new Error(result.message || 'Failed to save order');
-      // }
 
+      // console.log("result", result)
       if (!orderIdToUse && result.data) {
         const newOrderId = result.data.order_id || result.data.id;
         if (newOrderId) {
@@ -325,11 +323,11 @@ const AddOrder = () => {
       navigate(`/admin/editdeals/${formValues.deal_id || preSelectedDealId || 0}`);
     } catch (err) {
       // setError(`Failed to save order: ${err.message}`);
+      console.log(err)
     }
   };
   console.log("existingDetails", existingDetails)
   const handleSubmitOrder = async () => {
-    // Validate deal status
     const selectedDeal = deals.find((deal) => deal.deal_id === Number(formValues.deal_id));
     if (!selectedDeal || selectedDeal.status !== 'approved') {
       setError('Cannot submit order: Selected deal is not approved');
@@ -371,12 +369,11 @@ const AddOrder = () => {
           },
           body: JSON.stringify(updatedData),
         });
+        console.log("updatedData", updatedData)
       }
 
       const result = await response.json();
-      // if (!response.ok || result.status_code !== 200) {
-      //   throw new Error(result.message || 'Failed to submit order');
-      // }
+
 
       if (!orderIdToUse && result.data) {
         const newOrderId = result.data.order_id || result.data.id;
@@ -398,7 +395,6 @@ const AddOrder = () => {
   };
 
   const handleAddOrderClick = () => {
-    // Validate deal status before opening dialog
     const selectedDealId = Number(formValues.deal_id) || preSelectedDealId;
     const selectedDeal = deals.find((deal) => deal.deal_id === selectedDealId);
     if (!selectedDeal || selectedDeal.status !== 'approved') {
@@ -438,79 +434,8 @@ const AddOrder = () => {
     setActiveRole(newRole);
   };
 
-  const handleRefresh = () => {
-    setLoading(true);
-    setProducts([]);
-    setAllOrders([]);
-    setDeals([]);
-    setExistingDetails([]);
-    setError(null);
 
-    const loadData = async () => {
-      try {
-        const productsResponse = await fetch(`${BASE_URL}/products/get-products-by-role`, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            'ngrok-skip-browser-warning': 'true',
-          },
-        });
-        const productsResult = await productsResponse.json();
-        if (productsResult.status_code === 200 && Array.isArray(productsResult.data)) {
-          setProducts(productsResult.data);
-        }
-
-        const ordersResponse = await fetch(`${BASE_URL}/orders/get-order-by-user`, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            'ngrok-skip-browser-warning': 'true',
-          },
-        });
-        const ordersResult = await ordersResponse.json();
-        if (ordersResult.status_code === 200 && Array.isArray(ordersResult.data)) {
-          setAllOrders(ordersResult.data);
-        }
-
-        if (!preSelectedDealId) {
-          const dealsResponse = await fetch(`${BASE_URL}/deals/get-deals-by-user`, {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-              'ngrok-skip-browser-warning': 'true',
-            },
-          });
-          const dealsResult = await dealsResponse.json();
-          if (dealsResult.status_code === 200 && Array.isArray(dealsResult.data)) {
-            // Filter accepted deals
-            const acceptedDeals = dealsResult.data.filter((deal) => deal.status === 'approved');
-            setDeals(acceptedDeals);
-          }
-        }
-
-        if (order_id || createdOrderId) {
-          const idToUse = order_id ? Number(order_id) : createdOrderId;
-          const detailsResponse = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${idToUse}`, {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-              'ngrok-skip-browser-warning': 'true',
-            },
-          });
-          const detailsResult = await detailsResponse.json();
-          if (detailsResult.status_code === 200 && Array.isArray(detailsResult.data)) {
-            setExistingDetails(detailsResult.data);
-          }
-        }
-      } catch (err) {
-        setError(`Failed to refresh data: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  };
+ 
 
   return (
     <div>
@@ -722,7 +647,7 @@ const AddOrder = () => {
                         Save as Draft
                       </button>
                       <button
-                        onClick={() => setShowSubmitConfirm(true)} // Open submit confirmation dialog
+                        onClick={() => setShowSubmitConfirm(true)} 
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 text-sm sm:text-base touch-manipulation"
                         disabled={existingDetails.length === 0 || !formValues.deal_id}
                       >
@@ -763,14 +688,14 @@ const AddOrder = () => {
             {showConfirm && (
               <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
                 <div className="bg-white rounded-lg shadow-lg p-6 w-80">
-                  <h2 className="text-lg font-semibold mb-4">Xác nhận xóa</h2>
-                  <p className="mb-6">Bạn có chắc chắn muốn xóa đơn hàng này không?</p>
+                  <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
+                  <p className="mb-6">Are you sure delete this order?</p>
                   <div className="flex justify-end space-x-3">
                     <button
                       onClick={() => setShowConfirm(false)}
                       className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
                     >
-                      Hủy
+                      Cancel
                     </button>
                     <button
                       onClick={() => {
@@ -779,7 +704,7 @@ const AddOrder = () => {
                       }}
                       className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                     >
-                      Xóa
+                      Delete
                     </button>
                   </div>
                 </div>

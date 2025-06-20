@@ -7,33 +7,21 @@ import {
   BarChart2,
 } from 'lucide-react';
 
-const VALID_ROLES = ['admin', 'sales', 'channel', 'manager'];
-
-const validateRole = (role) => {
-  return VALID_ROLES.includes(role) ? role : undefined;
-};
-
 export const SIDE_MENU_DATA = [
   {
-    id: '01',
+    id: '01', // Dùng tên resource làm ID cho nhất quán
     label: 'Dashboard',
     icon: LayoutDashboard,
-    path: '/admin/dashboard',
-    roles: ['admin'],
+    path: '/dashboard', // Một đường dẫn chung
+    resourceType: 'dashboard', // Key để kiểm tra quyền
     ariaLabel: 'Navigate to dashboard',
   },
   {
     id: '02',
     label: 'Products',
     icon: Package,
-    path: (role) => {
-      const validatedRole = validateRole(role);
-      if (validatedRole === 'sales') return '/sales/products';
-      if (validatedRole === 'admin') return '/admin/products';
-      if (validatedRole === 'manager') return '/manager/products';
-      return '/channel/products';
-    },
-    roles: ['admin', 'sales', 'channel', 'manager'],
+    path: '/products', // Một đường dẫn chung
+    resourceType: 'product', // Key để kiểm tra quyền
     ariaLabel: 'Navigate to products',
   },
   {
@@ -41,21 +29,15 @@ export const SIDE_MENU_DATA = [
     label: 'Categories',
     icon: ListTree,
     path: '/categories',
-    roles: ['admin', 'manager'],
+    resourceType: 'category',
     ariaLabel: 'Navigate to categories',
   },
   {
     id: '04',
     label: 'Orders',
     icon: ShoppingCart,
-    path: (role) => {
-      const validatedRole = validateRole(role);
-      if (validatedRole === 'sales') return '/sales/orders';
-      if (validatedRole === 'admin') return '/admin/orders';
-      if (validatedRole === 'manager') return '/manager/orders';
-      return '/channel/orders';
-    },
-    roles: ['admin', 'sales', 'channel', 'manager'],
+    path: '/orders',
+    resourceType: 'order',
     ariaLabel: 'Navigate to orders',
   },
   {
@@ -63,7 +45,7 @@ export const SIDE_MENU_DATA = [
     label: 'Users',
     icon: Users,
     path: '/users',
-    roles: ['admin', 'manager'],
+    resourceType: 'user',
     ariaLabel: 'Navigate to users',
   },
   {
@@ -71,30 +53,31 @@ export const SIDE_MENU_DATA = [
     label: 'Reports',
     icon: BarChart2,
     path: '/reports',
-    roles: ['admin', 'channel', 'sales', 'manager'],
+    resourceType: 'report',
     ariaLabel: 'Navigate to reports',
   },
   {
-  id: '07',
-  label: 'Types',
-  icon: ListTree, 
-  path: '/admin/types',
-  roles: ['admin', 'manager'],
-  ariaLabel: 'Navigate to types',
+    id: '07',
+    label: 'Types',
+    icon: ListTree, 
+    path: '/types',
+    resourceType: 'type',
+    ariaLabel: 'Navigate to types',
   },
-{
-  id: '08',
-  label: 'Deals',
-  icon: ShoppingCart,
-  path: (role) => {
-    const validatedRole = validateRole(role);
-    if (validatedRole === 'sales') return '/sales/deals';
-    if (validatedRole === 'admin') return '/admin/deals';
-    if (validatedRole === 'manager') return '/manager/deals';
-    return '/channel/deals';
+  {
+    id: '08',
+    label: 'Deals',
+    icon: ShoppingCart,
+    path: '/deals',
+    resourceType: 'deal',
+    ariaLabel: 'Navigate to deals',
   },
-  roles: ['admin', 'sales', 'channel', 'manager'],
-  ariaLabel: 'Navigate to deals',
-},
-
+  {
+    id: '09',
+    label: 'Per Type', 
+    icon: ShoppingCart, 
+    path: '/pertype',
+    resourceType: 'per_type', 
+    ariaLabel: 'Navigate to per type reports',
+  },
 ];
