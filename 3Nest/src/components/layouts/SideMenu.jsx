@@ -1,28 +1,40 @@
-import React, { useContext } from 'react';
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { SIDE_MENU_DATA } from '../../utils/data';
+import { SIDE_MENU_DATA } from '../../utils/data'; 
+import { canAccess } from '../../utils/permissionUtils'; 
 
 const SideMenu = ({ activeMenu }) => {
   const navigate = useNavigate();
-  const userRole = localStorage.getItem('role') || 'guest'; 
+  
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUserString = localStorage.getItem('user');
+    if (storedUserString) {
+      try {
+        setUser(JSON.parse(storedUserString));
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage", error);
+        localStorage.removeItem('user'); 
+      }
+    }
+  }, []); 
+
+  const filteredMenuItems = user
+    ? SIDE_MENU_DATA.filter(item => canAccess(user, item.resourceType))
+    : []; 
 
   const handleNavigation = (item) => {
-    if (item.roles && !item.roles.includes(userRole)) {
-      console.warn(`Bạn không có quyền truy cập ${item.label}`);
-      return;
-    }
-
-
-
-    const path = typeof item.path === 'function' ? item.path(userRole) : item.path;
-    navigate(path);
+    navigate(item.path);
   };
 
-
-
-  const filteredMenuItems = SIDE_MENU_DATA.filter(item => 
-    !item.roles || item.roles.includes(userRole)
-  );
+  if (!user) {
+    return (
+      <div className="w-full h-full bg-white shadow-md rounded-lg p-6">
+        <p>Loading menu...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full bg-white shadow-md rounded-lg p-6">

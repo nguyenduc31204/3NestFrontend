@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LuCoins,
   LuWalletMinimal,
@@ -11,468 +12,260 @@ import {
   LuArrowUpNarrowWide,
   LuRefreshCcw,
 } from 'react-icons/lu';
+import { hasPermission } from '../../../utils/permissionUtils';
+import { BASE_URL } from '../../../utils/apiPath';
 import Header from '../../../components/layouts/Header';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
-import { BASE_URL } from '../../../utils/apiPath';
-import { useNavigate } from 'react-router-dom';
-import { decodeToken } from '../../../utils/help';
 
-const Orders = () => {
+
+
+const StatCard = ({ Icon, value, label, color }) => (
+  <div className="rounded-lg p-5 shadow-md bg-white flex items-center space-x-4">
+    <div className={`w-12 h-12 rounded-full bg-${color}-100 text-${color}-600 flex items-center justify-center`}>
+      <Icon className="w-6 h-6" />
+    </div>
+    <div>
+      <div className="text-2xl font-bold text-gray-800">{value}</div>
+      <div className="text-gray-500">{label}</div>
+    </div>
+  </div>
+);
+
+const IconButton = ({ children, title, onClick }) => (
+  <button
+    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors"
+    title={title}
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
+
+const Th = ({ children }) => (
+  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{children}</th>
+);
+
+const Td = ({ children }) => (
+  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{children}</td>
+);
+
+const RoleButton = ({ current, value, children, onClick }) => (
+  <button
+    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+      current === value 
+        ? 'bg-white shadow text-blue-600 ring-1 ring-blue-200' 
+        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+    }`}
+    onClick={() => onClick(value)}
+  >
+    {children}
+  </button>
+);
+
+const Alert = ({ msg }) => (
+  <div className="p-4 my-4 mx-6 bg-red-50 border-l-4 border-red-400 text-red-700">
+    <p><strong>Error:</strong> {msg}</p>
+  </div>
+);
+
+const Loader = ({ msg }) => (
+  <div className="p-8 text-center text-gray-500">{msg}</div>
+);
+
+
+
+const OrdersPage = () => {
   const navigate = useNavigate();
+
+  //--- State Management ---
+  const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [roles, setRoles] = useState([]); 
+  const [activeRoleId, setActiveRoleId] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [activeRole, setActiveRole] = useState('admin');
+  const [refreshTrigger, setRefreshTrigger] = useState(0); 
 
-  const token = localStorage.getItem('access_token');
-  const decodedToken = decodeToken(token);
-  const userId = decodedToken?.user_id;
-  const role = decodedToken?.role; 
-
+  const token = useMemo(() => localStorage.getItem('access_token'), []);
   useEffect(() => {
-    loadOrdersByRole();
-  }, [activeRole]);
-
-  const loadOrdersByRole = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    const response = await fetch(`${BASE_URL}/orders/get-orders-by-role?role=${activeRole}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-      },
-    });
-    const result = await response.json();
-    if (result.status_code === 200 && Array.isArray(result.data)) {
-      const filteredOrders = activeRole === 'admin'
-        ? result.data 
-        : result.data.filter(order => order.status !== 'draft');
-      setOrders(filteredOrders);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     } else {
-      throw new Error(result.message || 'Invalid orders data format');
+      navigate('/login');
     }
-  } catch (err) {
-    setError(`Failed to load orders: ${err.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  const loadProductChoose = async (pro_id) => {
-    try {
-      const response = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${pro_id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          'ngrok-skip-browser-warning': 'true',
-        },
-      });
-      const result = await response.json();
-      if (!response.ok || result.status_code !== 200) {
-        throw new Error(result.message || 'Failed to load order details');
-      }
-      setProducts(result.data);
-    } catch (err) {
-      setError(`Failed to load order details: ${err.message}`);
-    }
-  };
+  }, [navigate]);
 
   useEffect(() => {
-    if (selectedOrder?.order_id) {
-      loadProductChoose(selectedOrder.order_id);
-    }
-  }, [selectedOrder]);
+    if (!user) return; 
 
-  const handleRefresh = () => {
-    loadOrdersByRole();
-  };
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        if (hasPermission(user, 'order:Full control')) {
+          const rolesResponse = await fetch(`${BASE_URL}/roles/get-roles`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' },
+          });
+          if (!rolesResponse.ok) throw new Error('Failed to fetch roles');
+          const rolesResult = await rolesResponse.json();
+          const availableRoles = rolesResult.data || [];
+          setRoles(availableRoles);
 
-  const handleRoleChange = (role) => {
-    setActiveRole(role);
-  };
+          const adminRole = availableRoles.find(role => role.role_name.toLowerCase() === 'admin');
+          
+          if (!activeRoleId && adminRole) {
+            setActiveRoleId(adminRole.role_id);
+          }
+
+          const roleIdToFetch = activeRoleId || (adminRole ? adminRole.role_id : user.role_id);
+          
+          const ordersResponse = await fetch(`${BASE_URL}/orders/get-orders-by-role?role_id=${roleIdToFetch}`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' },
+          });
+          if (!ordersResponse.ok) throw new Error(`Failed to fetch orders for role ID: ${roleIdToFetch}`);
+          const ordersResult = await ordersResponse.json();
+          setOrders(ordersResult.data || []);
+
+        } else {
+          const ordersResponse = await fetch(`${BASE_URL}/orders/get-orders-by-user`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' },
+          });
+          if (!ordersResponse.ok) throw new Error('Failed to fetch your orders');
+          const ordersResult = await ordersResponse.json();
+          setOrders(ordersResult.data || []);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user, activeRoleId, token, refreshTrigger]);
+
+  //--- Handlers ---
+  const handleRefresh = () => setRefreshTrigger(c => c + 1);
+
+  if (!user) {
+    return <Loader msg="Initializing..." />;
+  }
 
   return (
-    <div>
+    <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
       <Header />
       <DashboardLayout activeMenu="04">
-        <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="content py-6">
-            <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-              <div className="page-title">
-                <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Orders Management</h1>
-                <div className="breadcrumb text-sm text-gray-500">
-                  <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / My Orders
-                </div>
+        <div className="content py-6">
+          {/* Header của trang */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Orders Management</h1>
+              <div className="text-sm text-gray-500">
+                <a href="/dashboard" className="hover:underline">Dashboard</a> / Orders
               </div>
+            </div>
+            {hasPermission(user, 'order:manage') && (
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm sm:text-base flex items-center gap-2 touch-manipulation"
-                onClick={() => navigate('/admin/addorder')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+                onClick={() => navigate('/orders/add')}
               >
-                <i className="fas fa-plus"></i> Add New Order
+                + Add New Order
               </button>
-            </div>
-
-            <div className="stats-row grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-              <div className="stat-card rounded-lg p-4 shadow-md bg-white">
-                <div className="stat-icon bg-blue-100 text-blue-600 w-10 h-10 rounded-full flex items-center justify-center mb-3">
-                  <LuCoins className="w-5 h-5" />
-                </div>
-                <div className="stat-value text-xl font-bold text-gray-800">{orders.length}</div>
-                <div className="stat-label text-gray-500 text-sm">Total Orders</div>
-              </div>
-              <div className="stat-card rounded-lg p-4 shadow-md bg-white">
-                <div className="stat-icon bg-green-100 text-green-600 w-10 h-10 rounded-full flex items-center justify-center mb-3">
-                  <LuWalletMinimal className="w-5 h-5" />
-                </div>
-                <div className="stat-value text-xl font-bold text-gray-800">
-                  {orders.filter((order) => order.status === 'active').length}
-                </div>
-                <div className="stat-label text-gray-500 text-sm">Active Orders</div>
-              </div>
-              <div className="stat-card rounded-lg p-4 shadow-md bg-white">
-                <div className="stat-icon bg-yellow-100 text-yellow-600 w-10 h-10 rounded-full flex items-center justify-center mb-3">
-                  <LuPersonStanding className="w-5 h-5" />
-                </div>
-                <div className="stat-value text-xl font-bold text-gray-800">
-                  {orders.filter((order) => order.status === 'draft').length}
-                </div>
-                <div className="stat-label text-gray-500 text-sm">Draft Orders</div>
-              </div>
-            </div>
-
-            <div className="card bg-white rounded-lg shadow-md overflow-hidden mb-6">
-              <div className="card-header flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-gray-200 gap-4">
-                <h2 className="text-lg font-semibold text-gray-800">Admin Orders</h2>
-                <div className="flex flex-col gap-4">
-                  {role === 'admin' && (
-                    <div className="product-role flex space-x-2 bg-gray-50 p-2 rounded-md">
-                      <button
-                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                          activeRole === 'admin'
-                            ? 'bg-white shadow text-blue-600'
-                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                        }`}
-                        onClick={() => handleRoleChange('admin')}
-                      >
-                        Admin
-                      </button>
-                      <button
-                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                          activeRole === 'sales'
-                            ? 'bg-white shadow text-blue-600'
-                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                        }`}
-                        onClick={() => handleRoleChange('sales')}
-                      >
-                        Sales
-                      </button>
-                      <button
-                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                          activeRole === 'channels'
-                            ? 'bg-white shadow text-blue-600'
-                            : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                        }`}
-                        onClick={() => handleRoleChange('channels')}
-                      >
-                        Channels
-                      </button>
-                    </div>
-                  )}
-                  <div className="tools flex space-x-2">
-                    <button className="p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-md touch-manipulation">
-                      <LuArrowDownToLine className="w-5 h-5" />
-                    </button>
-                    <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md touch-manipulation">
-                      <LuArrowUpNarrowWide className="w-5 h-5" />
-                    </button>
-                    <button
-                      className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md touch-manipulation"
-                      onClick={handleRefresh}
-                    >
-                      <LuRefreshCcw className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card-body p-0">
-                {error && (
-                  <div className="p-4 bg-red-50 border-l-4 border-red-400">
-                    <p className="text-sm text-red-700">{error}</p>
-                  </div>
-                )}
-
-                {loading && (
-                  <div className="p-8 text-center">
-                    <div className="inline-flex items-center px-4 py-2 font-semibold text-sm text-blue-500 bg-white shadow rounded-md">
-                      Loading orders...
-                    </div>
-                  </div>
-                )}
-
-                {!loading && (
-                  <>
-                    {/* Desktop Table */}
-                    <div className="hidden md:block table-responsive overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Title</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {orders.length === 0 ? (
-                            <tr>
-                              <td colSpan="11" className="px-4 py-8 text-center text-gray-500">
-                                No orders found
-                              </td>
-                            </tr>
-                          ) : (
-                            orders.map((order, index) => (
-                              <tr key={order.order_id} className="hover:bg-gray-50">
-                                <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
-                                <td className="px-4 py-4 text-sm text-gray-900">#{order.order_id}</td>
-                                <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.order_title || '-'}</td>
-                                <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[150px]">{order.user_email || '-'}</td>
-                                <td className="px-4 py-4 text-sm text-gray-900 truncate max-w-[120px]">{order.customer_name || '-'}</td>
-                                <td className="px-4 py-4 text-sm">
-                                  <span
-                                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                      order.status === 'submited'
-                                        ? 'bg-green-100 text-green-800'
-                                        : order.status === 'draft'
-                                        ? 'bg-yellow-100 text-yellow-800'
-                                        : order.status === 'approved'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-red-100 text-red-800'
-                                    }`}
-                                  >
-                                    {order.status === 'draft' ? 'Draft' : order.status === 'submited' ? 'Submitted' : order.status === 'approved' ? 'Approved' : order.status || 'Unknown'}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-4 text-sm text-gray-900">
-                                  ${order.total_budget?.toLocaleString() || '0'}
-                                </td>
-                                <td className="px-4 py-4 text-sm text-gray-900">
-                                  {new Date(order.created_at).toLocaleDateString() || '--'}
-                                </td>
-                                <td className="px-4 py-4 text-sm text-gray-900 flex flex-wrap gap-2">
-                                  {/* <button
-                                    className="text-yellow-600 hover:text-yellow-800 text-xs sm:text-sm touch-manipulation"
-                                    onClick={() => setSelectedOrder(order)}
-                                  >
-                                    View Details
-                                  </button> */}
-                                  <button
-                                    className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm touch-manipulation"
-                                    onClick={() => navigate(`/admin/editorder/${order.order_id}`)}
-                                  >
-                                    View
-                                  </button>
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Mobile Card Layout */}
-                    <div className="block md:hidden divide-y divide-gray-200">
-                      {orders.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">No orders found</div>
-                      ) : (
-                        orders.map((order) => (
-                          <div key={order.order_id} className="p-4 bg-white hover:bg-gray-50">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="font-medium text-gray-800">Order #{order.order_id}</span>
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  order.status === 'approved'
-                                    ? 'bg-green-100 text-green-800'
-                                    : order.status === 'draft'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : order.status === 'submited'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}
-                              >
-                                {order.status === 'draft' ? 'Draft' : order.status === 'submited' ? 'Submitted' : order.status || 'Unknown'}
-                              </span>
-                            </div>
-                            <div className="text-sm text-gray-600 space-y-1">
-                              <p><strong>Title:</strong> {order.order_title || '-'}</p>
-                              <p><strong>Customer:</strong> {order.customer_name || '-'}</p>
-                              <p><strong>Total:</strong> ${order.total_budget?.toLocaleString() || '0'}</p>
-                              <p><strong>Date:</strong> {new Date(order.created_at).toLocaleDateString() || '--'}</p>
-                            </div>
-                            <div className="flex gap-2 mt-3">
-                              <button
-                                className="text-yellow-600 hover:text-yellow-800 text-sm touch-manipulation"
-                                onClick={() => setSelectedOrder(order)}
-                              >
-                                View Details
-                              </button>
-                              <button
-                                className="text-blue-600 hover:text-blue-800 text-sm touch-manipulation"
-                                onClick={() => navigate(`/admin/editorder/${order.order_id}`)}
-                              >
-                                View
-                              </button>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </>
-                )}
-
-                <div className="pagination flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-gray-200 gap-4">
-                  <div className="text-sm text-gray-700">
-                    Showing <span className="font-medium">1</span> to{' '}
-                    <span className="font-medium">{orders.length}</span> of{' '}
-                    <span className="font-medium">{orders.length}</span> results
-                  </div>
-                  <nav className="flex rounded-md shadow-sm -space-x-px">
-                    <button className="inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-l-md touch-manipulation">
-                      <LuChevronsLeft className="w-5 h-5" />
-                    </button>
-                    <button className="inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 touch-manipulation">
-                      <LuChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button className="inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
-                      1
-                    </button>
-                    <button className="inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 touch-manipulation">
-                      <LuChevronRight className="w-5 h-5" />
-                    </button>
-                    <button className="inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-r-md touch-manipulation">
-                      <LuChevronsRight className="w-5 h-5" />
-                    </button>
-                  </nav>
-                </div>
-              </div>
-            </div>
-
-            {/* Order Detail Dialog */}
-            {selectedOrder && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
-                  <h2 className="text-lg sm:text-xl font-semibold mb-4">Order #{selectedOrder.order_id}</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Order Title:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.order_title || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Customer Name:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.customer_name || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Address:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.address || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Billing Address:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">{selectedOrder.billing_address || '-'}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Order Date:</span>
-                      <p className="text-gray-900 text-sm sm:text-base">
-                        {new Date(selectedOrder.created_at).toLocaleDateString() || '-'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700 text-sm sm:text-base">Status:</span>
-                      <p
-                        className={`inline-flex px-2 py-1 text-xs sm:text-sm font-semibold rounded-full ${
-                          selectedOrder.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : selectedOrder.status === 'draft'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : selectedOrder.status === 'submited'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {selectedOrder.status === 'draft' ? 'Draft' : selectedOrder.status === 'submited' ? 'Submitted' : selectedOrder.status || 'Unknown'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <h3 className="text-base sm:text-lg font-semibold mb-4">Order Details</h3>
-                  <div className="table-responsive overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {products.length === 0 ? (
-                          <tr>
-                            <td colSpan="5" className="px-4 py-4 text-sm text-gray-500 text-center">
-                              No products found
-                            </td>
-                          </tr>
-                        ) : (
-                          products.map((detail, index) => (
-                            <tr key={index}>
-                              <td className="px-4 py-2 text-sm text-gray-900 truncate max-w-[120px] sm:max-w-[200px]">
-                                {detail.product_name || '-'}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{detail.quantity || 0}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                ${detail.price_for_customer?.toLocaleString() || '0'}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                {detail.service_contract_duration || 0} year
-                              </td>
-                              <td className="px-4 py-2 text-sm text-gray-900">
-                                ${(detail.quantity * detail.price_for_customer || 0).toLocaleString()}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="flex justify-end mt-6">
-                    <button
-                      className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 text-sm sm:text-base touch-manipulation"
-                      onClick={() => setSelectedOrder(null)}
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              </div>
             )}
+          </div>
+
+          {/* Các thẻ thống kê */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              <StatCard Icon={LuCoins} value={orders.length} label="Total Orders" color="blue" />
+              <StatCard Icon={LuWalletMinimal} value={orders.filter(o => o.status === 'approved').length} label="Approved Orders" color="green" />
+              <StatCard Icon={LuPersonStanding} value={orders.filter(o => o.status === 'draft').length} label="Draft Orders" color="yellow" />
+          </div>
+
+          {/* Bảng dữ liệu */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="flex flex-wrap items-center justify-between p-4 border-b gap-4">
+              <h2 className="text-lg font-semibold">Order List</h2>
+              <div className="flex items-center space-x-2 flex-wrap gap-2">
+                {/* Bộ lọc role chỉ hiển thị cho người có quyền Full control */}
+                {hasPermission(user, 'order:Full control') && roles.map((role) => (
+                  <RoleButton
+                    key={role.role_id}
+                    current={activeRoleId}
+                    value={role.role_id}
+                    onClick={setActiveRoleId}
+                  >
+                    {role.role_name}
+                  </RoleButton>
+                ))}
+                <IconButton title="Export Excel"><LuArrowDownToLine className="w-5 h-5" /></IconButton>
+                <IconButton title="Refresh" onClick={handleRefresh}><LuRefreshCcw className="w-5 h-5" /></IconButton>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              {error && <Alert msg={error} />}
+              {loading ? <Loader msg="Loading orders..." /> : (
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <Th>Order ID</Th>
+                      <Th>Title</Th>
+                      <Th>Customer</Th>
+                      <Th>Status</Th>
+                      <Th>Total</Th>
+                      <Th>Date</Th>
+                      <Th>Actions</Th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {orders.length === 0 ? (
+                      <tr><td colSpan="7" className="text-center p-8 text-gray-500">No orders found.</td></tr>
+                    ) : (
+                      orders.map((order) => (
+                        <tr key={order.order_id} className="hover:bg-gray-50">
+                          <Td>#{order.order_id}</Td>
+                          <Td>{order.order_title}</Td>
+                          <Td>{order.customer_name}</Td>
+                          <Td>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full capitalize bg-blue-100 text-blue-800`}>
+                              {order.status}
+                            </span>
+                          </Td>
+                          <Td>${(order.total_budget || 0).toLocaleString()}</Td>
+                          <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
+                          
+                          {(hasPermission(user, 'order:edit') || hasPermission(user, 'order:delete')) && (
+                            <Td>
+                              {hasPermission(user, 'order:edit') && (
+                                <button
+                                  className="text-blue-600 hover:underline font-medium"
+                                  onClick={() => navigate(`/orders/edit/${order.order_id}`)}
+                                >
+                                  View/Edit
+                                </button>
+                              )}
+                              {/* {hasPermission(user, 'order:delete') && (
+                                <button className="text-red-600 hover:underline font-medium ml-4">Delete</button>
+                              )}
+                              */}
+                            </Td>
+                          )}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            {/*Pagination */}
           </div>
         </div>
       </DashboardLayout>
+      
     </div>
   );
 };
 
-export default Orders;
+export default OrdersPage;

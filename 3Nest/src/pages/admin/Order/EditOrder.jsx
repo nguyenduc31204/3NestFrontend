@@ -142,41 +142,6 @@ const EditOrderAdmin = () => {
     }
   }, [order_id, order, orderDetails, fetchData]);
 
-  const handleStatusChange = useCallback(
-    async (newStatus) => {
-      try {
-        setProcessing(true);
-        setError(null);
-        setSuccessMessage('');
-
-        const response = await fetch(`${BASE_URL}/orders/change-status-of-order`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            'ngrok-skip-browser-warning': 'true',
-          },
-          body: JSON.stringify({
-            order_id: parseInt(order_id),
-            status: newStatus,
-          }),
-        });
-
-        const result = await response.json();
-        if (!response.ok || result.status_code !== 200) {
-          throw new Error(result.message || `Failed to ${newStatus} order`);
-        }
-
-        await fetchData();
-        setSuccessMessage(`Order ${newStatus} successfully!`);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setProcessing(false);
-      }
-    },
-    [order_id, fetchData]
-  );
 
   const handleDiscardOrder = useCallback(async () => {
     try {

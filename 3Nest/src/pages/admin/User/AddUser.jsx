@@ -1,5 +1,5 @@
 // src/pages/admin/AddUser.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layouts/Header';
 import DasboardLayout from '../../../components/layouts/DashboardLayout';
@@ -12,30 +12,64 @@ const AddUser = () => {
     user_email: '',
     company_name: '',
     password: '',
-    role: ''
+    role_id: 0
   });
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
   };
+
+  const loadRoles = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/roles/get-roles`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch roles');  
+      }
+      const result = await response.json();
+      setRole(result.data || []);
+    } catch (err) {
+      console.error('Error loading roles:', err);
+      setError(err.message || 'An error occurred while loading roles');
+    }
+  };
+
+  useEffect(() => {
+    loadRoles();
+  }, []);
+
+  console.log('Available roles:', role);
 
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError(null);
+
+
 
   try {
     const res = await fetch(`${BASE_URL}/users/create-user`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
         Authorization: `Bearer ${localStorage.getItem('access_token')}`,
       },
       body: JSON.stringify(formData),
     });
+    console.log('Create-user API Response:', formData);
 
-    // Đọc luôn body trả về, dù res.ok hay không
     const resultText = await res.text();
     let resultJson;
     try {
@@ -67,7 +101,7 @@ const AddUser = () => {
   return (
     <>
       <Header />
-      <DasboardLayout activeMenu="04">
+      <DasboardLayout activeMenu="05">
         <div className="my-5 mx-auto max-w-3xl">
           {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
@@ -139,16 +173,18 @@ const AddUser = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select
-                  name="role"
-                  value={formData.role}
+                  name="role_id"
+                  value={Number(formData.role_id)}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select role</option>
-                  <option value="manager">Manager</option>
-                  <option value="sales">Sales</option>
-                  <option value="channel">Channel</option>
+                  {role.map(r => (
+                    <option key={r.role_id} value={parseInt(r.role_id)}>
+                      {r.role_name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
