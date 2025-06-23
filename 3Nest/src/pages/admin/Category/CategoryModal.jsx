@@ -4,7 +4,7 @@ import axiosInstance from "../../../utils/axiosInstance";
 const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
   const [categoryName, setCategoryName] = useState('');
   const [typeId, setTypeId] = useState('');
-  const [description, setDescription] = useState('');
+  const [category_description, setDescription] = useState('');
   const [types, setTypes] = useState([]);
 
   const isEdit = Boolean(category);
@@ -15,7 +15,7 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
     if (isEdit) {
       setCategoryName(category.category_name || '');
       setTypeId(category.type_id?.toString() || '');
-      setDescription(category.description || '');
+      setDescription(category.category_description || '');
     } else {
       setCategoryName('');
       setTypeId('');
@@ -38,7 +38,7 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
     const payload = {
       category_name: categoryName,
       type_id: Number(typeId),
-      description
+      category_description
     };
 
     const config = {
@@ -109,7 +109,7 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
           </select>
 
           <textarea
-            value={description}
+            value={category_description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Description"
             className="w-full border p-2 rounded"

@@ -138,7 +138,7 @@ const App = () => {
 
         <Route path="/admin/deals" element={<DealAdmin />} />
         <Route path="/admin/editdeals/:deal_id" element={<AdminEditDeal />} />
-        <Route path="/admin/adddeals" element={<AddDealAdmin />} />
+        {/* <Route path="/admin/adddeals" element={<AddDealAdmin />} /> */}
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
@@ -157,9 +157,9 @@ const App = () => {
 
         {/* Products */}
         <Route path="/products" element={
-          <ProtectedRoute permission="product:manage">
+          <ProtectedRoute permission="product:view">
               <Products />
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }/>
 
         {/* Orders */}

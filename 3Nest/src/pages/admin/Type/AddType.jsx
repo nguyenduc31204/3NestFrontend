@@ -21,7 +21,7 @@ const AddType = () => {
     try {
       const response = await axiosInstance.post('/types/create-type', {
         type_name: typeName,
-        description: description,
+        type_description: description,
       });
       if ([200, 201].includes(response.status)) {
         navigate('/admin/types');

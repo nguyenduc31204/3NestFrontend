@@ -10,7 +10,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     product_role: '',
     category_id: '',
     sku_partnumber: '',
-    description: '',
+    product_description: '',
     price: '',
     maximum_discount: '',
     channel_cost: '',
@@ -147,7 +147,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       product_role: parseInt(formData.product_role, 10),
       category_id: parseInt(formData.category_id, 10),
       sku_partnumber: formData.sku_partnumber,
-      description: formData.description,
+      product_description: formData.product_description,
       price: formData.price !== '' ? Number(formData.price) : 0,
       maximum_discount: formData.maximum_discount !== ''
         ? Number(formData.maximum_discount)
@@ -306,9 +306,9 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
           </div>
 
           <textarea
-            name="description"
+            name="product_description"
             placeholder="Description"
-            value={formData.description}
+            value={formData.product_description}
             onChange={handleChange}
             className="border p-2 col-span-2"
           />

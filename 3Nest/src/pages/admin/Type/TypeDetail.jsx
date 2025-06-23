@@ -115,7 +115,7 @@ const TypeDetail = () => {
                           <tr key={type.type_id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 text-sm text-gray-900">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                             <td className="px-6 py-4 text-sm text-gray-900">{type.type_name}</td>
-                            <td className="px-6 py-4 text-sm text-gray-900">{type.description}</td>
+                            <td className="px-6 py-4 text-sm text-gray-900">{type.type_description}</td>
                             <td className="px-6 py-4 text-sm text-gray-900 space-x-2">
                               <button
                                 className="bg-blue-600 text-white px-3 py-1 rounded"

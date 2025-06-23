@@ -11,7 +11,7 @@ const EditType = () => {
   const [formData, setFormData] = useState({
     type_id: '',
     type_name: '',
-    description: '',
+    type_description: '',
   });
 
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ const EditType = () => {
           setFormData({
             type_id: found.type_id,
             type_name: found.type_name || '',
-            description: found.description || '',
+            type_description: found.type_description || '',
           });
         } else {
           setError('Type not existed!');
