@@ -1,7 +1,6 @@
 
 
 export const BASE_URL = "https://49c4-1-53-88-216.ngrok-free.app"
-//export const BASE_URL = "http://localhost:8000"
 
 
 

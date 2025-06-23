@@ -79,7 +79,7 @@ const DealsPage = () => {
   const [user, setUser] = useState(null);
   const [deals, setDeals] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [activeRoleId, setActiveRoleId] = useState(null);
+  const [activeRoleId, setActiveRoleId] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -120,6 +120,7 @@ const DealsPage = () => {
           }
           
           const roleIdToFetch = activeRoleId || user.role_id;
+          console.log('Fetching deals for role ID:', roleIdToFetch);
           const dealsResponse = await fetch(`${BASE_URL}/deals/get-deals-by-role?role_id=${roleIdToFetch}`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
           // if (!dealsResponse.ok) throw new Error('Failed to fetch deals by role');
           const dealsResult = await dealsResponse.json();
@@ -151,8 +152,7 @@ const DealsPage = () => {
 
   return (
     <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
-      <Header />
-      <DashboardLayout activeMenu='08'>
+      {/* <DashboardLayout activeMenu='08'> */}
         <div className="content py-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
@@ -247,7 +247,7 @@ const DealsPage = () => {
             {/* phân trang  */}
           </div>
         </div>
-      </DashboardLayout>
+      {/* </DashboardLayout> */}
     </div>
   );
 };

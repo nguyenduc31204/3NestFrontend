@@ -9,19 +9,19 @@ import {
 
 export const SIDE_MENU_DATA = [
   {
-    id: '01', // Dùng tên resource làm ID cho nhất quán
+    id: '01', 
     label: 'Dashboard',
     icon: LayoutDashboard,
-    path: '/dashboard', // Một đường dẫn chung
-    resourceType: 'dashboard', // Key để kiểm tra quyền
+    path: '/dashboard', 
+    resourceType: 'dashboard',
     ariaLabel: 'Navigate to dashboard',
   },
   {
     id: '02',
     label: 'Products',
     icon: Package,
-    path: '/products', // Một đường dẫn chung
-    resourceType: 'product', // Key để kiểm tra quyền
+    path: '/products',
+    resourceType: 'product', 
     ariaLabel: 'Navigate to products',
   },
   {
