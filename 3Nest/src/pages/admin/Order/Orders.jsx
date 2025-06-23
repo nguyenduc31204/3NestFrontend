@@ -126,6 +126,7 @@ const OrdersPage = () => {
           });
           if (!ordersResponse.ok) throw new Error(`Failed to fetch orders for role ID: ${roleIdToFetch}`);
           const ordersResult = await ordersResponse.json();
+          console.log('Orders Result:', ordersResult);
           setOrders(ordersResult.data || []);
 
         } else {
@@ -155,10 +156,9 @@ const OrdersPage = () => {
 
   return (
     <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
-      <Header />
-      <DashboardLayout activeMenu="04">
+      {/* <DashboardLayout activeMenu="04"> */}
         <div className="content py-6">
-          {/* Header của trang */}
+          
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Orders Management</h1>
@@ -236,9 +236,9 @@ const OrdersPage = () => {
                           <Td>${(order.total_budget || 0).toLocaleString()}</Td>
                           <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
                           
-                          {(hasPermission(user, 'order:edit') || hasPermission(user, 'order:delete')) && (
+                          {(hasPermission(user, 'order:view') || hasPermission(user, 'order:view')) && (
                             <Td>
-                              {hasPermission(user, 'order:edit') && (
+                              {hasPermission(user, 'order:view') && (
                                 <button
                                   className="text-blue-600 hover:underline font-medium"
                                   onClick={() => navigate(`/orders/edit/${order.order_id}`)}
@@ -246,10 +246,6 @@ const OrdersPage = () => {
                                   View
                                 </button>
                               )}
-                              {/* {hasPermission(user, 'order:delete') && (
-                                <button className="text-red-600 hover:underline font-medium ml-4">Delete</button>
-                              )}
-                              */}
                             </Td>
                           )}
                         </tr>
@@ -262,7 +258,7 @@ const OrdersPage = () => {
             {/*Pagination */}
           </div>
         </div>
-      </DashboardLayout>
+      {/* </DashboardLayout> */}
       
     </div>
   );

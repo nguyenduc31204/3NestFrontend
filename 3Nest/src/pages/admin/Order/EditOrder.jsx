@@ -8,7 +8,7 @@ const OrderDetailRow = ({ detail, index }) => (
   <tr key={index}>
     <td className="px-4 py-4 text-sm text-gray-900">{detail.product_name || 'Unknown'}</td>
     <td className="px-4 py-4 text-sm text-gray-900">{detail.sku_partnumber || '-'}</td>
-    <td className="px-4 py-4 text-sm text-gray-900">{detail.description || '-'}</td>
+    <td className="px-4 py-4 text-sm text-gray-900">{detail.order_description || '-'}</td>
     <td className="px-4 py-4 text-sm text-gray-900">{detail.quantity || 0}</td>
     <td className="px-4 py-4 text-sm text-gray-900">${detail.price_for_customer?.toLocaleString() || '0'}</td>
     <td className="px-4 py-4 text-sm text-gray-900">{detail.service_contract_duration || 0} year(s)</td>
@@ -79,6 +79,7 @@ const EditOrderAdmin = () => {
       // Fetch order details
       const detailsResponse = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${order_id}`, { headers });
       const detailsResult = await detailsResponse.json();
+      console.log('Order Details Result:', detailsResult);
       if (!detailsResponse.ok || detailsResult.status_code !== 200) {
         throw new Error(detailsResult.message || 'Failed to load order details');
       }
@@ -175,22 +176,21 @@ const EditOrderAdmin = () => {
   if (loading) {
     return (
       <div>
-        <Header />
-        <DashboardLayout activeMenu="04">
+        {/* <Header /> */}
+        {/* <DashboardLayout activeMenu="04"> */}
           <div className="p-8 text-center">
             <div className="inline-flex items-center px-4 py-2 font-semibold text-sm text-blue-500 bg-white shadow rounded-md">
               Loading order details...
             </div>
           </div>
-        </DashboardLayout>
+        {/* </DashboardLayout> */}
       </div>
     );
   }
 
   return (
     <div>
-      <Header />
-      <DashboardLayout activeMenu="04">
+      {/* <DashboardLayout activeMenu="04"> */}
         <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -288,12 +288,12 @@ const EditOrderAdmin = () => {
                       {order?.status || '--'}
                     </p>
                   </div>
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700">Total Budget</label>
                     <p className="mt-1 text-sm text-gray-900">
                       ${orderDetails.reduce((total, item) => total + (item.price_for_customer * item.quantity || 0), 0).toLocaleString()}
                     </p>
-                  </div>
+                  </div> */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Created At</label>
                     <p className="mt-1 text-sm text-gray-900">
@@ -325,6 +325,33 @@ const EditOrderAdmin = () => {
                         <OrderDetailRow key={index} detail={detail} index={index} />
                       ))}
                     </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colSpan="6" className="px-4 py-3 text-right font-bold text-sm text-gray-700">
+                          Total Budget
+                        </td>
+                        {/* <td className="px-4 py-3 text-sm text-gray-900">
+                          ${orderDetails
+                            .reduce((total, item) => total + (item.price_for_customer * item.quantity || 0), 0)
+                            .toLocaleString()}
+                        </td> */}
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {orderDetails
+                            .reduce((total, item) => {
+                              const basePrice = (item.price_for_customer || 0) * (item.quantity || 0);
+                              const duration = Math.max(0, item.service_contract_duration ?? 1);
+                              if (basePrice === 0 || duration === 0) {
+                                return total;
+                              }
+                              const growthRate = 0.05; 
+                              const totalMultiplier = (Math.pow(1 + growthRate, duration) - 1) / growthRate;
+                              const itemTotal = basePrice * totalMultiplier;
+                              return total + itemTotal;
+                            }, 0)
+                            .toLocaleString('vi-VN')} 
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               ) : (
@@ -393,7 +420,7 @@ const EditOrderAdmin = () => {
             )}
           </div>
         </div>
-      </DashboardLayout>
+      {/* </DashboardLayout> */}
     </div>
   );
 };
