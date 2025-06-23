@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
@@ -16,11 +17,11 @@ const AddUser = () => {
 
     role_id: 0
 
+
   });
+
   const [roles, setRoles] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState([]);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -42,41 +43,14 @@ const AddUser = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
+    setFormData(prev => ({ ...prev, [name]: name === 'role_id' ? parseInt(value) : value }));
   };
-
-  const loadRoles = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/roles/get-roles`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch roles');  
-      }
-      const result = await response.json();
-      setRole(result.data || []);
-    } catch (err) {
-      console.error('Error loading roles:', err);
-      setError(err.message || 'An error occurred while loading roles');
-    }
-  };
-
-  useEffect(() => {
-    loadRoles();
-  }, []);
-
-  console.log('Available roles:', role);
 
   const handleSubmit = async (e) => {
+
   e.preventDefault();
   setError(null);
+
 
     try {
       const res = await fetch(`${BASE_URL}/users/create-user`, {
@@ -88,7 +62,9 @@ const AddUser = () => {
         },
         body: JSON.stringify(formData),
       });
+
       if (!res.ok) throw new Error('Failed to create user');
+
       navigate('/users');
     } catch (err) {
       setError(err.message);
@@ -101,7 +77,6 @@ const AddUser = () => {
       <Header />
       {/* <DasboardLayout activeMenu="05"> */}
         <div className="my-5 mx-auto max-w-3xl">
-          {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">User Management</h1>
@@ -111,7 +86,6 @@ const AddUser = () => {
             </div>
           </div>
 
-          {/* Form Card */}
           <div className="bg-white shadow rounded-lg p-6">
             {error && (
               <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
@@ -172,15 +146,15 @@ const AddUser = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select
                   name="role_id"
-                  value={Number(formData.role_id)}
+                  value={formData.role_id}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select role</option>
-                  {role.map(r => (
-                    <option key={r.role_id} value={parseInt(r.role_id)}>
-                      {r.role_name}
+                  <option value={0}>Select role</option>
+                  {roles.map(role => (
+                    <option key={role.role_id} value={role.role_id}>
+                      {role.role_name}
                     </option>
                   ))}
                 </select>

@@ -174,8 +174,8 @@ const Categories = () => {
             </div>
           </div>
         </div>
-        <CategoryModal isOpen={modalOpen} onClose={() => setModalOpen(false)} category={editingCategory} onSubmitSuccess={loadProductsByTypeAndRole} />
       </DasboardLayout>
+      <CategoryModal isOpen={modalOpen} onClose={() => setModalOpen(false)} category={editingCategory} onSubmitSuccess={loadProductsByTypeAndRole} />
     </div>
   );
 };

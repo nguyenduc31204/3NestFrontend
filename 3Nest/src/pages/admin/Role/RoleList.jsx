@@ -34,7 +34,7 @@ const RoleList = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure to delete this role?')) return;
     try {
-      await fetch(`${BASE_URL}/roles/delete-role?request_id=${id}`, {
+      const res = await fetch(`${BASE_URL}/roles/delete-role?request_id=${id}`, {
         method: 'DELETE',
         headers: {
             'ngrok-skip-browser-warning': 'true',
@@ -42,6 +42,7 @@ const RoleList = () => {
         },
       });
       fetchRoles();
+      console.log(res);
     } catch (err) {
       setError('Failed to delete role');
     }

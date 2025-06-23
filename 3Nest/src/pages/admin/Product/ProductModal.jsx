@@ -7,7 +7,7 @@ const formatNumber = (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   const [formData, setFormData] = useState({
     product_name: '',
-    product_role: 'admin',
+    product_role: '',
     category_id: '',
     sku_partnumber: '',
     description: '',
@@ -16,17 +16,19 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     channel_cost: '',
   });
   const [categories, setCategories] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [discountErr, setDiscountErr] = useState('');
 
   const isFieldEnabled = (field) => {
-    const role = formData.product_role;
+    const role = roles.find((r) => String(r.role_id) === formData.product_role);
+    const roleName = role?.role_name;
     if (field === 'price') return true;
     const enabledFields = {
       admin: [],
       sales: ['maximum_discount'],
       channel: ['channel_cost'],
     };
-    return enabledFields[role]?.includes(field);
+    return enabledFields[roleName]?.includes(field);
   };
 
   const loadCategories = useCallback(async () => {
@@ -44,10 +46,26 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       console.error('Failed to fetch categories', err);
     }
   }, []);
+  const loadRoles = useCallback(async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/roles/get-roles`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const result = await res.json();
+      if (result.status_code === 200) setRoles(result.data || []);
+    } catch (err) {
+      console.error('Failed to fetch roles', err);
+    }
+  }, []);
 
   useEffect(() => {
     loadCategories();
-  }, [loadCategories]);
+    loadRoles();
+  }, [loadCategories, loadRoles]);
 
   useEffect(() => {
     if (categories.length === 0) return;
@@ -55,6 +73,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     if (product) {
       setFormData({
         ...product,
+        product_role: product.product_role?.toString() || '',
         category_id: product.category_id?.toString() || '',
         price: product.price ? String(product.price) : '',
         maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
@@ -64,9 +83,10 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       setFormData((prev) => ({
         ...prev,
         category_id: categories[0]?.category_id?.toString() || '',
+        product_role: roles[0]?.role_id?.toString() || '',
       }));
     }
-  }, [product, categories]);
+  }, [product, categories, roles]);
 
   const handleNumberChange = (name, raw) => {
     const digits = raw.replace(/[^0-9]/g, '');
@@ -124,7 +144,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     const cleaned = {
       ...(product ? { product_id: product.product_id } : {}),
       product_name: formData.product_name,
-      product_role: formData.product_role,
+      product_role: parseInt(formData.product_role, 10),
       category_id: parseInt(formData.category_id, 10),
       sku_partnumber: formData.sku_partnumber,
       description: formData.description,
@@ -166,6 +186,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       alert('Error saving product');
     }
   };
+  
+  console.log('FormData:', formData);
   console.log('category_id:', formData.category_id, 'typeof:', typeof formData.category_id);
   console.log('categories:', categories);
 
@@ -186,6 +208,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             onChange={handleChange}
             className="border p-2"
             required
+            
           />
 
           <select
@@ -194,13 +217,16 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             onChange={handleChange}
             className="border p-2"
             required
+            disabled={!!product}
           >
-            {['admin', 'sales', 'channel'].map((r) => (
-              <option key={r} value={r}>
-                {r.charAt(0).toUpperCase() + r.slice(1)}
+            <option value="">Select role</option>
+            {roles.map((r) => (
+              <option key={r.role_id} value={r.role_id}>
+                {r.role_name}
               </option>
             ))}
           </select>
+
 
           <select
           name="category_id"
