@@ -5,6 +5,9 @@
  * @returns {boolean}
  */
 export const hasPermission = (user, requiredPermission) => {
+    if (!user.permission) {
+      return true;
+    }
   if (!user || !Array.isArray(user.permissions)) {
     return false;
   }

@@ -143,9 +143,8 @@ const AddDealAdmin = () => {
 
   return (
     <div>
-      <Header />
       <Toaster position="top-right" reverseOrder={false} />
-      <DashboardLayout activeMenu="08">
+      {/* <DashboardLayout activeMenu="08"> */}
         <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="content py-6">
             <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -396,7 +395,7 @@ const AddDealAdmin = () => {
             </div>
           </div>
         )}
-      </DashboardLayout>
+      {/* </DashboardLayout> */}
     </div>
   );
 };

@@ -1,4 +1,7 @@
+
+
 import React, { useEffect, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layouts/Header';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
@@ -11,7 +14,10 @@ const AddUser = () => {
     user_email: '',
     company_name: '',
     password: '',
-    role_id: 0,
+
+    role_id: 0
+
+
   });
 
   const [roles, setRoles] = useState([]);
@@ -41,8 +47,10 @@ const AddUser = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
+
+  e.preventDefault();
+  setError(null);
+
 
     try {
       const res = await fetch(`${BASE_URL}/users/create-user`, {
@@ -63,10 +71,11 @@ const AddUser = () => {
     }
   };
 
+
   return (
     <>
       <Header />
-      <DashboardLayout activeMenu="05">
+      {/* <DasboardLayout activeMenu="05"> */}
         <div className="my-5 mx-auto max-w-3xl">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -169,7 +178,7 @@ const AddUser = () => {
             </form>
           </div>
         </div>
-      </DashboardLayout>
+      {/* </DashboardLayout> */}
     </>
   );
 };
