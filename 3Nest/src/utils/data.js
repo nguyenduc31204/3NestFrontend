@@ -5,7 +5,6 @@ import {
   ShoppingCart,
   Users,
   BarChart2,
-  User,
 } from 'lucide-react';
 
 export const SIDE_MENU_DATA = [
@@ -84,7 +83,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '10',
     label: 'Roles',
-    icon: Users, 
+    icon: ListTree, 
     path: '/roles',
     resourceType: 'role',
     ariaLabel: 'Navigate to roles',

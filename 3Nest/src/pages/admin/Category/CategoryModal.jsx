@@ -4,7 +4,7 @@ import axiosInstance from "../../../utils/axiosInstance";
 const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
   const [categoryName, setCategoryName] = useState('');
   const [typeId, setTypeId] = useState('');
-  const [category_description, setDescription] = useState('');
+  const [description, setDescription] = useState('');
   const [types, setTypes] = useState([]);
 
   const isEdit = Boolean(category);
@@ -15,7 +15,7 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
     if (isEdit) {
       setCategoryName(category.category_name || '');
       setTypeId(category.type_id?.toString() || '');
-      setDescription(category.category_description || '');
+      setDescription(category.description || '');
     } else {
       setCategoryName('');
       setTypeId('');
@@ -33,45 +33,47 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
   }, [isOpen, isEdit, category]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const payload = {
-      category_name: categoryName,
-      type_id: Number(typeId),
-      category_description
-    };
-
-    const config = {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    };
-
-    const endpoint = isEdit
-      ? "/categories/update-category"
-      : "/categories/create-category";
-
-    try {
-      await axiosInstance.post(
-        endpoint,
-        isEdit
-          ? { ...payload, category_id: category.category_id }
-          : payload,
-        config,
-        
-      );
-
-      onSubmitSuccess();
-      onClose();
-    } catch (error) {
-      console.error("Category submit error:", error.response || error);
-      alert(
-        "Đã xảy ra lỗi khi gửi dữ liệu: " +
-          (error.response?.data?.message || error.message)
-      );
-      // console.log("➡ Payload sent:", payload);
-      // console.log("➡ Endpoint:", endpoint);
-
-    }
+  const payload = {
+    category_name: categoryName,
+    type_id: Number(typeId),
+    category_description: description
   };
+
+  const config = {
+    headers: { 'ngrok-skip-browser-warning': 'true' }
+  };
+
+  const endpoint = isEdit
+    ? "/categories/update-category"
+    : "/categories/create-category";
+
+  try {
+    console.log("➡ Payload:", payload);
+    console.log("➡ Endpoint:", endpoint);
+
+    const res = await axiosInstance.post(
+      endpoint,
+      isEdit
+        ? { ...payload, category_id: category.category_id }
+        : payload,
+      config
+    );
+
+    console.log("➡ Response:", res.data);
+
+    onSubmitSuccess();
+    onClose();
+  } catch (error) {
+    console.error("Category submit error:", error.response || error);
+    alert(
+      "Đã xảy ra lỗi khi gửi dữ liệu: " +
+      (error.response?.data?.message || error.message)
+    );
+  }
+};
+
 
   if (!isOpen) return null;
 
@@ -109,9 +111,9 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
           </select>
 
           <textarea
-            value={category_description}
+            value={description}
             onChange={e => setDescription(e.target.value)}
-            placeholder="Description"
+            placeholder="description"
             className="w-full border p-2 rounded"
           />
 

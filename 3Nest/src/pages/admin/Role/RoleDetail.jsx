@@ -15,7 +15,7 @@ const RoleDetail = () => {
     const fetchDetail = async () => {
       try {
         const [roleRes, permRes] = await Promise.all([
-          fetch(`${BASE_URL}/roles/get-role?request_id=${id}`, {
+          fetch(`${BASE_URL}/roles/get-role?role_id=${id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('access_token')}`,
             },
@@ -30,6 +30,10 @@ const RoleDetail = () => {
 
         const roleData = await roleRes.json();
         const permData = await permRes.json();
+        console.log("Role Response:", roleRes.status, roleData);
+        console.log("Permission Response:", permRes.status, permData);
+
+
 
         if (roleData.status_code === 200 && permData.status_code === 200) {
           setRole(roleData.data);
@@ -62,8 +66,7 @@ console.log("all permissions:", permissions);
 
   return (
     <>
-      <Header />
-      <DashboardLayout activeMenu="05">
+     
         <div className="my-5 mx-auto max-w-2xl">
           <h1 className="text-xl font-semibold mb-4">Role Detail</h1>
           {error && <div className="mb-4 text-red-600">{error}</div>}
@@ -77,7 +80,7 @@ console.log("all permissions:", permissions);
               </div>
               <div>
                 <label className="block text-sm font-semibold">Description</label>
-                <div className="text-gray-700">{role.description}</div>
+                <div className="text-gray-700">{role.role_description}</div>
               </div>
               <div>
                 <label className="block text-sm font-semibold">Permissions</label>
@@ -103,7 +106,7 @@ console.log("all permissions:", permissions);
             </div>
           )}
         </div>
-      </DashboardLayout>
+    
     </>
   );
 };

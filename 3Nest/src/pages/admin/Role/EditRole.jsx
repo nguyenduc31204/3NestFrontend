@@ -6,8 +6,9 @@ import { BASE_URL } from '../../../utils/apiPath';
 
 const EditRole = () => {
   const { id } = useParams();
+  console.log("URL param id:", id);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ role_name: '', description: '' });
+  const [formData, setFormData] = useState({ role_name: '', role_description: '' });
   const [permissions, setPermissions] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState({});
   const [selectedPermissions, setSelectedPermissions] = useState({});
@@ -27,16 +28,19 @@ const EditRole = () => {
         if (permResult.status_code !== 200) throw new Error('Permission load failed');
         setPermissions(permResult.data);
 
-        const resRole = await fetch(`${BASE_URL}/roles/get-role?request_id=${id}`, {
+        const resRole = await fetch(`${BASE_URL}/roles/get-role?role_id=${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         });
         const roleResult = await resRole.json();
+        
+        console.log("Role API result:", roleResult);
         if (roleResult.status_code !== 200) throw new Error('Role load failed');
 
-        const { role_name, description, permissions: rolePermIds } = roleResult.data;
-        setFormData({ role_name, description });
+
+        const { role_name, role_description, permissions: rolePermIds } = roleResult.data;
+        setFormData({ role_name, role_description });
 
         const selected = {};
         const types = {};
@@ -54,7 +58,9 @@ const EditRole = () => {
       } catch (err) {
         setError('Failed to load role or permissions');
       }
+
     };
+    
 
     fetchAll();
   }, [id]);
@@ -106,7 +112,7 @@ const EditRole = () => {
     const payload = {
       role_id: Number(id),
       role_name: formData.role_name,
-      description: formData.description,
+      role_description: formData.role_description,
       permissions: selectedPermissionIds,
     };
 
@@ -142,8 +148,7 @@ const EditRole = () => {
 
   return (
     <>
-      <Header />
-      <DashboardLayout activeMenu="05">
+      
         <div className="my-5 mx-auto max-w-2xl">
           <h1 className="text-xl font-semibold mb-4">Edit Role</h1>
           {error && <div className="mb-4 text-red-600">{error}</div>}
@@ -161,8 +166,8 @@ const EditRole = () => {
             <div>
               <label className="block text-sm font-medium">Description</label>
               <textarea
-                name="description"
-                value={formData.description}
+                name="role_description"
+                value={formData.role_description}
                 onChange={handleChange}
                 rows={3}
                 className="w-full border px-3 py-2 rounded"
@@ -218,7 +223,7 @@ const EditRole = () => {
             </div>
           </form>
         </div>
-      </DashboardLayout>
+
     </>
   );
 };

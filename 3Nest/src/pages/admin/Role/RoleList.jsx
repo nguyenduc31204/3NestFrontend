@@ -54,8 +54,7 @@ const RoleList = () => {
 
   return (
     <>
-      <Header />
-      <DashboardLayout activeMenu="05">
+      
         <div className="my-5 mx-auto max-w-4xl">
           <div className="flex justify-between mb-4">
             <h1 className="text-xl font-semibold">Roles</h1>
@@ -82,7 +81,7 @@ const RoleList = () => {
                   <tr key={role.role_id} className="border-t">
                     <td className="px-4 py-2">{i + 1}</td>
                     <td className="px-4 py-2">{role.role_name}</td>
-                    <td className="px-4 py-2">{role.description}</td>
+                    <td className="px-4 py-2">{role.role_description}</td>
                     <td className="px-4 py-2 space-x-2">
                       <button
                         onClick={() => navigate(`/roles/edit/${role.role_id}`)}
@@ -110,7 +109,7 @@ const RoleList = () => {
             </table>
           </div>
         </div>
-      </DashboardLayout>
+     
     </>
   );
 };

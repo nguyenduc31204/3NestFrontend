@@ -56,31 +56,18 @@ const Login = () => {
 
         const decoded = decodeToken(access_token);
 
-        // Lấy role_id từ response login
-        const roleId = result.data && result.data.role && result.data.role.role_id;
-        console.log('roleId:', roleId, typeof roleId);
-        if (!roleId || isNaN(Number(roleId))) {
-          setError('role_id không hợp lệ!');
-          return;
-        }
-        const token = access_token;
-        console.log('Token:', token);
-        const permissionResponse = await fetch(`${BASE_URL}/permissions/get-permisions-by-role?role_id=${roleId}`, {
+        const permissionResponse = await fetch(`${BASE_URL}/permissions/get-permisisons-by-role?role_id=${decoded.role_id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'ngrok-skip-browser-warning': 'true',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${access_token}`,
           },
         })
 
         const permissionResult = await permissionResponse.json();
         console.log('Permissions:', permissionResult);
 
-        if (!permissionResult.data) {
-          setError('Không lấy được quyền cho user này!');
-          return;
-        }
         const userForStorage = {
           role_name: permissionResult.data.role_name,
           permissions: permissionResult.data.permissions || [],
@@ -158,7 +145,7 @@ const Login = () => {
           </button>
 
           <p className="text-sm text-center text-gray-700">
-            <Link to="/forgot-password" className="text-blue-600 hover:underline ml-1">Forgot Password?</Link>
+            <Link to="/forgotpassword" className="text-blue-600 hover:underline ml-1">Forgot Password?</Link>
           </p>
         </form>
       </div>

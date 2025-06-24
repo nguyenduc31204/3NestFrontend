@@ -49,8 +49,7 @@ const TypeDetail = () => {
 
   return (
     <div>
-      <Header />
-      <DasboardLayout activeMenu="07">
+      
         <div className="my-5 mx-auto">
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
@@ -62,7 +61,7 @@ const TypeDetail = () => {
               </div>
               <div className="action-buttons mb-2">
                 <button
-                  onClick={() => navigate('/admin/types/add')}
+                  onClick={() => navigate('/types/add')}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
                 >
                   + Add Type
@@ -119,7 +118,7 @@ const TypeDetail = () => {
                             <td className="px-6 py-4 text-sm text-gray-900 space-x-2">
                               <button
                                 className="bg-blue-600 text-white px-3 py-1 rounded"
-                                onClick={() => navigate(`/admin/types/edit/${type.type_id}`)}
+                                onClick={() => navigate(`/types/edit/${type.type_id}`)}
                               >
                                 Update
                               </button>
@@ -160,7 +159,7 @@ const TypeDetail = () => {
             </div>
           </div>
         </div>
-      </DasboardLayout>
+   
     </div>
   );
 };

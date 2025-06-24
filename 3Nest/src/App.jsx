@@ -7,20 +7,16 @@ import Reports from './pages/admin/Reports'
 import Logout from './pages/admin/Logout'
 import Users from './pages/admin/User/Users'
 import AddOrder from './pages/admin/Order/AddOder'
+import AddType from './pages/admin/Type/AddType'
+import EditType from './pages/admin/Type/EditType'
 
 import AddUser from './pages/admin/User/AddUser';
 import EditUser from './pages/admin/User/EditUser';
 import UserDetail from './pages/admin/User/UserDetail';
 
-import RoleList from './pages/admin/Role/RoleList';
-import AddRole from './pages/admin/Role/AddRole';
-import EditRole from './pages/admin/Role/EditRole';
-import RoleDetail from './pages/admin/Role/RoleDetail';
 
 import ForgotPassword from './pages/Auth/ForgotPassword'
 
-import AddType from './pages/admin/Type/AddType';
-import EditType from './pages/admin/Type/EditType';
 import TypeDetail from './pages/admin/Type/TypeDetail';
 
 import DealAdmin from './pages/admin/Deal/Deal'
@@ -37,6 +33,12 @@ import DashboardLayout from './components/layouts/DashboardLayout'
 import EditDealPage from './pages/admin/Deal/Edit'
 import AddDealAdmin from './pages/admin/Deal/AddDeal'
 import { AuthProvider } from './context/AuthContext'
+import RoleList from './pages/admin/Role/RoleList';
+import AddRole from './pages/admin/Role/AddRole';
+import EditRole from './pages/admin/Role/EditRole';
+import RoleDetail from './pages/admin/Role/RoleDetail';
+
+
 
 const RootRedirect = () => {
   const isAuthenticated = true; 
@@ -61,7 +63,7 @@ const App = () => {
         position="top-right" 
         reverseOrder={false} 
       />
-        <Header />
+      
       
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -87,8 +89,31 @@ const App = () => {
           {/* category */}
           <Route 
             path="/categories" 
-            element={ <ProtectedRoute><Categories /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="category:view"><Categories /></ProtectedRoute> } 
           />
+          {/* type */}
+          <Route 
+            path="/types" 
+            element={ <ProtectedRoute permission="type:view"><TypeDetail /></ProtectedRoute> } 
+          />
+          <Route 
+            path="/types/add" 
+            element={<ProtectedRoute permission="type:manage"><AddType /></ProtectedRoute>} 
+          />
+
+          <Route 
+            path="/types/edit/:id" 
+            element={<ProtectedRoute permission="type:manage"><EditType /></ProtectedRoute>} 
+          />
+
+          {/* role */}
+
+          <Route path="/roles" element={<ProtectedRoute permission="role:view"><RoleList /></ProtectedRoute>} />
+          <Route path="/roles/add" element={<ProtectedRoute permission="role:manage"><AddRole /></ProtectedRoute>} />
+          <Route path="/roles/edit/:id" element={<ProtectedRoute permission="role:manage"><EditRole /></ProtectedRoute>} />
+          <Route path="/roles/detail/:id" element={<RoleDetail />} />
+
+
 
           {/* order */}
           <Route 
@@ -140,27 +165,6 @@ const App = () => {
             path="/reports" 
             element={ <ProtectedRoute permission="report:view"><Reports /></ProtectedRoute> } 
           />
-          {/* <Route
-            path="/roles"
-            element={<ProtectedRoute permission="role:manage"><RoleList /></ProtectedRoute>}
-          />
-          <Route
-            path="/roles/add"
-            element={<ProtectedRoute permission="role:manage"><AddRole /></ProtectedRoute>}
-          />
-          <Route
-            path="/roles/edit/:id"
-            element={<ProtectedRoute permission="role:manage"><EditRole /></ProtectedRoute>}
-          />
-          <Route
-            path="/roles/detail/:id"
-            element={<ProtectedRoute permission="role:manage"><RoleDetail /></ProtectedRoute>}
-          /> */}
-
-          <Route path="/roles" element={<RoleList />} />
-          <Route path="/roles/add" element={<AddRole />} />
-          <Route path="/roles/edit/:id" element={<EditRole />} />
-          <Route path="/roles/detail/:id" element={<RoleDetail />} />
         </Route>
 
         <Route path="*" element={<div><h1>404 Not Found</h1></div>} />
