@@ -34,6 +34,9 @@ import ProtectedRoute from './pages/Auth/ProtectedRoute'
 import AddDealPage from './pages/Sales/Deal/AddDeal'
 import Header from './components/layouts/Header'
 import DashboardLayout from './components/layouts/DashboardLayout'
+import EditDealPage from './pages/admin/Deal/Edit'
+import AddDealAdmin from './pages/admin/Deal/AddDeal'
+import { AuthProvider } from './context/AuthContext'
 
 const RootRedirect = () => {
   const isAuthenticated = true; 
@@ -53,12 +56,12 @@ const ProtectedLayout = () => {
 
 const App = () => {
   return (
-    <div>
-      <Header />
+    <AuthProvider>
       <Toaster 
         position="top-right" 
         reverseOrder={false} 
       />
+        <Header />
       
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -70,25 +73,27 @@ const App = () => {
 
 
         <Route element={<ProtectedLayout />}>
+
           <Route 
             path="/dashboard" 
             // element={ <ProtectedRoute permission="dashboard:view"><Home /></ProtectedRoute> } 
           />
+          {/* product */}
           <Route 
             path="/products" 
             element={ <ProtectedRoute permission="product:view"><Products /></ProtectedRoute> } 
           />
+
+          {/* category */}
           <Route 
             path="/categories" 
             element={ <ProtectedRoute><Categories /></ProtectedRoute> } 
           />
+
+          {/* order */}
           <Route 
             path="/orders" 
-            element={ <ProtectedRoute permission="order:manage"><Orders /></ProtectedRoute> } 
-          />
-          <Route 
-            path="/deals" 
-            element={ <ProtectedRoute permission="order:manage"><DealAdmin /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="order:view"><Orders /></ProtectedRoute> } 
           />
           <Route 
             path="/orders/add" 
@@ -98,22 +103,39 @@ const App = () => {
             path="/orders/edit/:order_id" 
             element={ <ProtectedRoute permission="order:manage"><EditOrderAdmin /></ProtectedRoute> } 
           />
+
+          {/* deal */}
+          <Route 
+            path="/deals" 
+            element={ <ProtectedRoute permission="deal:view"><DealAdmin /></ProtectedRoute> } 
+          />
+          <Route 
+            path="/deals/add" 
+            element={ <ProtectedRoute permission="deal:manage"><AddDealAdmin /></ProtectedRoute> } 
+          />
+          <Route 
+            path="/deals/edit/:deal_id" 
+            element={ <ProtectedRoute permission="deal:manage"><EditDealPage /></ProtectedRoute> } 
+          />
+
+          {/* user */}
           <Route 
             path="/users" 
             element={ <ProtectedRoute permission="user:view"><Users /></ProtectedRoute> } 
           />
           <Route 
             path="/users/add" 
-            element={ <ProtectedRoute><AddUser /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="user:manage"><AddUser /></ProtectedRoute> } 
           />
           <Route 
             path="/users/edit/:userId" 
-            element={ <ProtectedRoute><EditUser /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="user:manage"><EditUser /></ProtectedRoute> } 
           />
           <Route 
             path="/users/detail/:userId" 
-            element={ <ProtectedRoute><UserDetail /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="user:manage"><UserDetail /></ProtectedRoute> } 
           />
+
           <Route 
             path="/reports" 
             element={ <ProtectedRoute permission="report:view"><Reports /></ProtectedRoute> } 
@@ -143,7 +165,7 @@ const App = () => {
 
         <Route path="*" element={<div><h1>404 Not Found</h1></div>} />
       </Routes>
-    </div>
+    </AuthProvider>
   );
 };
 export default App

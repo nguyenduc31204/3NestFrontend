@@ -321,7 +321,8 @@ const AddOrder = () => {
       setExistingDetails([]);
       setCreatedOrderId(null);
       localStorage.removeItem('createdOrderId');
-      navigate(`/deals/edit/${formValues.deal_id || preSelectedDealId || 0}`);
+      navigate(`/orders`);
+      toast.success('Order saved successfully');
     } catch (err) {
       // setError(`Failed to save order: ${err.message}`);
       console.log(err)
@@ -389,7 +390,8 @@ const AddOrder = () => {
       setExistingDetails([]);
       setCreatedOrderId(null);
       localStorage.removeItem('createdOrderId');
-      navigate(`/deals/edit/${formValues.deal_id || preSelectedDealId || 0}`);
+      navigate(`/orders`);
+      toast.success('Order submitted successfully');
     } catch (err) {
       setError(`Failed to submit order: ${err.message}`);
     }

@@ -5,22 +5,42 @@
  * @returns {boolean}
  */
 export const hasPermission = (user, requiredPermission) => {
-  // 🚧 Bỏ kiểm tra quyền nếu đang test
-  // return true;
+  if (!user.permissions) {
+    return true; // fallback nếu không có quyền rõ ràng (ví dụ admin)
+  }
 
-  if (!user || !Array.isArray(user.permissions)) return false;
-  if (!requiredPermission || typeof requiredPermission !== 'string') return false;
+  if (!user || !Array.isArray(user.permissions)) {
+    return false;
+  }
 
-  const [requiredType, requiredAction] = requiredPermission.toLowerCase().split(':');
-  if (!requiredType || !requiredAction) return false;
+  const parts = requiredPermission.split(':');
+  if (parts.length !== 2) return false;
+
+  const requiredType = parts[0].toLowerCase();
+  const requiredName = parts[1].toLowerCase();
 
   return user.permissions.some(p => {
-    const typeMatch = p.permission_type_name?.toLowerCase() === requiredType;
-    const nameMatch =
-      p.permission_name?.toLowerCase() === requiredAction ||
-      p.permission_name?.toLowerCase() === 'full control';
+    const typeMatch = p.permission_type_name.toLowerCase() === requiredType;
+    if (!typeMatch) return false;
 
-    return typeMatch && nameMatch;
+    const currentPermissionName = p.permission_name.toLowerCase();
+
+    // full control luôn được phép
+    if (currentPermissionName === 'full control') return true;
+
+    // quyền "manage" bao gồm cả "review" và "view"
+    if (currentPermissionName === 'manage' &&
+      (requiredName === 'manage' || requiredName === 'review' || requiredName === 'view')) {
+      return true;
+    }
+
+    // quyền "review" bao gồm cả "view"
+    if (currentPermissionName === 'review' &&
+      (requiredName === 'review' || requiredName === 'view')) {
+      return true;
+    }
+
+    return currentPermissionName === requiredName;
   });
 };
 

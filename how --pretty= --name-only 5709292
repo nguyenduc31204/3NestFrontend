@@ -1,0 +1,32 @@
+[33m85aab9e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mTrang[m[33m)[m HEAD@{0}: reset: moving to 85aab9e
+[33m0fd00b5[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: checkout: moving from Trang to Trang
+[33m0fd00b5[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2}: pull origin main: Fast-forward
+[33mb810f2a[m HEAD@{3}: checkout: moving from main to Trang
+[33m5709292[m[33m ([m[1;32mmain[m[33m)[m HEAD@{4}: commit: filter product, user by role
+[33m457b70b[m HEAD@{5}: commit (amend): crud product
+[33m0f73e0e[m HEAD@{6}: rebase (finish): returning to refs/heads/main
+[33m0f73e0e[m HEAD@{7}: rebase (continue): crud product
+[33mfca0d0c[m HEAD@{8}: pull --rebase origin main (start): checkout fca0d0c0cc8965598112d241092a11c9c44df546
+[33m68725df[m HEAD@{9}: commit: crud product
+[33mb810f2a[m HEAD@{10}: checkout: moving from Trang to main
+[33mb810f2a[m HEAD@{11}: checkout: moving from main to Trang
+[33mb810f2a[m HEAD@{12}: merge Trang: Fast-forward
+[33m02cdfd6[m HEAD@{13}: checkout: moving from Trang to main
+[33mb810f2a[m HEAD@{14}: commit: crud category
+[33m65c04f4[m[33m ([m[1;31morigin/Trang[m[33m)[m HEAD@{15}: pull origin main: Fast-forward
+[33m02cdfd6[m HEAD@{16}: checkout: moving from main to Trang
+[33m02cdfd6[m HEAD@{17}: checkout: moving from Trang to main
+[33m02cdfd6[m HEAD@{18}: merge main: Fast-forward
+[33m5ce1162[m HEAD@{19}: checkout: moving from main to Trang
+[33m02cdfd6[m HEAD@{20}: checkout: moving from Trang to main
+[33m5ce1162[m HEAD@{21}: checkout: moving from main to Trang
+[33m02cdfd6[m HEAD@{22}: commit: user crud
+[33m5ce1162[m HEAD@{23}: checkout: moving from Trang to main
+[33m5ce1162[m HEAD@{24}: checkout: moving from main to Trang
+[33m5ce1162[m HEAD@{25}: checkout: moving from Trang to main
+[33m5ce1162[m HEAD@{26}: checkout: moving from main to Trang
+[33m5ce1162[m HEAD@{27}: checkout: moving from Doug to main
+[33m5ce1162[m HEAD@{28}: checkout: moving from Trang to Doug
+[33m5ce1162[m HEAD@{29}: checkout: moving from main to Trang
+[33m5ce1162[m HEAD@{30}: reset: moving to HEAD
+[33m5ce1162[m HEAD@{31}: clone: from https://github.com/nguyenduc31204/3NestFrontend.git

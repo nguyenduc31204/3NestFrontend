@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, use } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LuCoins,
@@ -95,6 +95,8 @@ const DealsPage = () => {
       navigate('/login');
     }
   }, [navigate]);
+      console.log('User loaded from localStorage:', user);
+
 
   useEffect(() => {
     if (!user) return;
@@ -144,6 +146,12 @@ const DealsPage = () => {
     fetchData();
   }, [user, activeRoleId, token, refreshTrigger]);
 
+  const isDraft = 'draft';
+  const isSubmitted = 'submitted';
+  const isAccepted = 'approved';
+  const isRejected = 'rejected';
+  const isViewOnly = isAccepted || isRejected;
+
   const handleRefresh = () => setRefreshTrigger(c => c + 1);
 
   if (!user) {
@@ -181,7 +189,7 @@ const DealsPage = () => {
             <div className="flex flex-wrap items-center justify-between p-4 border-b gap-4">
               <h2 className="text-lg font-semibold">Deal List</h2>
               <div className="flex items-center space-x-2 flex-wrap gap-2">
-                {hasPermission(user, 'deal:Full control') && roles.map((role) => (
+                {hasPermission(user, 'deal:full control') && roles.map((role) => (
                   <RoleButton
                     key={role.role_id}
                     current={activeRoleId}
@@ -220,13 +228,25 @@ const DealsPage = () => {
                           <Td>#{deal.deal_id}</Td>
                           <Td>{deal.customer_name}</Td>
                           <Td>{deal.tax_identification_number}</Td>
-                          <Td><span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full capitalize bg-blue-100 text-blue-800`}>{deal.status}</span></Td>
+                          <Td>
+                            <span
+                              className={`inline-block px-3 py-1 text-xs font-bold capitalize rounded-full ${
+                                (isAccepted === deal?.status) ? 'bg-green-100 text-green-800' :
+                                (isRejected === deal?.status) ? 'bg-red-100 text-red-800' :
+                                (isSubmitted === deal?.status) ? 'bg-blue-100 text-blue-800' :
+                                (isDraft === deal?.status) ? 'bg-gray-200 text-gray-800' :
+                                'bg-gray-100 text-gray-600' 
+                              }`}
+                            >
+                              {deal?.status || 'N/A'}
+                            </span>
+                          </Td>
                           <Td>{deal.user_name || 'N/A'}</Td> 
                           <Td>{new Date(deal.created_at).toLocaleDateString()}</Td>
                           
-                          {(hasPermission(user, 'deal:edit') || hasPermission(user, 'deal:delete')) && (
+                          {(hasPermission(user, 'deal:view') || hasPermission(user, 'deal:view')) && (
                             <Td>
-                              {hasPermission(user, 'deal:edit') && (
+                              {hasPermission(user, 'deal:view') && (
                                 <button
                                   className="text-blue-600 hover:underline font-medium"
                                   onClick={() => navigate(`/deals/edit/${deal.deal_id}`)}
@@ -234,7 +254,6 @@ const DealsPage = () => {
                                   View
                                 </button>
                               )}
-                              {/* Thêm nút Delete */}
                             </Td>
                           )}
                         </tr>

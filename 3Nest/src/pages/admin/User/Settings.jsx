@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../../../components/layouts/Header'
-import DasboardLayout from '../../../components/layouts/DashboardLayout'
 
 const Settings = () => {
   const navigate = useNavigate()
@@ -52,8 +50,6 @@ const Settings = () => {
 
   return (
     <div>
-      <Header />
-      <DasboardLayout activeMenu="Settings">
         <div className='my-5 mx-auto'>
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
@@ -197,7 +193,6 @@ const Settings = () => {
             </div>
           </div>
         </div>
-      </DasboardLayout>
     </div>
   )
 }

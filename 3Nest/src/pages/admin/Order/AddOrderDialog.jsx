@@ -152,7 +152,7 @@ const AddOrderDialog = ({
         setSelectedProduct(null); 
       } catch (err) {
         setRequestError(`Failed to load products: ${err.message}`);
-        toast.error(`Unable to load product: ${err.message}`); // <<< toast.error từ react-hot-toast
+        toast.error(`Unable to load product: ${err.message}`); 
       } finally {
         setLoading(false);
       }

@@ -9,10 +9,9 @@ const Logout = () => {
       try {
         localStorage.removeItem('access_token');
         localStorage.removeItem('createdOrderId');
+        localStorage.removeItem('user');
+        localStorage.removeItem('role');
 
-       
-
-       
         navigate('/login');
       } catch (error) {
         console.error('Logout error:', error);
