@@ -14,8 +14,6 @@ import {
 } from 'react-icons/lu';
 import { hasPermission } from '../../../utils/permissionUtils';
 import { BASE_URL } from '../../../utils/apiPath';
-import Header from '../../../components/layouts/Header';
-import DashboardLayout from '../../../components/layouts/DashboardLayout';
 
 
 
@@ -146,6 +144,13 @@ const OrdersPage = () => {
 
     fetchData();
   }, [user, activeRoleId, token, refreshTrigger]);
+  console.log('Orders:', orders.status);
+
+  const isDraft = 'draft';
+  const isSubmitted = 'submitted';
+  const isAccepted = 'approved';
+  const isRejected = 'rejected';
+  const isViewOnly = isAccepted || isRejected;
 
   //--- Handlers ---
   const handleRefresh = () => setRefreshTrigger(c => c + 1);
@@ -229,8 +234,16 @@ const OrdersPage = () => {
                           <Td>{order.order_title}</Td>
                           <Td>{order.customer_name}</Td>
                           <Td>
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full capitalize bg-blue-100 text-blue-800`}>
-                              {order.status}
+                            <span
+                              className={`inline-block px-3 py-1 text-xs font-bold capitalize rounded-full ${
+                                (isAccepted === order?.status) ? 'bg-green-100 text-green-800' :
+                                (isRejected === order?.status) ? 'bg-red-100 text-red-800' :
+                                (isSubmitted === order?.status) ? 'bg-blue-100 text-blue-800' :
+                                (isDraft === order?.status) ? 'bg-gray-200 text-gray-800' :
+                                'bg-gray-100 text-gray-600' 
+                              }`}
+                            >
+                              {order?.status || 'N/A'}
                             </span>
                           </Td>
                           <Td>${(order.total_budget || 0).toLocaleString()}</Td>

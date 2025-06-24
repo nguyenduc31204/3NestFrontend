@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast, Toaster } from 'react-hot-toast';
 import { BASE_URL } from '../../../utils/apiPath';
 import { hasPermission } from '../../../utils/permissionUtils';
-import Header from '../../../components/layouts/Header';
-import DashboardLayout from '../../../components/layouts/DashboardLayout';
 
 const useUser = () => {
   const [user, setUser] = useState(null);
@@ -84,18 +82,19 @@ const EditDealPage = () => {
       console.log('My Info Result:', myInforResult);
       if (!myInforResponse.ok) throw new Error(myInforResult.detail || 'Failed to load orders');
       setActiveRoleId(myInforResult.data.user_id);
-      console.log('Active Role ID:', activeRoleId);
+      console.log('Active Role ID:', myInforResult);
       
       if (myInforResult.data.user_id === fetchedDeal.user_id) {
-        setDealCreatorInfo(loggedInUser);
+        setDealCreatorInfo(myInforResult.data);
+        console.log('12:', myInforResult.data);
       } else if (hasPermission(loggedInUser, 'deal:Full control')) {
         // Trường hợp admin xem deal của người khác -> Gọi API lấy thông tin
         const creatorResponse = await fetch(`${BASE_URL}/users/get-user?user_id=${fetchedDeal.user_id}`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
         const creatorResult = await creatorResponse.json();
+        console.log('Creator Result:', creatorResult);
         if (!creatorResponse.ok) throw new Error(creatorResult.detail || 'Failed to fetch creator info');
         setDealCreatorInfo(creatorResult.data);
       } else {
-        // Trường hợp không có quyền nhưng vẫn thấy (phòng hờ), chỉ hiển thị thông tin cơ bản
         setDealCreatorInfo({ user_name: `User ID: ${fetchedDeal.user_id}` });
       }
       console.log('Deal Creator Info:', dealCreatorInfo);
@@ -111,8 +110,67 @@ const EditDealPage = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleSubmitDeal = async () => { /* ... */ };
-  const handleDiscardDeal = async () => { /* ... */ };
+    const handleSubmitDeal = async () => {
+    setProcessing(true);
+    setError('');
+    try {
+      const response = await fetch(`${BASE_URL}/deals/update-deal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify({
+          deal_id: deal_id,
+          status: 'submitted',
+        }),
+      });
+  
+      const result = await response.json();
+      if (!response.ok || result.status_code !== 200) {
+        throw new Error(result.message || 'Failed to submit deal');
+      }
+  
+      const updatedResponse = await fetch(`${BASE_URL}/deals/get-deal?deal_id=${deal_id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const updatedResult = await updatedResponse.json();
+      if (updatedResult.status_code === 200) {
+        setDealData(updatedResult.data);
+        toast.success('Deal submitted successfully');
+      }
+    } catch (err) {
+      setError(`Failed to submit deal: ${err.message}`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+  const handleDiscardDeal = async () => {
+    setProcessing(true);
+    try {
+      const response = await fetch(`${BASE_URL}/deals/delete-deal?deal_id=${deal_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+  
+      toast.success('Deal discarded successfully');
+      navigate('/deals');
+    } catch (err) {
+      // setError(`Failed to discard deal: ${err.message}`);
+    } finally {
+      setProcessing(false);
+      setShowConfirm(false);
+    }
+  };
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading deal details...</div>;
   if (error) return <div className="p-4 m-4 bg-red-50 border-l-4 border-red-400 text-red-700">{error}</div>;
@@ -212,7 +270,6 @@ const EditDealPage = () => {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                               {orders
-                                .filter(order => activeRoleId === loggedInUser.role_name || order.status !== 'draft')
                                 .map((order, index) => (
                                   <tr key={order.order_id} className="hover:bg-gray-50">
                                     <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
@@ -225,6 +282,8 @@ const EditDealPage = () => {
                                             ? 'bg-blue-100 text-blue-800'
                                             : order.status === 'approved'
                                             ? 'bg-green-100 text-green-800'
+                                            : order.status === 'draft'
+                                            ? 'bg-gray-200 text-gray-800'
                                             : 'bg-red-100 text-red-800'
                                         }`}
                                       >
