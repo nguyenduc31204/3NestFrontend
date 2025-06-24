@@ -60,7 +60,7 @@ const RoleList = () => {
           <div className="flex justify-between mb-4">
             <h1 className="text-xl font-semibold">Roles</h1>
             <button
-              onClick={() => navigate('/admin/roles/add')}
+              onClick={() => navigate('/roles/add')}
               className="px-4 py-2 bg-blue-600 text-white rounded"
             >
               + Add Role
@@ -85,7 +85,7 @@ const RoleList = () => {
                     <td className="px-4 py-2">{role.description}</td>
                     <td className="px-4 py-2 space-x-2">
                       <button
-                        onClick={() => navigate(`/admin/roles/edit/${role.role_id}`)}
+                        onClick={() => navigate(`/roles/edit/${role.role_id}`)}
                         className="text-blue-600 hover:underline"
                       >
                         Edit
@@ -98,7 +98,7 @@ const RoleList = () => {
                       </button>
 
                       <button
-                        onClick={() => navigate(`/admin/roles/detail/${role.role_id}`)}
+                        onClick={() => navigate(`/roles/detail/${role.role_id}`)}
                         className="text-green-600 hover:underline"
                       >
                         Detail

@@ -112,7 +112,7 @@ const AddRole = () => {
         return;
       }
 
-      navigate('/admin/roles');
+      navigate('roles');
     } catch (err) {
       setError(err.message);
     }
@@ -137,7 +137,7 @@ const AddRole = () => {
                 <div>
                   <h1 className="text-2xl font-semibold text-gray-800 mb-1">Role Management</h1>
                   <div className="text-gray-500 text-sm">
-                    <a href="/admin/dashboard" className="hover:underline">Dashboard</a> / <a href="/admin/roles" className="hover:underline">Roles</a> / Add
+                    <a href="/dashboard" className="hover:underline">Dashboard</a> / <a href="/roles" className="hover:underline">Roles</a> / Add
                   </div>
                 </div>
               </div>
@@ -207,7 +207,7 @@ const AddRole = () => {
                   <div className="flex justify-end space-x-2">
                     <button
                       type="button"
-                      onClick={() => navigate('/admin/roles')}
+                      onClick={() => navigate('/roles')}
                       className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                     >
                       Cancel

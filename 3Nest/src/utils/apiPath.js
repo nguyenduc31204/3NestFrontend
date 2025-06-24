@@ -1,6 +1,4 @@
-
-
-export const BASE_URL = "https://49c4-1-53-88-216.ngrok-free.app"
+export const BASE_URL = "https://a824-42-113-156-214.ngrok-free.app"
 
 
 
@@ -10,8 +8,8 @@ export const API_PATHS = {
         LOGOUT: "/auth/logout",
     },
     USER: {
-        PROFILE: "/user/profile",
-        UPDATE_PROFILE: "/user/update-profile",
+        // PROFILE: "/user/profile",
+        // UPDATE_PROFILE: "/user/update-profile",
     },
     PRODUCTS: {
         CREATE: "/products/create-product",

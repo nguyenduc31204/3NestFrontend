@@ -127,7 +127,7 @@ const EditRole = () => {
         return;
       }
 
-      navigate('/admin/roles');
+      navigate('/roles');
     } catch (err) {
       setError('Failed to update role');
     }
@@ -204,7 +204,7 @@ const EditRole = () => {
             <div className="flex justify-end space-x-2">
               <button
                 type="button"
-                onClick={() => navigate('/admin/roles')}
+                onClick={() => navigate('/roles')}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
               >
                 Cancel

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiBell, FiMessageSquare, FiSettings, FiLogOut, FiX } from 'react-icons/fi';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -37,7 +36,7 @@ const Header = () => {
         console.log('User Info Response:', result);
         if (response.ok && result.status_code === 200) {
           setCurrentUser({
-            name: result.data.name || 'Unknown User',
+            name: result.data.user_name || 'Unknown User',
             avatar: result.data.avatar || '',
             role: result.data.role || 'user',
           });
@@ -137,11 +136,11 @@ const Header = () => {
             aria-expanded={isDropdownOpen}
           >
             <img
-              src={currentUser.avatar}
+              src={currentUser.avatar || '/src/assets/user-avatar.png'}
               alt="User avatar"
               className="w-8 h-8 rounded-full object-cover border-2 border-blue-500"
               onError={(e) => {
-                e.target.src = '';
+                e.target.src = '/src/assets/user-avatar.png';
                 e.target.onerror = null;
               }}
             />

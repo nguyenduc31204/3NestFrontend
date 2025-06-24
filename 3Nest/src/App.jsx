@@ -12,6 +12,10 @@ import AddUser from './pages/admin/User/AddUser';
 import EditUser from './pages/admin/User/EditUser';
 import UserDetail from './pages/admin/User/UserDetail';
 
+import RoleList from './pages/admin/Role/RoleList';
+import AddRole from './pages/admin/Role/AddRole';
+import EditRole from './pages/admin/Role/EditRole';
+import RoleDetail from './pages/admin/Role/RoleDetail';
 
 import ForgotPassword from './pages/Auth/ForgotPassword'
 
@@ -114,6 +118,27 @@ const App = () => {
             path="/reports" 
             element={ <ProtectedRoute permission="report:view"><Reports /></ProtectedRoute> } 
           />
+          {/* <Route
+            path="/roles"
+            element={<ProtectedRoute permission="role:manage"><RoleList /></ProtectedRoute>}
+          />
+          <Route
+            path="/roles/add"
+            element={<ProtectedRoute permission="role:manage"><AddRole /></ProtectedRoute>}
+          />
+          <Route
+            path="/roles/edit/:id"
+            element={<ProtectedRoute permission="role:manage"><EditRole /></ProtectedRoute>}
+          />
+          <Route
+            path="/roles/detail/:id"
+            element={<ProtectedRoute permission="role:manage"><RoleDetail /></ProtectedRoute>}
+          /> */}
+
+          <Route path="/roles" element={<RoleList />} />
+          <Route path="/roles/add" element={<AddRole />} />
+          <Route path="/roles/edit/:id" element={<EditRole />} />
+          <Route path="/roles/detail/:id" element={<RoleDetail />} />
         </Route>
 
         <Route path="*" element={<div><h1>404 Not Found</h1></div>} />

@@ -80,8 +80,7 @@ const getRoleName = (roleId) => {
 
   return (
     <>
-      <Header />
-      <DashboardLayout activeMenu="06">
+      
         <div className="my-5 mx-auto max-w-5xl">
           <div className="flex justify-between mb-4">
             <h1 className="text-xl font-semibold">Users</h1>
@@ -118,7 +117,7 @@ const getRoleName = (roleId) => {
             </tbody>
           </table>
         </div>
-      </DashboardLayout>
+     
     </>
   );
 };

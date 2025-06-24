@@ -34,7 +34,7 @@ const ForgotPassword = () => {
         email: data.email,
         phone: data.phone,
       }).toString();
-      const url = `${BASE_URL}/users/reset-password?${queryParams}`;
+      const url = `${BASE_URL}/users/forgot-password?${queryParams}`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -49,10 +49,10 @@ const ForgotPassword = () => {
       console.log('Reset Password API Response:', result); 
 
       if (response.ok && result.status_code === 200) {
-        setSuccess(result.message || 'Reset password link sent successfully. Check your email.');
+        setSuccess(result.mess || 'Password reset successfully. Check your email for the new password.');
         reset();
       } else {
-        throw new Error(result.message || 'Failed to process reset password request');
+        throw new Error(result.mess || 'Failed to process reset password request');
       }
     } catch (err) {
       setError(err.message || 'An error occurred');

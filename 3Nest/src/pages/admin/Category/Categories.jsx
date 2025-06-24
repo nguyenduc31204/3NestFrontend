@@ -83,8 +83,7 @@ const Categories = () => {
 
   return (
     <div>
-      <Header />
-      <DasboardLayout activeMenu="03">
+
         <div className='my-5 mx-auto'>
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
@@ -174,7 +173,6 @@ const Categories = () => {
             </div>
           </div>
         </div>
-      </DasboardLayout>
       <CategoryModal isOpen={modalOpen} onClose={() => setModalOpen(false)} category={editingCategory} onSubmitSuccess={loadProductsByTypeAndRole} />
     </div>
   );

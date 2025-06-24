@@ -161,7 +161,7 @@ const Products = () => {
 
   return (
     <div>
-      <Header />
+      
       <div className="my-5 mx-auto">
         <div className="content p-6 sm:p-10">
           <div className="flex items-center justify-between mb-8">
