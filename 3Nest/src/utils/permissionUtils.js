@@ -5,7 +5,7 @@
  * @returns {boolean}
  */
 export const hasPermission = (user, requiredPermission) => {
-    if (!user.permission) {
+    if (!user.permissions) {
       return true;
     }
   if (!user || !Array.isArray(user.permissions)) {
@@ -19,11 +19,28 @@ export const hasPermission = (user, requiredPermission) => {
 
   return user.permissions.some(p => {
     const typeMatch = p.permission_type_name.toLowerCase() === requiredType;
-    const currentPermissionName = p.permission_name.toLowerCase();
+    if (!typeMatch) return false;
 
-    return typeMatch && (currentPermissionName === requiredName || currentPermissionName === 'full control');
+    const currentPermissionName = p.permission_name.toLowerCase(); 
+
+    if (currentPermissionName === 'full control') {
+      return true;
+    }
+
+    if (currentPermissionName === 'manage' && 
+        (requiredName === 'manage' || requiredName === 'review' || requiredName === 'view')) {
+      return true;
+    }
+    
+    if (currentPermissionName === 'review' &&
+        (requiredName === 'review' || requiredName === 'view')) {
+      return true;
+    }
+    return currentPermissionName === requiredName;
   });
 };
+
+
 
 
 export const canAccess = (user, resourceType) => {

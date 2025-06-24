@@ -1,6 +1,6 @@
 
 
-export const BASE_URL = "https://49c4-1-53-88-216.ngrok-free.app"
+export const BASE_URL = "https://7ec9-123-16-147-238.ngrok-free.app"
 
 
 export const API_PATHS = {

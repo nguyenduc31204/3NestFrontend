@@ -74,7 +74,6 @@ const AddUser = () => {
 
   return (
     <>
-      <Header />
       {/* <DasboardLayout activeMenu="05"> */}
         <div className="my-5 mx-auto max-w-3xl">
           <div className="flex items-center justify-between mb-6">

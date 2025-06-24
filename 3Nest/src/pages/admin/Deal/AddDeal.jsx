@@ -26,7 +26,7 @@ const AddDealAdmin = () => {
   } = useForm({
     defaultValues: {
       deal_type: '',
-      description: '',
+      deal_description: '',
       tax_indentification_number: '',
       customer_name: '',
       domain_name: '',
@@ -114,7 +114,7 @@ const AddDealAdmin = () => {
       console.log("loi", result)
 
       if (result.data && result.data.deal_id) {
-        navigate(`/admin/editdeals/${result.data.deal_id}`);
+        navigate(`/deals/edit/${result.data.deal_id}`);
         toast.success('Add Deal Succsess!')
       } else {
         toast.error('The tax identification number has been used.');
@@ -335,7 +335,7 @@ const AddDealAdmin = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Description</label>
                       <textarea
-                        {...register('description')}
+                        {...register('deal_description')}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"
                         placeholder="Enter description"
                         rows="4"

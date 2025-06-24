@@ -114,8 +114,6 @@ const EditUser = () => {
 
   return (
     <>
-      <Header />
-      <DasboardLayout activeMenu="04">
         <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md">
           <h2 className="text-2xl font-semibold mb-4">Update User</h2>
           {loading ? (
@@ -178,7 +176,6 @@ const EditUser = () => {
             </form>
           )}
         </div>
-      </DasboardLayout>
     </>
   );
 };
