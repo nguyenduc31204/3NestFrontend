@@ -15,9 +15,10 @@ const RoleDetail = () => {
     const fetchDetail = async () => {
       try {
         const [roleRes, permRes] = await Promise.all([
-          fetch(`${BASE_URL}/roles/get-role?role_id=${id}`, {
+          fetch(`${BASE_URL}/roles/get-role?request_id=${id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+              'ngrok-skip-browser-warning': 'true',
             },
           }),
           fetch(`${BASE_URL}/permissions/get-permissions`, {
@@ -80,7 +81,7 @@ console.log("all permissions:", permissions);
               </div>
               <div>
                 <label className="block text-sm font-semibold">Description</label>
-                <div className="text-gray-700">{role.role_description}</div>
+                <div className="text-gray-700">{role.description}</div>
               </div>
               <div>
                 <label className="block text-sm font-semibold">Permissions</label>

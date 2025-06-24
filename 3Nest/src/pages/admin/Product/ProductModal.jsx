@@ -10,7 +10,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     product_role: '',
     category_id: '',
     sku_partnumber: '',
-    product_description: '',
+    description: '',
     price: '',
     maximum_discount: '',
     channel_cost: '',
@@ -67,26 +67,29 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     loadRoles();
   }, [loadCategories, loadRoles]);
 
-  useEffect(() => {
-    if (categories.length === 0) return;
+useEffect(() => {
+  if (categories.length === 0 || roles.length === 0) return;
 
-    if (product) {
-      setFormData({
-        ...product,
-        product_role: product.product_role?.toString() || '',
-        category_id: product.category_id?.toString() || '',
-        price: product.price ? String(product.price) : '',
-        maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
-        channel_cost: product.channel_cost ? String(product.channel_cost) : '',
-      });
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        category_id: categories[0]?.category_id?.toString() || '',
-        product_role: roles[0]?.role_id?.toString() || '',
-      }));
-    }
-  }, [product, categories, roles]);
+  if (product) {
+    setFormData({
+      product_name: product.product_name || '',
+      product_role: product.product_role?.toString() || roles[0]?.role_id?.toString() || '',
+      category_id: product.category_id?.toString() || categories[0]?.category_id?.toString() || '',
+      sku_partnumber: product.sku_partnumber || '',
+      description: product.description || '',
+      price: product.price ? String(product.price) : '',
+      maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
+      channel_cost: product.channel_cost ? String(product.channel_cost) : '',
+    });
+  } else {
+    setFormData((prev) => ({
+      ...prev,
+      product_role: roles[0]?.role_id?.toString() || '',
+category_id: categories[0]?.category_id?.toString() || '',
+    }));
+  }
+}, [product, categories, roles]);
+
 
   const handleNumberChange = (name, raw) => {
     const digits = raw.replace(/[^0-9]/g, '');
@@ -147,7 +150,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       product_role: parseInt(formData.product_role, 10),
       category_id: parseInt(formData.category_id, 10),
       sku_partnumber: formData.sku_partnumber,
-      product_description: formData.product_description,
+      description: formData.description,
       price: formData.price !== '' ? Number(formData.price) : 0,
       maximum_discount: formData.maximum_discount !== ''
         ? Number(formData.maximum_discount)
@@ -180,7 +183,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       alert('Tên sản phẩm đã tồn tại. Vui lòng chọn tên khác.');
     } else {
       alert(result.message || 'Failed to save product');
-    }
+}
   }
     } catch {
       alert('Error saving product');
@@ -276,7 +279,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
               min="0"
               max="100"
               value={formData.maximum_discount}
-              onChange={handleChange}
+onChange={handleChange}
               disabled={!isFieldEnabled('maximum_discount')}
               required={isFieldEnabled('maximum_discount')}
               className={`border p-2 w-full ${
@@ -306,9 +309,9 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
           </div>
 
           <textarea
-            name="product_description"
+            name="description"
             placeholder="Description"
-            value={formData.product_description}
+            value={formData.description}
             onChange={handleChange}
             className="border p-2 col-span-2"
           />

@@ -97,8 +97,10 @@ const RoleList = () => {
                       </button>
 
                       <button
-                        onClick={() => navigate(`/roles/detail/${role.role_id}`)}
-                        className="text-green-600 hover:underline"
+                        onClick={() => {
+                          console.log('Role detail click:', role);
+                          navigate(`/roles/detail/${role.role_id}`);
+                        }}
                       >
                         Detail
                       </button>

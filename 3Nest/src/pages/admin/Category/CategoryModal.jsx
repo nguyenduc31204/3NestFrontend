@@ -10,27 +10,35 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
   const isEdit = Boolean(category);
 
   useEffect(() => {
-    if (!isOpen) return;
+  if (!isOpen) return;
 
-    if (isEdit) {
-      setCategoryName(category.category_name || '');
-      setTypeId(category.type_id?.toString() || '');
-      setDescription(category.description || '');
-    } else {
-      setCategoryName('');
-      setTypeId('');
-      setDescription('');
-    }
+    const fetchTypesAndSetForm = async () => {
+      try {
+        const res = await axiosInstance.get("/types/get-types", {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
 
-    axiosInstance
-      .get("/types/get-types", {
-        headers: { 'ngrok-skip-browser-warning': 'true' }
-      })
-      .then(res => {
-        setTypes(res.data.data || []);
-      })
-      .catch(err => console.error("Fetch types error:", err));
+        const fetchedTypes = res.data.data || [];
+        setTypes(fetchedTypes);
+
+        if (isEdit && category) {
+          setCategoryName(category.category_name || '');
+          setDescription(category.description || '');
+          setTypeId(category.type_id?.toString() || '');
+        } else {
+          setCategoryName('');
+          setDescription('');
+          setTypeId(fetchedTypes[0]?.type_id?.toString() || '');
+        }
+      } catch (err) {
+        console.error("Fetch types error:", err);
+      }
+    };
+
+    fetchTypesAndSetForm();
   }, [isOpen, isEdit, category]);
+
+
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -101,14 +109,12 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
           >
             <option value="">-- Select Type --</option>
             {types.map(t => (
-              <option
-                key={t.type_id}
-                value={String(t.type_id)}  
-              >
+              <option key={t.type_id} value={String(t.type_id)}>
                 {t.type_name}
               </option>
             ))}
           </select>
+
 
           <textarea
             value={description}

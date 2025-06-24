@@ -17,50 +17,48 @@ const EditRole = () => {
   // Load permissions & role
   useEffect(() => {
     const fetchAll = async () => {
-      try {
-        const resPerm = await fetch(`${BASE_URL}/permissions/get-permissions`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            'ngrok-skip-browser-warning': 'true',
-          },
-        });
-        const permResult = await resPerm.json();
-        if (permResult.status_code !== 200) throw new Error('Permission load failed');
-        setPermissions(permResult.data);
+  try {
+    const resPerm = await fetch(`${BASE_URL}/permissions/get-permissions`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        'ngrok-skip-browser-warning': 'true',
+      },
+    });
+    const permResult = await resPerm.json();
+    if (permResult.status_code !== 200) throw new Error('Permission load failed');
+    setPermissions(permResult.data);
 
-        const resRole = await fetch(`${BASE_URL}/roles/get-role?role_id=${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          },
-        });
-        const roleResult = await resRole.json();
-        
-        console.log("Role API result:", roleResult);
-        if (roleResult.status_code !== 200) throw new Error('Role load failed');
+    const resRole = await fetch(`${BASE_URL}/roles/get-role?request_id=${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        'ngrok-skip-browser-warning': 'true',
+      },
+    });
+    const roleResult = await resRole.json();
+    if (roleResult.status_code !== 200) throw new Error('Role load failed');
 
+    console.log("🔥 roleResult.data:", roleResult.data);
 
-        const { role_name, role_description, permissions: rolePermIds } = roleResult.data;
-        setFormData({ role_name, role_description });
+    const { role_name, description, permissions: rolePerms } = roleResult.data;
 
-        const selected = {};
-        const types = {};
+    setFormData({ role_name, role_description: description });
 
-        rolePermIds.forEach(pid => {
-          const permObj = permResult.data.find(p => p.permission_id === pid);
-          if (permObj) {
-            selected[pid] = { type: permObj.permission_type_name };
-            types[permObj.permission_type_name] = true;
-          }
-        });
+    const selected = {};
+    const types = {};
 
-        setSelectedPermissions(selected);
-        setSelectedTypes(types);
-      } catch (err) {
-        setError('Failed to load role or permissions');
-      }
+    rolePerms.forEach(perm => {
+      selected[perm.permission_id] = { type: perm.permission_type_name };
+      types[perm.permission_type_name] = true;
+    });
 
-    };
-    
+    setSelectedPermissions(selected);
+    setSelectedTypes(types);
+  } catch (err) {
+    console.error("❌ Fetch error:", err);
+    setError('Failed to load role or permissions');
+  }
+};
+
 
     fetchAll();
   }, [id]);
@@ -91,7 +89,7 @@ const EditRole = () => {
   const handlePermissionSelect = (perm) => {
     setSelectedPermissions((prev) => {
       const updated = Object.entries(prev)
-        .filter(([pid]) => {
+.filter(([pid]) => {
           const permObj = permissions.find(p => p.permission_id === Number(pid));
           return permObj?.permission_type_name !== perm.permission_type_name;
         })
@@ -112,7 +110,7 @@ const EditRole = () => {
     const payload = {
       role_id: Number(id),
       role_name: formData.role_name,
-      role_description: formData.role_description,
+      role_description: formData.description,
       permissions: selectedPermissionIds,
     };
 
@@ -181,7 +179,13 @@ const EditRole = () => {
                   <label className="flex items-center space-x-2 font-medium text-gray-800 mb-2 capitalize">
                     <input
                       type="checkbox"
-                      checked={selectedTypes[typeName] || false}
+checked={
+                        selectedTypes[typeName] !== undefined
+                          ? selectedTypes[typeName]
+                          : Object.values(selectedPermissions).some(
+                              (perm) => perm.type === typeName
+                            )
+                      }
                       onChange={() => toggleType(typeName)}
                     />
                     <span>{typeName}</span>
