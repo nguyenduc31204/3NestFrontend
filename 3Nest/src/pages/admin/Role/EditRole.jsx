@@ -6,8 +6,9 @@ import { BASE_URL } from '../../../utils/apiPath';
 
 const EditRole = () => {
   const { id } = useParams();
+  console.log("URL param id:", id);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ role_name: '', description: '' });
+  const [formData, setFormData] = useState({ role_name: '', role_description: '' });
   const [permissions, setPermissions] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState({});
   const [selectedPermissions, setSelectedPermissions] = useState({});
@@ -16,45 +17,48 @@ const EditRole = () => {
   // Load permissions & role
   useEffect(() => {
     const fetchAll = async () => {
-      try {
-        const resPerm = await fetch(`${BASE_URL}/permissions/get-permissions`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            'ngrok-skip-browser-warning': 'true',
-          },
-        });
-        const permResult = await resPerm.json();
-        if (permResult.status_code !== 200) throw new Error('Permission load failed');
-        setPermissions(permResult.data);
+  try {
+    const resPerm = await fetch(`${BASE_URL}/permissions/get-permissions`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        'ngrok-skip-browser-warning': 'true',
+      },
+    });
+    const permResult = await resPerm.json();
+    if (permResult.status_code !== 200) throw new Error('Permission load failed');
+    setPermissions(permResult.data);
 
-        const resRole = await fetch(`${BASE_URL}/roles/get-role?request_id=${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          },
-        });
-        const roleResult = await resRole.json();
-        if (roleResult.status_code !== 200) throw new Error('Role load failed');
+    const resRole = await fetch(`${BASE_URL}/roles/get-role?request_id=${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        'ngrok-skip-browser-warning': 'true',
+      },
+    });
+    const roleResult = await resRole.json();
+    if (roleResult.status_code !== 200) throw new Error('Role load failed');
 
-        const { role_name, description, permissions: rolePermIds } = roleResult.data;
-        setFormData({ role_name, description });
+    console.log("🔥 roleResult.data:", roleResult.data);
 
-        const selected = {};
-        const types = {};
+    const { role_name, description, permissions: rolePerms } = roleResult.data;
 
-        rolePermIds.forEach(pid => {
-          const permObj = permResult.data.find(p => p.permission_id === pid);
-          if (permObj) {
-            selected[pid] = { type: permObj.permission_type_name };
-            types[permObj.permission_type_name] = true;
-          }
-        });
+    setFormData({ role_name, role_description: description });
 
-        setSelectedPermissions(selected);
-        setSelectedTypes(types);
-      } catch (err) {
-        setError('Failed to load role or permissions');
-      }
-    };
+    const selected = {};
+    const types = {};
+
+    rolePerms.forEach(perm => {
+      selected[perm.permission_id] = { type: perm.permission_type_name };
+      types[perm.permission_type_name] = true;
+    });
+
+    setSelectedPermissions(selected);
+    setSelectedTypes(types);
+  } catch (err) {
+    console.error("❌ Fetch error:", err);
+    setError('Failed to load role or permissions');
+  }
+};
+
 
     fetchAll();
   }, [id]);
@@ -85,7 +89,7 @@ const EditRole = () => {
   const handlePermissionSelect = (perm) => {
     setSelectedPermissions((prev) => {
       const updated = Object.entries(prev)
-        .filter(([pid]) => {
+.filter(([pid]) => {
           const permObj = permissions.find(p => p.permission_id === Number(pid));
           return permObj?.permission_type_name !== perm.permission_type_name;
         })
@@ -106,7 +110,7 @@ const EditRole = () => {
     const payload = {
       role_id: Number(id),
       role_name: formData.role_name,
-      description: formData.description,
+      role_description: formData.description,
       permissions: selectedPermissionIds,
     };
 
@@ -127,7 +131,7 @@ const EditRole = () => {
         return;
       }
 
-      navigate('/admin/roles');
+      navigate('/roles');
     } catch (err) {
       setError('Failed to update role');
     }
@@ -142,8 +146,7 @@ const EditRole = () => {
 
   return (
     <>
-      <Header />
-      <DashboardLayout activeMenu="05">
+      
         <div className="my-5 mx-auto max-w-2xl">
           <h1 className="text-xl font-semibold mb-4">Edit Role</h1>
           {error && <div className="mb-4 text-red-600">{error}</div>}
@@ -161,8 +164,8 @@ const EditRole = () => {
             <div>
               <label className="block text-sm font-medium">Description</label>
               <textarea
-                name="description"
-                value={formData.description}
+                name="role_description"
+                value={formData.role_description}
                 onChange={handleChange}
                 rows={3}
                 className="w-full border px-3 py-2 rounded"
@@ -176,7 +179,13 @@ const EditRole = () => {
                   <label className="flex items-center space-x-2 font-medium text-gray-800 mb-2 capitalize">
                     <input
                       type="checkbox"
-                      checked={selectedTypes[typeName] || false}
+checked={
+                        selectedTypes[typeName] !== undefined
+                          ? selectedTypes[typeName]
+                          : Object.values(selectedPermissions).some(
+                              (perm) => perm.type === typeName
+                            )
+                      }
                       onChange={() => toggleType(typeName)}
                     />
                     <span>{typeName}</span>
@@ -204,7 +213,7 @@ const EditRole = () => {
             <div className="flex justify-end space-x-2">
               <button
                 type="button"
-                onClick={() => navigate('/admin/roles')}
+                onClick={() => navigate('/roles')}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
               >
                 Cancel
@@ -218,7 +227,7 @@ const EditRole = () => {
             </div>
           </form>
         </div>
-      </DashboardLayout>
+
     </>
   );
 };

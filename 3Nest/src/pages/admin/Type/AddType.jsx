@@ -6,14 +6,14 @@ import DashboardLayout from '../../../components/layouts/DashboardLayout';
 
 const AddType = () => {
   const [typeName, setTypeName] = useState('');
-  const [description, setDescription] = useState('');
+  const [type_description, setDescription] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!typeName || !description) {
+    if (!typeName || !type_description) {
       setError('Please enter full fields');
       return;
     }
@@ -21,10 +21,10 @@ const AddType = () => {
     try {
       const response = await axiosInstance.post('/types/create-type', {
         type_name: typeName,
-        description: description,
+        type_description: type_description,
       });
       if ([200, 201].includes(response.status)) {
-        navigate('/admin/types');
+        navigate('/types');
       } else {
         setError('Cannot create new type');
       }
@@ -36,8 +36,7 @@ const AddType = () => {
 
   return (
     <div>
-      <Header />
-      <DashboardLayout activeMenu="type">
+      
         <div className="my-5 mx-auto">
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
@@ -70,7 +69,7 @@ const AddType = () => {
                     <textarea
                       className="mt-1 block w-full border border-gray-300 rounded px-3 py-2"
                       rows="3"
-                      value={description}
+                      value={type_description}
                       onChange={(e) => setDescription(e.target.value)}
                       required
                     />
@@ -78,7 +77,7 @@ const AddType = () => {
                   <div className="flex justify-end space-x-2">
                     <button
                       type="button"
-                      onClick={() => navigate('/admin/types')}
+                      onClick={() => navigate('/types')}
                       className="px-4 py-2 bg-gray-300 rounded"
                     >
                       Cancel
@@ -95,7 +94,7 @@ const AddType = () => {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+    
     </div>
   );
 };

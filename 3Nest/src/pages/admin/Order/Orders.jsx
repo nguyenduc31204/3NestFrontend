@@ -256,7 +256,7 @@ const OrdersPage = () => {
                           <Td>${(order.total_budget || 0).toLocaleString()}</Td>
                           <Td>{new Date(order.created_at).toLocaleDateString()}</Td>
                           
-                          {(hasPermission(user, 'order:view') || hasPermission(user, 'order:view')) && (
+                          {(hasPermission(user, 'order:view') || hasPermission(user, 'order:manage')) && (
                             <Td>
                               {hasPermission(user, 'order:view') && (
                                 <button
@@ -267,6 +267,7 @@ const OrdersPage = () => {
                                 </button>
                               )}
                             </Td>
+                            
                           )}
                         </tr>
                       ))

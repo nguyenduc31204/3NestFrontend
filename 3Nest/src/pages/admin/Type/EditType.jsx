@@ -11,7 +11,7 @@ const EditType = () => {
   const [formData, setFormData] = useState({
     type_id: '',
     type_name: '',
-    description: '',
+    type_description: '',
   });
 
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ const EditType = () => {
           setFormData({
             type_id: found.type_id,
             type_name: found.type_name || '',
-            description: found.description || '',
+            type_description: found.type_description || '',
           });
         } else {
           setError('Type not existed!');
@@ -58,7 +58,7 @@ const EditType = () => {
     try {
       await axiosInstance.post('/types/update-type', formData);
       setSuccess('Updated successfully!');
-      setTimeout(() => navigate('/admin/types'), 1500);
+      setTimeout(() => navigate('/types'), 1500);
     } catch (err) {
       setError('Update type error!');
     }
@@ -68,15 +68,14 @@ const EditType = () => {
 
   return (
     <div>
-      <Header />
-      <DashboardLayout activeMenu="type">
+      
         <div className="my-5 mx-auto">
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
               <div className="page-title">
                 <h1 className="text-2xl font-semibold text-gray-800 mb-2">Edit Type</h1>
                 <div className="breadcrumb text-gray-500 text-sm">
-                  <a href="#" className="hover:underline">Dashboard</a> / <a href="/admin/types" className="hover:underline">Types</a> / Edit
+                  <a href="#" className="hover:underline">Dashboard</a> / <a href="/types" className="hover:underline">Types</a> / Edit
                 </div>
               </div>
             </div>
@@ -100,8 +99,8 @@ const EditType = () => {
                   <div>
                     <label className="block text-sm font-medium">Description</label>
                     <textarea
-                      name="description"
-                      value={formData.description}
+                      name="type_description"
+                      value={formData.type_description}
                       onChange={handleChange}
                       className="mt-1 block w-full border border-gray-300 rounded px-3 py-2"
                       rows={4}
@@ -111,7 +110,7 @@ const EditType = () => {
                   <div className="flex justify-end space-x-2">
                     <button
                       type="button"
-                      onClick={() => navigate('/admin/types')}
+                      onClick={() => navigate('/types')}
                       className="px-4 py-2 bg-gray-300 rounded"
                     >
                       Cancel
@@ -128,7 +127,7 @@ const EditType = () => {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      
     </div>
   );
 };

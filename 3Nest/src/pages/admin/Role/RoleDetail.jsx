@@ -18,6 +18,7 @@ const RoleDetail = () => {
           fetch(`${BASE_URL}/roles/get-role?request_id=${id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+              'ngrok-skip-browser-warning': 'true',
             },
           }),
           fetch(`${BASE_URL}/permissions/get-permissions`, {
@@ -30,6 +31,10 @@ const RoleDetail = () => {
 
         const roleData = await roleRes.json();
         const permData = await permRes.json();
+        console.log("Role Response:", roleRes.status, roleData);
+        console.log("Permission Response:", permRes.status, permData);
+
+
 
         if (roleData.status_code === 200 && permData.status_code === 200) {
           setRole(roleData.data);
@@ -62,8 +67,7 @@ console.log("all permissions:", permissions);
 
   return (
     <>
-      <Header />
-      <DashboardLayout activeMenu="05">
+     
         <div className="my-5 mx-auto max-w-2xl">
           <h1 className="text-xl font-semibold mb-4">Role Detail</h1>
           {error && <div className="mb-4 text-red-600">{error}</div>}
@@ -94,7 +98,7 @@ console.log("all permissions:", permissions);
               </div>
               <div className="flex justify-end">
                 <button
-                  onClick={() => navigate('/admin/roles')}
+                  onClick={() => navigate('/roles')}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                 >
                   Back
@@ -103,7 +107,7 @@ console.log("all permissions:", permissions);
             </div>
           )}
         </div>
-      </DashboardLayout>
+    
     </>
   );
 };

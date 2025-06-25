@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react'
 import {
     LuCoins,
@@ -36,46 +35,56 @@ const Categories = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    loadProductsByTypeAndRole();
-  }, []);
-
   const loadProductsByTypeAndRole = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${BASE_URL}/categories/get-categories`, {
-        method: 'GET',
+      setError(null); // Reset error state
+      const response = await axiosInstance.get("/categories/get-categories", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
-        },
+        }
       });
-      const result = await response.json();
-      setProducts(result.data);
-      setLoading(false);
+      
+      if (response.data && response.data.data) {
+        setProducts(response.data.data);
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (err) {
       console.error("API Error:", err);
-      setError(`Failed to load products: ${err.message}`);
+      setError(`Failed to load categories: ${err.message}`);
+    } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadProductsByTypeAndRole();
+  }, []);
 
   const handleDelete = async (category_id) => {
     if (!window.confirm('Are you sure you want to delete this category?')) return;
     try {
       await axiosInstance.delete(`/categories/delete-category?category_id=${category_id}`);
-      loadProductsByTypeAndRole();
-      
+      await loadProductsByTypeAndRole(); // Reload after delete
     } catch (err) {
       console.error("Delete error", err);
       alert("Error deleting category");
     }
-    
   };
 
   const handleRefresh = () => {
     loadProductsByTypeAndRole();
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setEditingCategory(null);
+  };
+
+  const handleUpdateSuccess = async () => {
+    await loadProductsByTypeAndRole(); // Reload data after successful update
+    handleModalClose();
   };
 
   const totalPages = Math.ceil(products.length / itemsPerPage);
@@ -83,8 +92,7 @@ const Categories = () => {
 
   return (
     <div>
-      <Header />
-      <DasboardLayout activeMenu="03">
+      
         <div className='my-5 mx-auto'>
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
@@ -132,7 +140,7 @@ const Categories = () => {
                 )}
 
                 {loading ? (
-                  <div className="p-8 text-center text-blue-600">Loading products...</div>
+                  <div className="p-8 text-center text-blue-600">Loading categories...</div>
                 ) : (
                   <div className="table-responsive overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -174,8 +182,13 @@ const Categories = () => {
             </div>
           </div>
         </div>
-      </DasboardLayout>
-      <CategoryModal isOpen={modalOpen} onClose={() => setModalOpen(false)} category={editingCategory} onSubmitSuccess={loadProductsByTypeAndRole} />
+      
+      <CategoryModal 
+        isOpen={modalOpen} 
+        onClose={handleModalClose}
+        onSubmitSuccess={handleUpdateSuccess}
+        category={editingCategory} 
+      />
     </div>
   );
 };

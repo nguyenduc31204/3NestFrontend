@@ -80,4 +80,12 @@ export const SIDE_MENU_DATA = [
     resourceType: 'per_type', 
     ariaLabel: 'Navigate to per type reports',
   },
+  {
+    id: '10',
+    label: 'Roles',
+    icon: ListTree, 
+    path: '/roles',
+    resourceType: 'role',
+    ariaLabel: 'Navigate to roles',
+  },
 ];

@@ -4,7 +4,6 @@ import { FiSearch, FiBell, FiMessageSquare, FiSettings, FiLogOut, FiX } from 're
 import logo from '../../assets/3nestv8.png';
 import { useAuth } from '../../context/AuthContext';
 
-
 const UserProfileDropdown = ({ user, onLogout }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const settingsPath = user?.role_name === 'admin' ? '/admin/settings' : '/profile';
@@ -65,24 +64,26 @@ const HeaderIcons = () => (
   </>
 );
 
-
 const Header = () => {
   const { user, isLoading, logout } = useAuth();
-  
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     if (logout) {
-      await logout(); 
+      await logout();
     }
     navigate('/login');
   };
 
   if (isLoading) {
-    return <header className="sticky top-0 z-40 p-4 bg-white shadow-sm border-b border-gray-100 text-gray-400">Loading...</header>;
+    return (
+      <header className="sticky top-0 z-40 p-4 bg-white shadow-sm border-b border-gray-100 text-gray-400">
+        Loading...
+      </header>
+    );
   }
 
   if (!user) {
@@ -97,7 +98,7 @@ const Header = () => {
         </Link>
       </div>
 
-      {/* Search Bar - Desktop */}
+      {/* Search bar - desktop */}
       <div className="hidden md:flex flex-1 max-w-xl mx-4">
         <div className="relative w-full">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -114,9 +115,8 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Right Section: Icons and User Profile */}
+      {/* Right section: icons and user */}
       <div className="flex items-center space-x-2 sm:space-x-4">
-        {/* Search Icon for Mobile */}
         <button
           className="md:hidden p-2 text-gray-500 rounded-full hover:bg-gray-100"
           onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -124,12 +124,12 @@ const Header = () => {
         >
           <FiSearch className="w-5 h-5" />
         </button>
-        
+
         <HeaderIcons />
         <UserProfileDropdown user={user} onLogout={handleLogout} />
       </div>
 
-      {/* Mobile Search Bar - Full width when toggled */}
+      {/* Mobile search bar */}
       {isSearchOpen && (
         <div className="absolute top-16 left-0 right-0 p-4 bg-white border-b border-gray-100 md:hidden">
           <div className="relative">

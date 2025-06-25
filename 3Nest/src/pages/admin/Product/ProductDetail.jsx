@@ -64,7 +64,7 @@ const ProductDetail = ({ isOpen, onClose, product, roles = [] }) => {
                     <Field label="Description" value={product.description} />
                     <Field
                       label="Price"
-                      value={product.price ? Number(product.price).toLocaleString() : null}
+value={product.price ? Number(product.price).toLocaleString() : null}
                     />
                     <Field
                       label="Channel Cost"

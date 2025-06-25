@@ -6,7 +6,7 @@ import { BASE_URL } from '../../../utils/apiPath';
 
 const AddRole = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ role_name: '', description: '' });
+  const [formData, setFormData] = useState({ role_name: '', role_description: '' });
   const [error, setError] = useState(null);
 
   const [permissions, setPermissions] = useState([]);
@@ -104,7 +104,15 @@ const AddRole = () => {
           ...formData,
           permissions: selectedPermissionIds,
         }),
+        
       });
+      console.log(res);
+      const data = await res.json(); // 👈 Lấy JSON từ response
+
+      console.log("Create role response status:", res.status);
+      console.log("Create role response body:", data);
+
+      
 
       if (!res.ok) {
         const data = await res.json();
@@ -112,7 +120,7 @@ const AddRole = () => {
         return;
       }
 
-      navigate('/admin/roles');
+      navigate('/roles');
     } catch (err) {
       setError(err.message);
     }
@@ -128,8 +136,7 @@ const AddRole = () => {
 
   return (
     <>
-      <Header />
-      <DashboardLayout activeMenu="05">
+      
         <div className="my-5 mx-auto">
           <div className="content p-6 sm:p-10 flex justify-center">
             <div className="w-full max-w-2xl">
@@ -137,7 +144,7 @@ const AddRole = () => {
                 <div>
                   <h1 className="text-2xl font-semibold text-gray-800 mb-1">Role Management</h1>
                   <div className="text-gray-500 text-sm">
-                    <a href="/admin/dashboard" className="hover:underline">Dashboard</a> / <a href="/admin/roles" className="hover:underline">Roles</a> / Add
+                    <a href="/admin/dashboard" className="hover:underline">Dashboard</a> / <a href="/roles" className="hover:underline">Roles</a> / Add
                   </div>
                 </div>
               </div>
@@ -160,8 +167,8 @@ const AddRole = () => {
                   <div>
                     <label className="block text-sm font-medium mb-1">Description</label>
                     <textarea
-                      name="description"
-                      value={formData.description}
+                      name="role_description"
+                      value={formData.role_description}
                       onChange={handleChange}
                       rows={3}
                       className="w-full border px-3 py-2 rounded"
@@ -207,7 +214,7 @@ const AddRole = () => {
                   <div className="flex justify-end space-x-2">
                     <button
                       type="button"
-                      onClick={() => navigate('/admin/roles')}
+                      onClick={() => navigate('/roles')}
                       className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                     >
                       Cancel
@@ -224,7 +231,7 @@ const AddRole = () => {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+     
     </>
   );
 };
