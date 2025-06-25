@@ -97,7 +97,7 @@ const App = () => {
           />
           <Route 
             path="/orders/edit/:order_id" 
-            element={ <ProtectedRoute permission="order:manage"><EditOrderAdmin /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="order:view"><EditOrderAdmin /></ProtectedRoute> } 
           />
 
           {/* deal */}
@@ -111,7 +111,7 @@ const App = () => {
           />
           <Route 
             path="/deals/edit/:deal_id" 
-            element={ <ProtectedRoute permission="deal:manage"><EditDealPage /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="deal:view"><EditDealPage /></ProtectedRoute> } 
           />
 
           {/* user */}

@@ -3,17 +3,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast, Toaster } from 'react-hot-toast';
 import { BASE_URL } from '../../../utils/apiPath';
 import { hasPermission } from '../../../utils/permissionUtils';
+import { useAuth } from '../../../context/AuthContext';
 
-const useUser = () => {
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate();
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) setUser(JSON.parse(storedUser));
-    else navigate('/login');
-  }, [navigate]);
-  return user;
-};
+// const useUser = () => {
+//   const [user, setUser] = useState(null);
+//   const navigate = useNavigate();
+//   useEffect(() => {
+//     const storedUser = localStorage.getItem('user');
+//     if (storedUser) setUser(JSON.parse(storedUser));
+//     else navigate('/login');
+//   }, [navigate]);
+//   return user;
+  
+// };
+
+
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, processing, title, message }) => {
   if (!isOpen) return null;
@@ -44,8 +48,8 @@ const InfoField = ({ label, value }) => (
 const EditDealPage = () => {
   const navigate = useNavigate();
   const { deal_id } = useParams();
-  const loggedInUser = useUser();
-  console.log('loggedInUser:', loggedInUser);
+  // const loggedInUser = useUser();
+  // console.log('loggedInUser:', loggedInUser);
 
   const [dealData, setDealData] = useState(null);
   const [dealCreatorInfo, setDealCreatorInfo] = useState(null); // State mới cho thông tin người tạo
@@ -55,12 +59,16 @@ const EditDealPage = () => {
   const [processing, setProcessing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [activeRoleId, setActiveRoleId] = useState(0);
+  const { user, isLoading: isAuthLoading } = useAuth();
+
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
   
 
   const token = useMemo(() => localStorage.getItem('access_token'), []);
 
   const fetchData = useCallback(async () => {
-    if (!token || !deal_id || !loggedInUser) return;
+    if (!token || !deal_id || !user) return;
     
     setLoading(true);
     setError(null);
@@ -87,7 +95,7 @@ const EditDealPage = () => {
       if (myInforResult.data.user_id === fetchedDeal.user_id) {
         setDealCreatorInfo(myInforResult.data);
         console.log('12:', myInforResult.data);
-      } else if (hasPermission(loggedInUser, 'deal:Full control')) {
+      } else if (hasPermission(user, 'deal:Full control')) {
         // Trường hợp admin xem deal của người khác -> Gọi API lấy thông tin
         const creatorResponse = await fetch(`${BASE_URL}/users/get-user?user_id=${fetchedDeal.user_id}`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
         const creatorResult = await creatorResponse.json();
@@ -104,7 +112,38 @@ const EditDealPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [deal_id, token, loggedInUser]);
+  }, [deal_id, token, user]);
+  const handleChangeStatus = useCallback(async (newStatus, reason = '') => {
+    if (newStatus === 'rejected' && !reason.trim()) {
+      toast.error('Please provide a reason for rejection.');
+      return;
+    }
+    
+    setProcessing(true);
+    try {
+      const response = await fetch(`${BASE_URL}/deals/change-status-of-deal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify({ deal_id: parseInt(deal_id), status: newStatus, reason: reason }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || `Failed to ${newStatus} deal`);
+      
+      setDealData(prev => ({ ...prev, status: newStatus }));
+      toast.success(`Deal has been ${newStatus}.`);
+      setShowRejectModal(false);
+      setRejectReason('');
+
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setProcessing(false);
+    }
+  }, [deal_id, token]);
 
   useEffect(() => {
     fetchData();
@@ -185,7 +224,7 @@ const EditDealPage = () => {
               
             </div>
             <div className='mb-6 flex flex-col sm:flex-row justify-end gap-4 w-1/5 ml-auto'>
-              {dealData?.status === 'approved' && hasPermission(loggedInUser, 'order:manage') && (
+              {dealData?.status === 'approved' && hasPermission(user, 'order:manage') && (
               <button onClick={() => navigate(`/orders/add?deal_id=${deal_id}`)} disabled={processing} className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 font-medium">
                 + Add Order to Deal
               </button>
@@ -228,16 +267,28 @@ const EditDealPage = () => {
                   {/* <h2 className="text-xl font-semibold mb-4">Actions</h2> */}
                   <div className="space-y-4">
                     
-                    {dealData?.status === 'draft' && hasPermission(loggedInUser, 'deal:manage') && (
+                    {dealData?.status === 'draft' && hasPermission(user, 'deal:manage') && (
+                    <>
                       <button onClick={handleSubmitDeal} disabled={processing} className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium disabled:opacity-50">
                         {processing ? 'Submitting...' : 'Submit Deal'}
                       </button>
-                    )}
-                    {dealData?.status === 'draft' && hasPermission(loggedInUser, 'deal:manage') && (
                       <button onClick={() => setShowConfirm(true)} disabled={processing} className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 font-medium disabled:opacity-50">
                         Discard Deal
                       </button>
-                    )}
+                    </>
+                  )}
+
+                  {/* Nút Approve và Reject cho người có quyền review */}
+                  {dealData?.status === 'submitted' && (user?.role_name === 'manager') && (
+                    <>
+                      <button onClick={() => handleChangeStatus('approved')} disabled={processing} className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 font-medium disabled:opacity-50">
+                        {processing ? 'Processing...' : 'Approve'}
+                      </button>
+                      <button onClick={() => setShowRejectModal(true)} disabled={processing} className="w-full bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 font-medium disabled:opacity-50">
+                        Reject
+                      </button>
+                    </>
+                  )}
                     {dealData?.status !== 'draft' && dealData?.status !== 'approved' && <p className="text-sm text-gray-500">No actions available for this deal status.</p>}
                   </div>
                 </div>
@@ -319,6 +370,28 @@ const EditDealPage = () => {
         </div>
       {/* </DashboardLayout> */}
       <ConfirmationModal isOpen={showConfirm} onClose={() => setShowConfirm(false)} onConfirm={handleDiscardDeal} title="Confirm Discard" message="Are you sure? This action cannot be undone." processing={processing} />
+
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Reason for Rejection</h2>
+            <p className="text-sm text-gray-600 mb-4">Please provide a reason for rejecting this deal.</p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows="4"
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter reason here..."
+            />
+            <div className="flex justify-end space-x-3 mt-6">
+              <button onClick={() => setShowRejectModal(false)} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 font-medium">Cancel</button>
+              <button onClick={() => handleChangeStatus('rejected', rejectReason)} disabled={processing} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium disabled:opacity-50">
+                {processing ? 'Rejecting...' : 'Confirm Reject'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

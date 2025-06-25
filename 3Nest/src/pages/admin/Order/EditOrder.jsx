@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../../utils/apiPath';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
+import { hasPermission } from '../../../utils/permissionUtils';
 
 const OrderDetailRow = ({ detail, index, user }) => {
   const isChannel = user?.role_name === 'channel';
@@ -46,6 +47,11 @@ const EditOrderAdmin = () => {
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const { user } = useAuth();
 
+  console.log('Current user:', user);
+
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+
   useEffect(() => {
     let isMounted = true;
 
@@ -81,6 +87,7 @@ const EditOrderAdmin = () => {
 
         const detailsResponse = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${order_id}`, { headers });
         const detailsResult = await detailsResponse.json();
+        console.log('Order details:', detailsResult);
         if (!detailsResponse.ok || detailsResult.status_code !== 200) {
           throw new Error(detailsResult.message || 'Failed to load order details');
         }
@@ -105,6 +112,51 @@ const EditOrderAdmin = () => {
       isMounted = false;
     };
   }, [order_id]);
+
+  const handleChangeStatus = useCallback(async (newStatus, reason = '') => {
+    if (newStatus === 'rejected' && !reason.trim()) {
+      toast.error('Please provide a reason for rejection.');
+      return;
+    }
+    
+    try {
+      setProcessing(true);
+      setError(null);
+
+      const requestBody = {
+        order_id: parseInt(order_id),
+        status: newStatus,
+        reason: reason,
+      };
+
+      const response = await fetch(`${BASE_URL}/orders/change-status-of-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const result = await response.json();
+      if (!response.ok || result.status_code !== 200) {
+        throw new Error(result.message || `Failed to ${newStatus} order`);
+      }
+      
+      setOrder(prev => ({ ...prev, status: newStatus }));
+      toast.success(`Order has been ${newStatus}.`);
+      
+      // Đóng modal nếu có
+      if (showRejectModal) setShowRejectModal(false);
+      
+    } catch (err) {
+      setError(err.message);
+      toast.error(err.message || 'An error occurred.');
+    } finally {
+      setProcessing(false);
+    }
+  }, [order_id, showRejectModal]);
 
   const handleSubmitOrder = useCallback(async () => {
     try {
@@ -379,6 +431,31 @@ const EditOrderAdmin = () => {
               {processing ? 'Submitting...' : 'Submit Order'}
             </button>
           )}
+
+          {isSubmitted && (user?.role_name === 'manager') && (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowRejectModal(true)}
+                disabled={processing}
+                className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 ${
+                  processing ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                Reject
+              </button>
+              <button
+                type="button"
+                onClick={() => handleChangeStatus('approved')}
+                disabled={processing}
+                className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 ${
+                  processing ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {processing ? 'Processing...' : 'Approve'}
+              </button>
+            </>
+          )}
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -388,6 +465,39 @@ const EditOrderAdmin = () => {
             Back
           </button>
         </div>
+
+        {showRejectModal && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+              <h2 className="text-lg font-semibold mb-4">Reason for Rejection</h2>
+              <p className="text-sm text-gray-600 mb-4">Please provide a reason for rejecting this order. This will be visible to the user who created the order.</p>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows="4"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter reason here..."
+              />
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setShowRejectModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleChangeStatus('rejected', rejectReason)}
+                  disabled={processing}
+                  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 ${
+                    processing ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {processing ? 'Rejecting...' : 'Confirm Reject'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showDiscardConfirm && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">

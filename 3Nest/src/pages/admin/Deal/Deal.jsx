@@ -14,8 +14,6 @@ import {
 } from 'react-icons/lu';
 import { hasPermission } from '../../../utils/permissionUtils';
 import { BASE_URL } from '../../../utils/apiPath';
-import Header from '../../../components/layouts/Header';
-import DashboardLayout from '../../../components/layouts/DashboardLayout';
 
 
 
@@ -106,27 +104,33 @@ const DealsPage = () => {
       setError(null);
       
       try {
-        if (hasPermission(user, 'deal:Full control')) {
-          if (roles.length === 0) {
-            const rolesResponse = await fetch(`${BASE_URL}/roles/get-roles`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
-            if (!rolesResponse.ok) throw new Error('Failed to fetch roles');
-            const rolesResult = await rolesResponse.json();
-            const availableRoles = rolesResult.data || [];
-            setRoles(availableRoles);
-            
-            if (!activeRoleId) {
-              const adminRole = availableRoles.find(r => r.role_name.toLowerCase() === 'admin');
-              if (adminRole) setActiveRoleId(adminRole.role_id);
-              else setActiveRoleId(user.role_id);
-            }
-          }
+        if (hasPermission(user, 'deal:review')) {
           
-          const roleIdToFetch = activeRoleId || user.role_id;
+          const rolesResponse = await fetch(`${BASE_URL}/roles/get-roles`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
+          if (!rolesResponse.ok) throw new Error('Failed to fetch roles');
+          const rolesResult = await rolesResponse.json();
+          console.log('Roles fetched:', rolesResult);
+          const availableRoles = rolesResult.data || [];
+          setRoles(availableRoles);
+          
+          const adminRole = availableRoles.find(role => role.role_name.toLowerCase() === 'admin');
+
+          const managerRole = availableRoles.find(role => role.role_name.toLowerCase() === 'manager');
+
+          const defaultRole = adminRole || managerRole;
+          
+          if (!activeRoleId && defaultRole) {
+            setActiveRoleId(defaultRole.role_id);
+          }
+          console.log('Available roles:', availableRoles);
+          
+          
+          const roleIdToFetch = activeRoleId || adminRole?.role_id || managerRole?.role_id || user.role_id;
           console.log('Fetching deals for role ID:', roleIdToFetch);
           const dealsResponse = await fetch(`${BASE_URL}/deals/get-deals-by-role?role_id=${roleIdToFetch}`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
           // if (!dealsResponse.ok) throw new Error('Failed to fetch deals by role');
           const dealsResult = await dealsResponse.json();
-          console.log('Deals by role:', dealsResult);
+          console.log('Deals by role1:', dealsResult);
           setDeals(dealsResult.data || []);
 
         } else {
@@ -189,7 +193,7 @@ const DealsPage = () => {
             <div className="flex flex-wrap items-center justify-between p-4 border-b gap-4">
               <h2 className="text-lg font-semibold">Deal List</h2>
               <div className="flex items-center space-x-2 flex-wrap gap-2">
-                {hasPermission(user, 'deal:full control') && roles.map((role) => (
+                {hasPermission(user, 'deal:review') && roles.map((role) => (
                   <RoleButton
                     key={role.role_id}
                     current={activeRoleId}
