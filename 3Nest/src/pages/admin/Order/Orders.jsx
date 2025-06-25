@@ -93,7 +93,7 @@ const OrdersPage = () => {
       navigate('/login');
     }
   }, [navigate]);
-
+  console.log('User:', user);
   useEffect(() => {
     if (!user) return; 
 
@@ -102,7 +102,7 @@ const OrdersPage = () => {
       setError(null);
       
       try {
-        if (hasPermission(user, 'order:Full control')) {
+        if (hasPermission(user, 'order:review')) {
           const rolesResponse = await fetch(`${BASE_URL}/roles/get-roles`, {
             headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' },
           });
@@ -112,16 +112,21 @@ const OrdersPage = () => {
           setRoles(availableRoles);
 
           const adminRole = availableRoles.find(role => role.role_name.toLowerCase() === 'admin');
+
+          const managerRole = availableRoles.find(role => role.role_name.toLowerCase() === 'manager');
+
+          const defaultRole = adminRole || managerRole;
           
-          if (!activeRoleId && adminRole) {
-            setActiveRoleId(adminRole.role_id);
+          if (!activeRoleId && defaultRole) {
+            setActiveRoleId(defaultRole.role_id);
           }
 
-          const roleIdToFetch = activeRoleId || (adminRole ? adminRole.role_id : user.role_id);
+          const roleIdToFetch = activeRoleId || adminRole?.role_id || managerRole?.role_id || user.role_id;
           
           const ordersResponse = await fetch(`${BASE_URL}/orders/get-orders-by-role?role_id=${roleIdToFetch}`, {
             headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' },
           });
+          console.log('Fetching orders for role ID:', roleIdToFetch);
           if (!ordersResponse.ok) throw new Error(`Failed to fetch orders for role ID: ${roleIdToFetch}`);
           const ordersResult = await ordersResponse.json();
           console.log('Orders Result:', ordersResult);
@@ -131,9 +136,11 @@ const OrdersPage = () => {
           const ordersResponse = await fetch(`${BASE_URL}/orders/get-orders-by-user`, {
             headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' },
           });
+          console.log('2:', user.user_id);
           if (!ordersResponse.ok) throw new Error('Failed to fetch your orders');
           const ordersResult = await ordersResponse.json();
-          setOrders(ordersResult.data || []);
+          setOrders(ordersResult.data.orders || []);
+          console.log('Orders222:', ordersResult.data);
         }
       } catch (err) {
         setError(err.message);
@@ -194,7 +201,7 @@ const OrdersPage = () => {
               <h2 className="text-lg font-semibold">Order List</h2>
               <div className="flex items-center space-x-2 flex-wrap gap-2">
                 {/* Bộ lọc role chỉ hiển thị cho người có quyền Full control */}
-                {hasPermission(user, 'order:Full control') && roles.map((role) => (
+                {hasPermission(user, 'order:review') && roles.map((role) => (
                   <RoleButton
                     key={role.role_id}
                     current={activeRoleId}

@@ -5,9 +5,11 @@
  * @returns {boolean}
  */
 export const hasPermission = (user, requiredPermission) => {
-  if (!user.permissions) {
-    return true; // fallback nếu không có quyền rõ ràng (ví dụ admin)
-  }
+
+  console.log("Checking permission:", requiredPermission, "for user:", user);
+    if (!user.permissions) {
+      return true;
+    }
 
   if (!user || !Array.isArray(user.permissions)) {
     return false;
@@ -19,38 +21,39 @@ export const hasPermission = (user, requiredPermission) => {
   const requiredType = parts[0].toLowerCase();
   const requiredName = parts[1].toLowerCase();
 
-  return user.permissions.some(p => {
+  for (const p of user.permissions) {
     const typeMatch = p.permission_type_name.toLowerCase() === requiredType;
-    if (!typeMatch) return false;
 
-    const currentPermissionName = p.permission_name.toLowerCase();
+    if (typeMatch) {
+      const currentPermissionName = p.permission_name.toLowerCase().trim(); 
 
-    // full control luôn được phép
-    if (currentPermissionName === 'full control') return true;
+      if (currentPermissionName === 'full control') {
+        return true;
+      }
 
-    // quyền "manage" bao gồm cả "review" và "view"
-    if (currentPermissionName === 'manage' &&
-      (requiredName === 'manage' || requiredName === 'review' || requiredName === 'view')) {
-      return true;
+      // Nếu quyền của user là 'manage', họ có quyền manage, review, và view
+      if (currentPermissionName === 'manage' && 
+          (requiredName === 'manage' || requiredName === 'view')) {
+        return true;
+      }
+      
+      // Nếu quyền của user là 'review', họ có quyền review và view
+      if (currentPermissionName === 'review' &&
+          (requiredName === 'review' || requiredName === 'view')) {
+        return true;
+      }
+      
+      // Trường hợp cuối: quyền phải khớp chính xác
+      if (currentPermissionName === requiredName) {
+        return true;
+      }
     }
+  }
 
-    // quyền "review" bao gồm cả "view"
-    if (currentPermissionName === 'review' &&
-      (requiredName === 'review' || requiredName === 'view')) {
-      return true;
-    }
-
-    return currentPermissionName === requiredName;
-  });
+  return false;
 };
 
 
-/**
- * Kiểm tra xem người dùng có quyền truy cập vào loại tài nguyên không.
- * @param {object} user - Đối tượng người dùng.
- * @param {string} resourceType - Loại tài nguyên (VD: 'user', 'order').
- * @returns {boolean}
- */
 export const canAccess = (user, resourceType) => {
   if (!user || !Array.isArray(user.permissions)) return false;
   if (!resourceType || typeof resourceType !== 'string') return false;
