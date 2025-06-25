@@ -52,7 +52,7 @@ const EditDealPage = () => {
   // console.log('loggedInUser:', loggedInUser);
 
   const [dealData, setDealData] = useState(null);
-  const [dealCreatorInfo, setDealCreatorInfo] = useState(null); // State mới cho thông tin người tạo
+  const [dealCreatorInfo, setDealCreatorInfo] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,7 +95,7 @@ const EditDealPage = () => {
       if (myInforResult.data.user_id === fetchedDeal.user_id) {
         setDealCreatorInfo(myInforResult.data);
         console.log('12:', myInforResult.data);
-      } else if (hasPermission(user, 'deal:Full control')) {
+      } else if (hasPermission(user, 'deal:review')) {
         // Trường hợp admin xem deal của người khác -> Gọi API lấy thông tin
         const creatorResponse = await fetch(`${BASE_URL}/users/get-user?user_id=${fetchedDeal.user_id}`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
         const creatorResult = await creatorResponse.json();
@@ -189,6 +189,7 @@ const EditDealPage = () => {
       setProcessing(false);
     }
   };
+  console.log('dealCreatorInfo', dealCreatorInfo);
   const handleDiscardDeal = async () => {
     setProcessing(true);
     try {
