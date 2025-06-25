@@ -1,8 +1,6 @@
 
 export const BASE_URL = "https://a136-42-113-156-214.ngrok-free.app"
 
-
-
 export const API_PATHS = {
     AUTH: {
         LOGIN: "/users/login",

@@ -81,7 +81,7 @@ const Login = () => {
         console.log('Decoded token:', decoded);
 
         //console.log('Decoded token:', decoded);
-         navigate('/orders');
+         navigate('/products');
 
 
         // switch (decoded?.role?.toLowerCase()) {

@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import { decodeToken } from '../../../utils/help';
 import ProductModal from './ProductModal';
 import ProductDetail from './ProductDetail';
+import { hasPermission } from '../../../utils/permissionUtils';
+
 
 const Products = () => {
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ const Products = () => {
   const token = localStorage.getItem('access_token');
   const decode = decodeToken(token);
   const currentRoleName = decode?.role || localStorage.getItem('role');
+  const permissions = decode?.permissions || [];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -34,6 +37,17 @@ const Products = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -103,14 +117,42 @@ const Products = () => {
   }, [token]);
 
   useEffect(() => {
-    if (selectedTypeId && activeRoleId) {
-      loadProductsByTypeAndRole(activeRoleId, selectedTypeId);
-    }
-  }, [selectedTypeId, activeRoleId]);
+  if (!activeRoleId || !selectedTypeId || !user) return;
+
+  if (canManage) {
+    loadProductsByTypeAndRole(activeRoleId, selectedTypeId);
+  } else if (canView) {
+    loadProductsByRole(activeRoleId);
+  }
+}, [activeRoleId, selectedTypeId, currentRoleName, user]);
+
+
 
   const loadProductsByTypeAndRole = async (roleId, typeId) => {
     try {
       const url = `${BASE_URL}/products/get-products-by-role-and-type?role_id=${roleId}&type_id=${typeId}`;
+      console.log("Fetching products with URL:", url);
+      const res = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const result = await res.json();
+      if (res.ok && result.status_code === 200) {
+        setProducts(result.data || []);
+      } else {
+        setError(result.message || 'Failed to load products');
+      }
+    } catch (err) {
+      setError(`Failed to load products: ${err.message}`);
+    }
+  };
+
+  const loadProductsByRole = async (roleId) => {
+    try {
+      const url = `${BASE_URL}/products/get-products-by-role?role_id=${roleId}`;
       const res = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -151,13 +193,35 @@ const Products = () => {
     }
   };
 
-  const handleRefresh = () => loadProductsByTypeAndRole(activeRoleId, selectedTypeId);
+  const handleRefresh = () => {
+  if (canManage) {
+    loadProductsByTypeAndRole(activeRoleId, selectedTypeId);
+  } else if (canView) {
+    loadProductsByRole(activeRoleId);
+  }
+};
+
+
+
   const handleRoleChange = (newRoleId) => setActiveRoleId(newRoleId);
   const handleTypeChange = (e) => setSelectedTypeId(e.target.value);
   const openDetail = (product) => {
     setDetailProduct(product);
     setIsDetailOpen(true);
   };
+
+  const canFullControl = user && hasPermission(user, 'product:full-control');
+  const canManage = user && (hasPermission(user, 'product:manage') || canFullControl || currentRoleName === 'admin');
+  const canView = user && (hasPermission(user, 'product:view') || canManage);
+
+  if (!user) return <div className="p-8 text-center">Initializing…</div>;
+
+  if (!canView) {
+    return <div className="p-8 text-center text-red-600">Do not have permission accessing this page</div>;
+  }
+
+
+
 
   return (
     <div>
@@ -171,7 +235,7 @@ const Products = () => {
                 <a href="#" className="hover:underline">Dashboard</a> / Products
               </div>
             </div>
-            {currentRoleName === 'admin' && (
+            {canManage && (
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
                 onClick={() => {
@@ -201,7 +265,9 @@ const Products = () => {
               </div>
             </div>
 
+
             <div className="p-4 border-b grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50">
+              {hasPermission(user, 'role:manage') && (
               <div>
                 <label className="block text-sm font-medium mb-1">Product Type</label>
                 <select
@@ -214,7 +280,8 @@ const Products = () => {
                   ))}
                 </select>
               </div>
-              {currentRoleName === 'admin' && (
+              )}
+              {hasPermission(user, 'role:manage') && (
                 <div className="flex items-end space-x-2">
                   {roles.map((r) => (
                     <RoleButton
@@ -267,7 +334,7 @@ const Products = () => {
                       <Td>
                         <button
                           className="text-blue-600 hover:underline mr-2" onClick={() => openDetail(product)}> Detail</button>
-                        {currentRoleName === 'admin' && (
+                        {canManage && (
                           <>
                             <button className="text-indigo-600 hover:underline mr-2" onClick={() => { setEditingProduct(product); setIsModalOpen(true); }}>Edit</button>
                             <button className="text-red-600 hover:underline" onClick={() => handleDelete(product.product_id)}>Delete</button>

@@ -76,7 +76,7 @@ useEffect(() => {
       product_role: product.product_role?.toString() || roles[0]?.role_id?.toString() || '',
       category_id: product.category_id?.toString() || categories[0]?.category_id?.toString() || '',
       sku_partnumber: product.sku_partnumber || '',
-      description: product.description || '',
+      description: product.description || product.product_description || '',
       price: product.price ? String(product.price) : '',
       maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
       channel_cost: product.channel_cost ? String(product.channel_cost) : '',
@@ -150,7 +150,7 @@ category_id: categories[0]?.category_id?.toString() || '',
       product_role: parseInt(formData.product_role, 10),
       category_id: parseInt(formData.category_id, 10),
       sku_partnumber: formData.sku_partnumber,
-      description: formData.description,
+      product_description: formData.description,
       price: formData.price !== '' ? Number(formData.price) : 0,
       maximum_discount: formData.maximum_discount !== ''
         ? Number(formData.maximum_discount)
@@ -279,7 +279,7 @@ category_id: categories[0]?.category_id?.toString() || '',
               min="0"
               max="100"
               value={formData.maximum_discount}
-onChange={handleChange}
+              onChange={handleChange}
               disabled={!isFieldEnabled('maximum_discount')}
               required={isFieldEnabled('maximum_discount')}
               className={`border p-2 w-full ${

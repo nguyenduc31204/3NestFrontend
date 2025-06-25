@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../utils/axiosInstance';
 import DasboardLayout from '../../../components/layouts/DashboardLayout';
 import Header from '../../../components/layouts/Header';
+import { hasPermission } from '../../../utils/permissionUtils';
 import {
   LuArrowDownToLine,
   LuArrowUpNarrowWide,
@@ -14,8 +15,10 @@ const TypeDetail = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [user, setUser] = useState(null);
   const itemsPerPage = 10;
   const navigate = useNavigate();
+  
 
   const fetchTypes = async () => {
     try {
@@ -40,12 +43,29 @@ const TypeDetail = () => {
     }
   };
 
+
   useEffect(() => {
-    fetchTypes();
-  }, []);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      if (hasPermission(parsedUser, 'type:view')) {
+        fetchTypes();
+      }
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const totalPages = Math.ceil(types.length / itemsPerPage);
   const paginatedData = types.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  if (!user) return <div className="p-8 text-center">Initializing…</div>;
+
+  if (!hasPermission(user, 'type:view')) {
+    return <div className="p-8 text-center text-red-600">Bạn không có quyền truy cập trang này.</div>;
+  }
+
+  
 
   return (
     <div>
@@ -60,12 +80,14 @@ const TypeDetail = () => {
                 </div>
               </div>
               <div className="action-buttons mb-2">
-                <button
-                  onClick={() => navigate('/types/add')}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                  + Add Type
-                </button>
+                {hasPermission(user, 'role:manage') && (
+                  <button
+                    onClick={() => navigate('/types/add')}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                  >
+                    + Add Type
+                  </button>
+                )}
               </div>
             </div>
 
@@ -106,7 +128,9 @@ const TypeDetail = () => {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type Name</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          {hasPermission(user, 'role:manage') && (
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          )}
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -115,20 +139,22 @@ const TypeDetail = () => {
                             <td className="px-6 py-4 text-sm text-gray-900">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                             <td className="px-6 py-4 text-sm text-gray-900">{type.type_name}</td>
                             <td className="px-6 py-4 text-sm text-gray-900">{type.type_description}</td>
-                            <td className="px-6 py-4 text-sm text-gray-900 space-x-2">
-                              <button
-                                className="bg-blue-600 text-white px-3 py-1 rounded"
-                                onClick={() => navigate(`/types/edit/${type.type_id}`)}
-                              >
-                                Update
-                              </button>
-                              <button
-                                className="bg-red-600 text-white px-3 py-1 rounded"
-                                onClick={() => handleDelete(type.type_id)}
-                              >
-                                Delete
-                              </button>
-                            </td>
+                            {hasPermission(user, 'role:manage') && (
+                              <td className="px-6 py-4 text-sm text-gray-900 space-x-2">
+                                <button
+                                  className="bg-blue-600 text-white px-3 py-1 rounded"
+                                  onClick={() => navigate(`/types/edit/${type.type_id}`)}
+                                >
+                                  Update
+                                </button>
+                                <button
+                                  className="bg-red-600 text-white px-3 py-1 rounded"
+                                  onClick={() => handleDelete(type.type_id)}
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         ))}
                       </tbody>

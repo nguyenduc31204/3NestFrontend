@@ -158,7 +158,7 @@ const App = () => {
           />
           <Route 
             path="/users/detail/:userId" 
-            element={ <ProtectedRoute permission="user:manage"><UserDetail /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="user:view"><UserDetail /></ProtectedRoute> } 
           />
 
           <Route 
