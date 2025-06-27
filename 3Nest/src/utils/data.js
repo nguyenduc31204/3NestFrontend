@@ -88,4 +88,12 @@ export const SIDE_MENU_DATA = [
     resourceType: 'role',
     ariaLabel: 'Navigate to roles',
   },
+  {
+    id: '11',
+    label: 'Activiti Log',
+    icon: ListTree, 
+    path: '/activitylog',
+    resourceType: 'role',
+    ariaLabel: 'Navigate to activity log',
+  },
 ];

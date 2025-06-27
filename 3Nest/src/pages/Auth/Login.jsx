@@ -83,23 +83,6 @@ const Login = () => {
         //console.log('Decoded token:', decoded);
          navigate('/orders');
 
-
-        // switch (decoded?.role?.toLowerCase()) {
-        //   case 'admin':
-        //     navigate('/admin/dashboard');
-        //     break;
-        //   case 'sales':
-        //     navigate('/sales/products');
-        //     break;
-        //   case 'channel':
-        //     navigate('/channel/products');
-        //     break;
-        //   case 'manager':
-        //     navigate('/manager/products');
-        //     break;
-        //   default:
-        //     navigate('/');
-        // }
       } else {
         setError(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
         throw new Error(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');

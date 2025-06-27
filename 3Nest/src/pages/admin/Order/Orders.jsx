@@ -15,7 +15,36 @@ import {
 import { hasPermission } from '../../../utils/permissionUtils';
 import { BASE_URL } from '../../../utils/apiPath';
 
+const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
+  if (totalPages <= 1) return null;
 
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    onPageChange(page);
+  };
+
+  return (
+    <div className="flex items-center justify-between p-4 bg-white border-t">
+      <span className="text-sm text-gray-700">
+        Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span>
+      </span>
+      <div className="flex items-center space-x-1">
+        <IconButton title="First Page" onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
+          <LuChevronsLeft />
+        </IconButton>
+        <IconButton title="Previous Page" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+          <LuChevronLeft />
+        </IconButton>
+        <IconButton title="Next Page" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+          <LuChevronRight />
+        </IconButton>
+        <IconButton title="Last Page" onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
+          <LuChevronsRight />
+        </IconButton>
+      </div>
+    </div>
+  );
+};
 
 const StatCard = ({ Icon, value, label, color }) => (
   <div className="rounded-lg p-5 shadow-md bg-white flex items-center space-x-4">
@@ -80,9 +109,12 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [roles, setRoles] = useState([]); 
   const [activeRoleId, setActiveRoleId] = useState(null); 
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0); 
+
+  const ITEMS_PER_PAGE = 10;
 
   const token = useMemo(() => localStorage.getItem('access_token'), []);
   useEffect(() => {
@@ -122,6 +154,7 @@ const OrdersPage = () => {
           }
 
           const roleIdToFetch = activeRoleId || adminRole?.role_id || managerRole?.role_id || user.role_id;
+          console.log('aloaloalo:', roleIdToFetch);
           
           const ordersResponse = await fetch(`${BASE_URL}/orders/get-orders-by-role?role_id=${roleIdToFetch}`, {
             headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' },
@@ -129,7 +162,7 @@ const OrdersPage = () => {
           console.log('Fetching orders for role ID:', roleIdToFetch);
           if (!ordersResponse.ok) throw new Error(`Failed to fetch orders for role ID: ${roleIdToFetch}`);
           const ordersResult = await ordersResponse.json();
-          console.log('Orders Result:', ordersResult);
+          console.log('2233232:', ordersResult);
           setOrders(ordersResult.data || []);
 
         } else {
@@ -139,8 +172,10 @@ const OrdersPage = () => {
           console.log('2:', user.user_id);
           if (!ordersResponse.ok) throw new Error('Failed to fetch your orders');
           const ordersResult = await ordersResponse.json();
-          setOrders(ordersResult.data.orders || []);
-          console.log('Orders222:', ordersResult.data);
+          const orders = ordersResult.data?.[0]?.orders || [];
+          setOrders(orders);
+          // setOrders(ordersResult.data || []);
+          console.log('000111:', ordersResult.data);
         }
       } catch (err) {
         setError(err.message);
@@ -151,7 +186,19 @@ const OrdersPage = () => {
 
     fetchData();
   }, [user, activeRoleId, token, refreshTrigger]);
-  console.log('Orders:', orders.status);
+          console.log('123123123:', orders);
+
+
+  const currentOrders = useMemo(() => {
+      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIndex = startIndex + ITEMS_PER_PAGE;
+      return orders.slice(startIndex, endIndex);
+    }, [orders, currentPage]);
+    const totalPages = useMemo(() => {
+      return Math.ceil(orders.length / ITEMS_PER_PAGE);
+    }, [orders]);
+
+  console.log('Orde23232323rs:', orders);
 
   const isDraft = 'draft';
   const isSubmitted = 'submitted';
@@ -160,14 +207,17 @@ const OrdersPage = () => {
   const isViewOnly = isAccepted || isRejected;
 
   //--- Handlers ---
-  const handleRefresh = () => setRefreshTrigger(c => c + 1);
+  const handleRefresh = () => {
+    setRefreshTrigger(c => c + 1);
+    setCurrentPage(1);
+  };
 
   if (!user) {
     return <Loader msg="Initializing..." />;
   }
 
   return (
-    <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8 ">
       {/* <DashboardLayout activeMenu="04"> */}
         <div className="content py-6">
           
@@ -196,7 +246,7 @@ const OrdersPage = () => {
           </div>
 
           {/* Bảng dữ liệu */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="bg-white rounded-lg shadow-md overflow-hidden ">
             <div className="flex flex-wrap items-center justify-between p-4 border-b gap-4">
               <h2 className="text-lg font-semibold">Order List</h2>
               <div className="flex items-center space-x-2 flex-wrap gap-2">
@@ -232,10 +282,10 @@ const OrdersPage = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {orders.length === 0 ? (
+                    {currentOrders.length === 0 ? (
                       <tr><td colSpan="7" className="text-center p-8 text-gray-500">No orders found.</td></tr>
                     ) : (
-                      orders.map((order) => (
+                      currentOrders.map((order) => (
                         <tr key={order.order_id} className="hover:bg-gray-50">
                           <Td>#{order.order_id}</Td>
                           <Td>{order.order_title}</Td>
@@ -277,6 +327,11 @@ const OrdersPage = () => {
               )}
             </div>
             {/*Pagination */}
+            <PaginationControls 
+              currentPage={currentPage}
+              totalPages={totalPages} 
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       {/* </DashboardLayout> */}

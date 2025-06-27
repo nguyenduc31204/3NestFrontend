@@ -200,6 +200,8 @@ const EditOrderAdmin = () => {
     }
   }, [order_id, order, orderDetails]);
 
+  console.log('Order details:', order);
+
   const handleDiscardOrder = useCallback(async () => {
     try {
       setProcessing(true);
@@ -235,7 +237,8 @@ const EditOrderAdmin = () => {
   const isRejected = order?.status === 'rejected';
   const isViewOnly = isAccepted || isRejected;
 
-  // Xác định tên cột giá cho tiêu đề bảng
+  console.log('Order status:', deal);
+  
   const priceColumnHeader = user?.role_name === 'channel' ? 'Channel Cost' : 'Price';
   
   if (loading) {
@@ -318,6 +321,10 @@ const EditOrderAdmin = () => {
                       <label className="block text-sm font-medium text-gray-500">Billing Address</label>
                       <p className="mt-1 text-sm text-gray-900">{deal.billing_address || '--'}</p>
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">Description</label>
+                      <p className="mt-1 text-sm text-gray-900">{deal.description || '--'}</p>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">No deal information available</p>
@@ -332,6 +339,10 @@ const EditOrderAdmin = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-500">Order Title</label>
                 <p className="mt-1 text-sm text-gray-900">{order?.order_title || '--'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500">Order des</label>
+                <p className="mt-1 text-sm text-gray-900">{order?.order_description || '--'}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-500">Status</label>

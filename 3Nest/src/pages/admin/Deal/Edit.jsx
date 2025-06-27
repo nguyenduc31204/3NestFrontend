@@ -5,17 +5,55 @@ import { BASE_URL } from '../../../utils/apiPath';
 import { hasPermission } from '../../../utils/permissionUtils';
 import { useAuth } from '../../../context/AuthContext';
 
-// const useUser = () => {
-//   const [user, setUser] = useState(null);
-//   const navigate = useNavigate();
-//   useEffect(() => {
-//     const storedUser = localStorage.getItem('user');
-//     if (storedUser) setUser(JSON.parse(storedUser));
-//     else navigate('/login');
-//   }, [navigate]);
-//   return user;
-  
-// };
+import {
+  LuChevronsLeft,
+  LuChevronLeft,
+  LuChevronRight,
+  LuChevronsRight,
+} from 'react-icons/lu';
+import { decodeToken } from '../../../utils/help';
+import { set } from 'react-hook-form';
+
+const IconButton = ({ children, title, onClick }) => (
+  <button
+    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors"
+    title={title}
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
+
+const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
+  if (totalPages <= 1) return null;
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    onPageChange(page);
+  };
+
+  return (
+    <div className="flex items-center justify-between p-4 bg-white border-t">
+      <span className="text-sm text-gray-700">
+        Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span>
+      </span>
+      <div className="flex items-center space-x-1">
+        <IconButton title="First Page" onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
+          <LuChevronsLeft />
+        </IconButton>
+        <IconButton title="Previous Page" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+          <LuChevronLeft />
+        </IconButton>
+        <IconButton title="Next Page" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+          <LuChevronRight />
+        </IconButton>
+        <IconButton title="Last Page" onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
+          <LuChevronsRight />
+        </IconButton>
+      </div>
+    </div>
+  );
+};
 
 
 
@@ -60,9 +98,13 @@ const EditDealPage = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [activeRoleId, setActiveRoleId] = useState(0);
   const { user, isLoading: isAuthLoading } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+
+  const ITEMS_PER_PAGE = 10;
+  const [role, setRole] = useState(null);
   
 
   const token = useMemo(() => localStorage.getItem('access_token'), []);
@@ -73,39 +115,52 @@ const EditDealPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const dealResponse = await fetch(`${BASE_URL}/deals/get-deal?deal_id=${deal_id}`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
+      const headers = { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' };
+
+      const [dealResponse, ordersResponse] = await Promise.all([
+        fetch(`${BASE_URL}/deals/get-deal?deal_id=${deal_id}`, { headers }),
+        fetch(`${BASE_URL}/orders/get-orders-by-deal?deal_id=${deal_id}`, { headers })
+      ]);
+
+      if (!dealResponse.ok) throw new Error((await dealResponse.json()).detail || 'Failed to load deal data');
       const dealResult = await dealResponse.json();
-      if (!dealResponse.ok) throw new Error(dealResult.detail || 'Failed to load deal data');
       const fetchedDeal = dealResult.data.deal;
-      console.log('Fetched Deal:', fetchedDeal.user_id);
-      setDealData(fetchedDeal);
 
-      const ordersResponse = await fetch(`${BASE_URL}/orders/get-orders-by-deal?deal_id=${deal_id}`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
       const ordersResult = await ordersResponse.json();
-      if (!ordersResponse.ok) throw new Error(ordersResult.detail || 'Failed to load orders');
-      setOrders(ordersResult.data || []);
+      const fetchedOrders = ordersResult.data || [];
 
-      const myInforResponse = await fetch(`${BASE_URL}/users/my-info`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
-      const myInforResult = await myInforResponse.json();
-      console.log('My Info Result:', myInforResult);
-      if (!myInforResponse.ok) throw new Error(myInforResult.detail || 'Failed to load orders');
-      setActiveRoleId(myInforResult.data.user_id);
-      console.log('Active Role ID:', myInforResult);
-      
-      if (myInforResult.data.user_id === fetchedDeal.user_id) {
-        setDealCreatorInfo(myInforResult.data);
-        console.log('12:', myInforResult.data);
+      let creatorInfo = null;
+      if (user.user_id === fetchedDeal.user_id) {
+        creatorInfo = user;
       } else if (hasPermission(user, 'deal:review')) {
-        // Trường hợp admin xem deal của người khác -> Gọi API lấy thông tin
-        const creatorResponse = await fetch(`${BASE_URL}/users/get-user?user_id=${fetchedDeal.user_id}`, { headers: { 'Authorization': `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } });
-        const creatorResult = await creatorResponse.json();
-        console.log('Creator Result:', creatorResult);
-        if (!creatorResponse.ok) throw new Error(creatorResult.detail || 'Failed to fetch creator info');
-        setDealCreatorInfo(creatorResult.data);
+        const creatorResponse = await fetch(`${BASE_URL}/users/get-user?user_id=${fetchedDeal.user_id}`, { headers });
+        if (!creatorResponse.ok) throw new Error((await creatorResponse.json()).detail || 'Failed to fetch creator info');
+        let partialCreatorInfo = (await creatorResponse.json()).data;
+
+        if (partialCreatorInfo && !partialCreatorInfo.role_name && partialCreatorInfo.role_id) {
+            console.log(`Role name is missing for user ${partialCreatorInfo.user_id}. Fetching role...`);
+            const roleResponse = await fetch(`${BASE_URL}/roles/get-role?request_id=${partialCreatorInfo.role_id}`, { headers });
+            if (roleResponse.ok) {
+                const roleResult = await roleResponse.json();
+                creatorInfo = { ...partialCreatorInfo, role_name: roleResult.data.role_name };
+            } else {
+                console.error('Could not fetch role name for creator.');
+                creatorInfo = { ...partialCreatorInfo, role_name: 'Unknown Role' };
+            }
+        } else {
+            creatorInfo = partialCreatorInfo;
+        }
       } else {
-        setDealCreatorInfo({ user_name: `User ID: ${fetchedDeal.user_id}` });
+        creatorInfo = { user_name: `User ID: ${fetchedDeal.user_id}`, role_name: 'N/A' };
       }
-      console.log('Deal Creator Info:', dealCreatorInfo);
+
+      console.log('Fetched Deal:', creatorInfo);
+
+      setDealData(fetchedDeal);
+      setOrders(fetchedOrders);
+      setDealCreatorInfo(creatorInfo);
+      setRole(creatorInfo.role_name || 'N/A');
+
     } catch (err) {
       setError(err.message);
       toast.error(err.message);
@@ -113,6 +168,7 @@ const EditDealPage = () => {
       setLoading(false);
     }
   }, [deal_id, token, user]);
+  
   const handleChangeStatus = useCallback(async (newStatus, reason = '') => {
     if (newStatus === 'rejected' && !reason.trim()) {
       toast.error('Please provide a reason for rejection.');
@@ -189,7 +245,20 @@ const EditDealPage = () => {
       setProcessing(false);
     }
   };
-  console.log('dealCreatorInfo', dealCreatorInfo);
+
+  const currentOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return orders.slice(startIndex, endIndex);
+  }, [orders, currentPage]);
+
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(orders.length / ITEMS_PER_PAGE);
+  }, [orders]);
+  
+  console.log('Deal Data:', dealData);
+  
   const handleDiscardDeal = async () => {
     setProcessing(true);
     try {
@@ -263,6 +332,7 @@ const EditDealPage = () => {
                     <InfoField label="Email" value={dealCreatorInfo?.user_email} />
                     <InfoField label="Phone" value={dealCreatorInfo?.phone} />
                     <InfoField label="Company" value={dealCreatorInfo?.company_name} />
+                    <InfoField label="role" value={role} />
                   </div>
                   <div className="w-full bg-white p-6 rounded-lg shadow-md">
                   {/* <h2 className="text-xl font-semibold mb-4">Actions</h2> */}
@@ -321,7 +391,7 @@ const EditDealPage = () => {
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                              {orders
+                              {currentOrders
                                 .map((order, index) => (
                                   <tr key={order.order_id} className="hover:bg-gray-50">
                                     <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
@@ -362,6 +432,11 @@ const EditDealPage = () => {
                                 ))}
                             </tbody>
                           </table>
+                          <PaginationControls 
+                            currentPage={currentPage}
+                            totalPages={totalPages} 
+                            onPageChange={setCurrentPage}
+                          />
                         </div>
                       )}
                     </div>

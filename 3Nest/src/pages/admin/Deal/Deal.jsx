@@ -15,6 +15,37 @@ import {
 import { hasPermission } from '../../../utils/permissionUtils';
 import { BASE_URL } from '../../../utils/apiPath';
 
+const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
+  if (totalPages <= 1) return null;
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    onPageChange(page);
+  };
+
+  return (
+    <div className="flex items-center justify-between p-4 bg-white border-t">
+      <span className="text-sm text-gray-700">
+        Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span>
+      </span>
+      <div className="flex items-center space-x-1">
+        <IconButton title="First Page" onClick={() => handlePageChange(1)} disabled={currentPage === 1}>
+          <LuChevronsLeft />
+        </IconButton>
+        <IconButton title="Previous Page" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+          <LuChevronLeft />
+        </IconButton>
+        <IconButton title="Next Page" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+          <LuChevronRight />
+        </IconButton>
+        <IconButton title="Last Page" onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages}>
+          <LuChevronsRight />
+        </IconButton>
+      </div>
+    </div>
+  );
+};
+
 
 
 const StatCard = ({ Icon, value, label, color }) => (
@@ -78,9 +109,12 @@ const DealsPage = () => {
   const [deals, setDeals] = useState([]);
   const [roles, setRoles] = useState([]);
   const [activeRoleId, setActiveRoleId] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const ITEMS_PER_PAGE = 10;
 
   const token = useMemo(() => localStorage.getItem('access_token'), []);
 
@@ -148,7 +182,16 @@ const DealsPage = () => {
     };
 
     fetchData();
-  }, [user, activeRoleId, token, refreshTrigger]);
+  }, [user, activeRoleId, token, refreshTrigger , navigate, roles.length]);
+
+  const currentDeals = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return deals.slice(startIndex, endIndex);
+  }, [deals, currentPage]);
+  const totalPages = useMemo(() => {
+    return Math.ceil(deals.length / ITEMS_PER_PAGE);
+  }, [deals]);
 
   const isDraft = 'draft';
   const isSubmitted = 'submitted';
@@ -156,11 +199,20 @@ const DealsPage = () => {
   const isRejected = 'rejected';
   const isViewOnly = isAccepted || isRejected;
 
-  const handleRefresh = () => setRefreshTrigger(c => c + 1);
+  const handleRoleChange = (roleId) => {
+    setActiveRoleId(roleId);
+    setCurrentPage(1); 
+  };
+
+  const handleRefresh = () => {
+    setRefreshTrigger(c => c + 1);
+    setCurrentPage(1);
+  };
 
   if (!user) {
     return <Loader msg="Initializing..." />;
   }
+  
 
   return (
     <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
@@ -224,10 +276,10 @@ const DealsPage = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {deals.length === 0 ? (
+                    {currentDeals.length === 0 ? (
                       <tr><td colSpan="7" className="text-center p-8 text-gray-500">No deals found.</td></tr>
                     ) : (
-                      deals.map((deal) => (
+                      currentDeals.map((deal) => (
                         <tr key={deal.deal_id} className="hover:bg-gray-50">
                           <Td>#{deal.deal_id}</Td>
                           <Td>{deal.customer_name}</Td>
@@ -268,6 +320,11 @@ const DealsPage = () => {
               )}
             </div>
             {/* phân trang  */}
+            <PaginationControls 
+            currentPage={currentPage}
+            totalPages={totalPages} 
+            onPageChange={setCurrentPage}
+          />
           </div>
         </div>
       {/* </DashboardLayout> */}

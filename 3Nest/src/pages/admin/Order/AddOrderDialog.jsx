@@ -223,7 +223,7 @@ const AddOrderDialog = ({
     }
 
     onSubmit(submissionData);
-    toast.success('Order added successfully!'); 
+    toast.success('Item added successfully!'); 
     handleClose();
   };
 
@@ -307,10 +307,10 @@ const AddOrderDialog = ({
 
           {selectedProduct && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-              <h3 className="font-semibold text-blue-800 mb-3">Product Information</h3>
+              <h3 className="font-semibold text-blue-800 mb-3">Item Information</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-medium text-gray-700">Product Name:</span>
+                  <span className="font-medium text-gray-700">Item Name:</span>
                   <p className="text-gray-900">{selectedProduct.product_name}</p>
                 </div>
                 <div>
@@ -318,7 +318,7 @@ const AddOrderDialog = ({
                   <p className="text-gray-900">{selectedProduct.sku_partnumber}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Original Price:</span>
+                  <span className="font-medium text-gray-700">List Price:</span>
                   <p className="text-gray-900 font-semibold text-green-600">
                     ${selectedProduct.price?.toLocaleString() || 'N/A'}
                   </p>
@@ -362,7 +362,7 @@ const AddOrderDialog = ({
               return (
                 <div key={field.id} className="grid grid-cols-5 gap-2 mb-2 items-end p-4 border border-gray-200 rounded-lg shadow-sm">
                   <div>
-                    <span className="font-medium text-gray-700">Product:</span>
+                    <span className="font-medium text-gray-700">Product/Service</span>
                     <p className="text-gray-900">
                       {productInfo?.product_name || 'Unknown Product'}
                     </p>
@@ -443,7 +443,7 @@ const AddOrderDialog = ({
                       <p className="text-red-600 text-sm mt-1">{errors.details[index].service_contract_duration.message}</p>
                     )}
                   </div>
-                  <div className="flex items-center justify-between">
+                  
                     <button
                       type="button"
                       onClick={() => remove(index)}
@@ -451,11 +451,10 @@ const AddOrderDialog = ({
                     >
                       Clear
                     </button>
-                    <div className="ml-auto">
-                      <p className="text-sm text-gray-900 font-bold">
-                        Subtotal: ${subtotal}
-                      </p>
-                    </div>
+                  <div className="col-span-5 flex justify-end items-center mt-2 mr-4">
+                    <p className="text-sm text-gray-900 font-bold">
+                      Subtotal: ${subtotal}
+                    </p>
                   </div>
                 </div>
               );
@@ -475,7 +474,7 @@ const AddOrderDialog = ({
               className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
               disabled={loading || fields.length === 0}
             >
-              Add Order
+              Add Item
             </button>
           </div>
         </form>
