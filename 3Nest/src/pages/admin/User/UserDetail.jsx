@@ -67,7 +67,7 @@ const UserDetail = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <button
-              onClick={() => navigate('/admin/users')}
+              onClick={() => navigate('/users')}
               className="p-1 mr-3 text-gray-500 hover:text-gray-700"
             >
               <LuChevronLeft className="w-6 h-6" />

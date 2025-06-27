@@ -1,196 +1,143 @@
-import React, { useEffect, useState } from 'react'
-import {
-    LuCoins,
-    LuWalletMinimal,
-    LuPersonStanding,
-    LuChevronsLeft,
-    LuChevronLeft,
-    LuChevronRight,
-    LuChevronsRight,
-    LuArrowDownToLine,
-    LuArrowUpNarrowWide,
-    LuRefreshCcw
-} from "react-icons/lu"
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Header from '../../../components/layouts/Header';
+import DashboardLayout from '../../../components/layouts/DashboardLayout';
+import { BASE_URL } from '../../../utils/apiPath';
+import { hasPermission } from '../../../utils/permissionUtils';
 
-import Header from '../../../components/layouts/Header'
-import DasboardLayout from '../../../components/layouts/DashboardLayout'
-import { API_PATHS, BASE_URL } from '../../../utils/apiPath'
-import { useNavigate } from 'react-router-dom'
-import CategoryModal from './CategoryModal';
-import axiosInstance from '../../../utils/axiosInstance';
-
-const Categories = () => {
-  const navigate = useNavigate();
-  const [types, setTypes] = useState([]);
-  const [selectedTypeId, setSelectedTypeId] = useState('');
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+const RoleList = () => {
+  const [user, setUser] = useState(null);
+  const [roles, setRoles] = useState([]);
   const [error, setError] = useState(null);
-  const role = localStorage.getItem('role');
-  const [activeRole, setActiveRole] = useState(role || 'admin');
+  const navigate = useNavigate();
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const fetchRoles = async (currentUser = user) => {
+    if (!currentUser || !hasPermission(currentUser, 'role:view')) return;
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const loadProductsByTypeAndRole = async () => {
     try {
-      setLoading(true);
-      setError(null); // Reset error state
-      const response = await axiosInstance.get("/categories/get-categories", {
+      const res = await fetch(`${BASE_URL}/roles/get-roles`, {
         headers: {
-          'ngrok-skip-browser-warning': 'true'
-        }
+          'ngrok-skip-browser-warning': 'true',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
       });
-      
-      if (response.data && response.data.data) {
-        setProducts(response.data.data);
+
+      const data = await res.json();
+
+      if (data.status_code === 200 && Array.isArray(data.data)) {
+        setRoles(data.data);
       } else {
-        throw new Error('Invalid response format');
+        setError(data.message || 'Failed to load roles');
       }
     } catch (err) {
-      console.error("API Error:", err);
-      setError(`Failed to load categories: ${err.message}`);
-    } finally {
-      setLoading(false);
+      setError('Failed to load roles');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!hasPermission(user, 'role:manage')) return;
+    if (!window.confirm('Are you sure to delete this role?')) return;
+
+    try {
+      const res = await fetch(`${BASE_URL}/roles/delete-role?request_id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        },
+      });
+      fetchRoles();
+    } catch (err) {
+      setError('Failed to delete role');
     }
   };
 
   useEffect(() => {
-    loadProductsByTypeAndRole();
-  }, []);
-
-  const handleDelete = async (category_id) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
-    try {
-      await axiosInstance.delete(`/categories/delete-category?category_id=${category_id}`);
-      await loadProductsByTypeAndRole(); // Reload after delete
-    } catch (err) {
-      console.error("Delete error", err);
-      alert("Error deleting category");
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      fetchRoles(parsedUser);
+    } else {
+      navigate('/login');
     }
-  };
+  }, [navigate]);
 
-  const handleRefresh = () => {
-    loadProductsByTypeAndRole();
-  };
-
-  const handleModalClose = () => {
-    setModalOpen(false);
-    setEditingCategory(null);
-  };
-
-  const handleUpdateSuccess = async () => {
-    await loadProductsByTypeAndRole(); // Reload data after successful update
-    handleModalClose();
-  };
-
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-  const paginatedData = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  if (!user) return <div className="p-8 text-center">Initializing…</div>;
+  if (!hasPermission(user, 'role:view')) {
+    return <div className="p-8 text-center text-red-600">Do not have permission access this page</div>;
+  }
 
   return (
-    <div>
-      
-        <div className='my-5 mx-auto'>
-          <div className="content p-20">
-            <div className="page-header flex justify-between items-center mb-10">
-              <div className="page-title">
-                <h1 className='text-2xl font-semibold text-gray-800 mb-2'>Category Management</h1>
-                <div className="breadcrumb text-gray-500 text-sm hover:text-slate-500">
-                  <a href="#" className='text-gray-500'>Dashboard</a> / Category
-                </div>
-              </div>
-              <div className="action-buttons mb-2">
-                <button
-                  onClick={() => { setEditingCategory(null); setModalOpen(true); }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                  <i className="fas fa-plus mr-2"></i> Add new category
-                </button>
-              </div>
-            </div>
-
-            <div className="card bg-white rounded-lg shadow-md overflow-hidden mb-6">
-              <div className="card-header flex items-center justify-between p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-800">Categories</h2>
-                <div className="tools flex space-x-2">
-                  <button className="p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-md transition-colors" title="Export Excel">
-                    <LuArrowDownToLine className="w-5 h-5" />
-                  </button>
-                  <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors" title="Filter">
-                    <LuArrowUpNarrowWide className="w-5 h-5" />
-                  </button>
-                  <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors" title="Refresh" onClick={handleRefresh}>
-                    <LuRefreshCcw className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="card-body p-0">
-                {error && (
-                  <div className="p-4 bg-red-50 border-l-4 border-red-400">
-                    <div className="flex">
-                      <div className="ml-3">
-                        <p className="text-sm text-red-700">{error}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {loading ? (
-                  <div className="p-8 text-center text-blue-600">Loading categories...</div>
-                ) : (
-                  <div className="table-responsive overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category Name</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type Name</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {paginatedData.map((category, index) => (
-                          <tr key={category.category_id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 text-sm text-gray-900">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                            <td className="px-6 py-4 text-sm text-gray-900">{category.category_name || '-'}</td>
-                            <td className="px-6 py-4 text-sm text-gray-900">{category.type_name || '-'}</td>
-                            <td className="px-6 py-4 text-sm text-gray-900">{category.description || '-'}</td>
-                            <td className="px-6 py-4 text-sm text-gray-900 space-x-2">
-                              <button onClick={() => { setEditingCategory(category); setModalOpen(true); }} className='text-blue-600'>Edit</button>
-                              <button onClick={() => handleDelete(category.category_id)} className='text-red-600'>Delete</button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    <div className="flex justify-end px-6 py-3 border-t bg-gray-50">
-                      <div className="space-x-2">
-                        <button className="px-3 py-1 border rounded disabled:opacity-50" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Prev</button>
-                        <span>Page {currentPage}</span>
-                        <button className="px-3 py-1 border rounded disabled:opacity-50" onClick={() => setCurrentPage(prev => (prev < totalPages ? prev + 1 : prev))} disabled={currentPage >= totalPages}>Next</button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+    <>
+      <div className="my-5 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+          <h1 className="text-xl font-semibold">Roles</h1>
+          {hasPermission(user, 'role:manage') && (
+            <button
+              onClick={() => navigate('/roles/add')}
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              + Add Role
+            </button>
+          )}
         </div>
-      
-      <CategoryModal 
-        isOpen={modalOpen} 
-        onClose={handleModalClose}
-        onSubmitSuccess={handleUpdateSuccess}
-        category={editingCategory} 
-      />
-    </div>
+
+        {error && <div className="mb-4 text-red-600">{error}</div>}
+
+        <div className="bg-white shadow rounded-lg overflow-x-auto">
+          <table className="min-w-full table-auto">
+            <thead>
+              <tr className="bg-gray-100 text-left">
+                <th className="px-4 py-2 whitespace-nowrap">#</th>
+                <th className="px-4 py-2 whitespace-nowrap">Name</th>
+                <th className="px-4 py-2 whitespace-nowrap">Description</th>
+                <th className="px-4 py-2 whitespace-nowrap">Detail</th>
+                {hasPermission(user, 'role:manage') && (
+                  <th className="px-4 py-2 whitespace-nowrap">Actions</th>
+                )}
+              </tr>
+            </thead>
+
+            <tbody>
+              {roles.map((role, i) => (
+                <tr key={role.role_id} className="border-t">
+                  <td className="px-4 py-2">{i + 1}</td>
+                  <td className="px-4 py-2">{role.role_name}</td>
+                  <td className="px-4 py-2">{role.role_description}</td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => navigate(`/roles/detail/${role.role_id}`)}
+                      className="text-gray-700 hover:text-blue-600 hover:underline"
+                    >
+                      Detail
+                    </button>
+                  </td>
+                  {hasPermission(user, 'role:manage') && (
+                    <td className="px-4 py-2 space-x-2">
+                      <button
+                        onClick={() => navigate(`/roles/edit/${role.role_id}`)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(role.role_id)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
   );
+
 };
 
-export default Categories;
+export default RoleList;

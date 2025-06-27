@@ -40,7 +40,7 @@ import Profile from './pages/admin/User/Profile'
 
 const RootRedirect = () => {
   const isAuthenticated = true; 
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+  return isAuthenticated ? <Navigate to="/login" replace /> : <Navigate to="/login" replace />;
 };
 
 const ProtectedLayout = () => {
@@ -158,7 +158,7 @@ const App = () => {
           />
           <Route 
             path="/users/detail/:userId" 
-            element={ <ProtectedRoute permission="user:manage"><UserDetail /></ProtectedRoute> } 
+            element={ <ProtectedRoute permission="user:view"><UserDetail /></ProtectedRoute> } 
           />
 
           {/* <Route 

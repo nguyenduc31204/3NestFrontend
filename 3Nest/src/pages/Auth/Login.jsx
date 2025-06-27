@@ -81,7 +81,7 @@ const Login = () => {
         console.log('Decoded token:', decoded);
 
         //console.log('Decoded token:', decoded);
-         navigate('/orders');
+         navigate('/products');
 
       } else {
         setError(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');

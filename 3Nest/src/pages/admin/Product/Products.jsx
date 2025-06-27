@@ -5,12 +5,17 @@ import {
   LuArrowDownToLine, LuArrowUpNarrowWide, LuRefreshCcw
 } from 'react-icons/lu';
 
+
+
+
 import Header from '../../../components/layouts/Header';
 import { BASE_URL } from '../../../utils/apiPath';
 import { useNavigate } from 'react-router-dom';
 import { decodeToken } from '../../../utils/help';
 import ProductModal from './ProductModal';
 import ProductDetail from './ProductDetail';
+import { hasPermission } from '../../../utils/permissionUtils';
+
 
 const Products = () => {
   const navigate = useNavigate();
@@ -26,6 +31,7 @@ const Products = () => {
   const token = localStorage.getItem('access_token');
   const decode = decodeToken(token);
   const currentRoleName = decode?.role || localStorage.getItem('role');
+  const permissions = decode?.permissions || [];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -34,6 +40,19 @@ const Products = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [user, setUser] = useState(null);
+  const [sortAsc, setSortAsc] = useState(true);
+
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -103,14 +122,42 @@ const Products = () => {
   }, [token]);
 
   useEffect(() => {
-    if (selectedTypeId && activeRoleId) {
-      loadProductsByTypeAndRole(activeRoleId, selectedTypeId);
-    }
-  }, [selectedTypeId, activeRoleId]);
+  if (!activeRoleId || !selectedTypeId || !user) return;
+
+  if (canManage) {
+    loadProductsByTypeAndRole(activeRoleId, selectedTypeId);
+  } else if (canView) {
+    loadProductsByRole(activeRoleId);
+  }
+}, [activeRoleId, selectedTypeId, currentRoleName, user]);
+
+
 
   const loadProductsByTypeAndRole = async (roleId, typeId) => {
     try {
       const url = `${BASE_URL}/products/get-products-by-role-and-type?role_id=${roleId}&type_id=${typeId}`;
+      console.log("Fetching products with URL:", url);
+      const res = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const result = await res.json();
+      if (res.ok && result.status_code === 200) {
+        setProducts(result.data || []);
+      } else {
+        setError(result.message || 'Failed to load products');
+      }
+    } catch (err) {
+      setError(`Failed to load products: ${err.message}`);
+    }
+  };
+
+  const loadProductsByRole = async (roleId) => {
+    try {
+      const url = `${BASE_URL}/products/get-products-by-role?role_id=${roleId}`;
       const res = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -151,13 +198,64 @@ const Products = () => {
     }
   };
 
-  const handleRefresh = () => loadProductsByTypeAndRole(activeRoleId, selectedTypeId);
+  const handleRefresh = () => {
+  if (canManage) {
+    loadProductsByTypeAndRole(activeRoleId, selectedTypeId);
+  } else if (canView) {
+    loadProductsByRole(activeRoleId);
+  }
+};
+
+
+
   const handleRoleChange = (newRoleId) => setActiveRoleId(newRoleId);
   const handleTypeChange = (e) => setSelectedTypeId(e.target.value);
   const openDetail = (product) => {
     setDetailProduct(product);
     setIsDetailOpen(true);
   };
+
+  const canFullControl = user && hasPermission(user, 'product:full-control');
+  const canManage = user && (hasPermission(user, 'product:manage') || canFullControl || currentRoleName === 'admin');
+  const canView = user && (hasPermission(user, 'product:view') || canManage);
+
+  if (!user) return <div className="p-8 text-center">Initializing…</div>;
+
+  if (!canView) {
+    return <div className="p-8 text-center text-red-600">Do not have permission accessing this page</div>;
+  }
+  const sortedProducts = [...products].sort((a, b) => {
+    const nameA = a.product_name?.toLowerCase() || '';
+    const nameB = b.product_name?.toLowerCase() || '';
+    if (nameA < nameB) return sortAsc ? -1 : 1;
+    if (nameA > nameB) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  function wrapTextByWords(text, maxLength = 50) {
+    if (!text) return ['-'];
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+
+    for (let word of words) {
+      if ((currentLine + word).length <= maxLength) {
+        currentLine += (currentLine ? ' ' : '') + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+
+    if (currentLine) lines.push(currentLine);
+
+    return lines;
+  }
+  
+
+
+
+
 
   return (
     <div>
@@ -171,7 +269,7 @@ const Products = () => {
                 <a href="#" className="hover:underline">Dashboard</a> / Products
               </div>
             </div>
-            {currentRoleName === 'admin' && (
+            {canManage && (
               <button
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
                 onClick={() => {
@@ -195,13 +293,22 @@ const Products = () => {
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-lg font-semibold">Products & Services</h2>
               <div className="flex space-x-2">
-                <IconButton title="Export Excel"><LuArrowDownToLine className="w-5 h-5" /></IconButton>
-                <IconButton title="Filter"><LuArrowUpNarrowWide className="w-5 h-5" /></IconButton>
-                <IconButton title="Refresh" onClick={handleRefresh}><LuRefreshCcw className="w-5 h-5" /></IconButton>
+                {/* <IconButton title="Export Excel"><LuArrowDownToLine className="w-5 h-5" /></IconButton>
+                <IconButton title="Filter"><LuArrowUpNarrowWide className="w-5 h-5" /></IconButton> */}
+                {/* <IconButton title="Refresh" onClick={handleRefresh}><LuRefreshCcw className="w-5 h-5" /></IconButton> */}
+                <IconButton
+                  title={`Sort ${sortAsc ? 'A → Z' : 'Z → A'}`}
+                  onClick={() => setSortAsc(prev => !prev)}
+                >
+                  <LuArrowUpNarrowWide className="w-5 h-5" />
+                </IconButton>
+
               </div>
             </div>
 
+
             <div className="p-4 border-b grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50">
+              {hasPermission(user, 'role:manage') && (
               <div>
                 <label className="block text-sm font-medium mb-1">Product Type</label>
                 <select
@@ -214,7 +321,8 @@ const Products = () => {
                   ))}
                 </select>
               </div>
-              {currentRoleName === 'admin' && (
+              )}
+              {hasPermission(user, 'role:manage') && (
                 <div className="flex items-end space-x-2">
                   {roles.map((r) => (
                     <RoleButton
@@ -238,44 +346,95 @@ const Products = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <Th>#</Th>
-                    <Th>Product Name</Th>
+                    <Th>Item Name</Th>
                     <Th>Category Name</Th>
                     <Th>Part Number</Th>
+                    <Th>Description</Th>
                     <Th>Price</Th>
+                    {currentRoleName === 'channel' && <Th>Channel Cost</Th>}
+                    {currentRoleName === 'sale' && <Th>Max Discount Price</Th>}
                     <Th>Status</Th>
+                    {canManage && (
                     <Th>Action</Th>
+                    )}
                   </tr>
                 </thead>
+
                 <tbody className="bg-white divide-y divide-gray-200">
                   {!loading && products.length === 0 && (
                     <tr>
                       <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No products found</td>
                     </tr>
                   )}
-                  {products.map((product, idx) => (
-                    <tr key={product.product_id || idx} className="hover:bg-gray-50">
-                      <Td>{idx + 1}</Td>
-                      <Td>{product.product_name || '-'}</Td>
-                      <Td>{product.category_name || '-'}</Td>
-                      <Td>{product.sku_partnumber || '-'}</Td>
-                      <Td>{product.price ? parseFloat(product.price).toLocaleString() : '-'}</Td>
-                      <Td>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {product.status ? 'Active' : 'Inactive'}
-                        </span>
-                      </Td>
-                      <Td>
-                        <button
-                          className="text-blue-600 hover:underline mr-2" onClick={() => openDetail(product)}> Detail</button>
-                        {currentRoleName === 'admin' && (
-                          <>
-                            <button className="text-indigo-600 hover:underline mr-2" onClick={() => { setEditingProduct(product); setIsModalOpen(true); }}>Edit</button>
-                            <button className="text-red-600 hover:underline" onClick={() => handleDelete(product.product_id)}>Delete</button>
-                          </>
-                        )}
-                      </Td>
-                    </tr>
-                  ))}
+                  
+                  {sortedProducts.map((product, idx) => {
+                      const discountPrice = product.maximum_discount
+                        ? product.price * (1 - product.maximum_discount / 100)
+                        : null;
+
+                      return (
+                        <tr key={product.product_id || idx} className="hover:bg-gray-50">
+                          <Td>{idx + 1}</Td>
+                          <Td>{product.product_name || '-'}</Td>
+                          <Td>{product.category_name || '-'}</Td>
+                          <Td>{product.sku_partnumber || '-'}</Td>
+                          <Td className="break-words whitespace-normal break-words max-w-[220px]">
+                            {wrapTextByWords(product.description || product.product_description || '-', 75).map((line, index) => (
+                              <div key={index}>{line}</div>
+                            ))}
+                          </Td>
+
+                          <Td>{product.price ? parseFloat(product.price).toLocaleString() : '-'}</Td>
+
+                          {currentRoleName === 'channel' && (
+                            <Td>{product.channel_cost ? parseFloat(product.channel_cost).toLocaleString() : '-'}</Td>
+                          )}
+
+                          {currentRoleName === 'sale' && (
+                            <Td>{discountPrice ? discountPrice.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '-'}</Td>
+                          )}
+
+                          <Td>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              product.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {product.status ? 'Active' : 'Inactive'}
+                            </span>
+                          </Td>
+
+                          <Td>
+                            {canManage && (
+                            <button
+                              className="text-blue-600 hover:underline mr-2"
+                              onClick={() => openDetail(product)}
+                            >
+                              Detail
+                            </button>
+                            )}
+                            {canManage && (
+                              <>
+                                <button
+                                  className="text-indigo-600 hover:underline mr-2"
+                                  onClick={() => {
+                                    setEditingProduct(product);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  className="text-red-600 hover:underline"
+                                  onClick={() => handleDelete(product.product_id)}
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </Td>
+                        </tr>
+                      );
+                    })}
+
                 </tbody>
               </table>
             </div>

@@ -18,6 +18,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   const [categories, setCategories] = useState([]);
   const [roles, setRoles] = useState([]);
   const [discountErr, setDiscountErr] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   const isFieldEnabled = (field) => {
     const role = roles.find((r) => String(r.role_id) === formData.product_role);
@@ -25,7 +27,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     if (field === 'price') return true;
     const enabledFields = {
       admin: [],
-      sales: ['maximum_discount'],
+      sale: ['maximum_discount'],
       channel: ['channel_cost'],
     };
     return enabledFields[roleName]?.includes(field);
@@ -76,7 +78,7 @@ useEffect(() => {
       product_role: product.product_role?.toString() || roles[0]?.role_id?.toString() || '',
       category_id: product.category_id?.toString() || categories[0]?.category_id?.toString() || '',
       sku_partnumber: product.sku_partnumber || '',
-      description: product.description || '',
+      description: product.description || product.product_description || '',
       price: product.price ? String(product.price) : '',
       maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
       channel_cost: product.channel_cost ? String(product.channel_cost) : '',
@@ -85,7 +87,7 @@ useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       product_role: roles[0]?.role_id?.toString() || '',
-category_id: categories[0]?.category_id?.toString() || '',
+      category_id: categories[0]?.category_id?.toString() || '',
     }));
   }
 }, [product, categories, roles]);
@@ -150,7 +152,7 @@ category_id: categories[0]?.category_id?.toString() || '',
       product_role: parseInt(formData.product_role, 10),
       category_id: parseInt(formData.category_id, 10),
       sku_partnumber: formData.sku_partnumber,
-      description: formData.description,
+      product_description: formData.description,
       price: formData.price !== '' ? Number(formData.price) : 0,
       maximum_discount: formData.maximum_discount !== ''
         ? Number(formData.maximum_discount)
@@ -175,15 +177,16 @@ category_id: categories[0]?.category_id?.toString() || '',
 
       const result = await res.json();
       if ([200, 201].includes(result.status_code)) {
+        setErrorMessage('');
         onSave();
         onClose();
       } else {
     console.error('Error response:', result); 
     if (result.message?.toLowerCase().includes('product') && result.message?.toLowerCase().includes('exist')) {
-      alert('Tên sản phẩm đã tồn tại. Vui lòng chọn tên khác.');
-    } else {
-      alert(result.message || 'Failed to save product');
-}
+    setErrorMessage('This product existed. please choose another name.');
+  } else {
+    setErrorMessage(result.detail || result.message || 'faild to save.');
+  }
   }
     } catch {
       alert('Error saving product');
@@ -211,8 +214,11 @@ category_id: categories[0]?.category_id?.toString() || '',
             onChange={handleChange}
             className="border p-2"
             required
-            
           />
+          {errorMessage && (
+            <p className="text-red-600 text-sm col-span-2 mt-1">{errorMessage}</p>
+          )}
+
 
           <select
             name="product_role"
@@ -240,10 +246,11 @@ category_id: categories[0]?.category_id?.toString() || '',
         >
           <option value="">Select a category</option>
           {categories.map((cat) => (
-            <option key={cat.category_id} value={cat.category_id.toString()}>
-              {cat.category_name}
-            </option>
-          ))}
+  <option key={cat.category_id} value={cat.category_id.toString()}>
+    {cat.category_name} {cat.type_name ? `- ${cat.type_name}` : ''}
+  </option>
+))}
+
         </select>
 
 
@@ -279,7 +286,7 @@ category_id: categories[0]?.category_id?.toString() || '',
               min="0"
               max="100"
               value={formData.maximum_discount}
-onChange={handleChange}
+              onChange={handleChange}
               disabled={!isFieldEnabled('maximum_discount')}
               required={isFieldEnabled('maximum_discount')}
               className={`border p-2 w-full ${
