@@ -18,6 +18,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   const [categories, setCategories] = useState([]);
   const [roles, setRoles] = useState([]);
   const [discountErr, setDiscountErr] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   const isFieldEnabled = (field) => {
     const role = roles.find((r) => String(r.role_id) === formData.product_role);
@@ -25,7 +27,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     if (field === 'price') return true;
     const enabledFields = {
       admin: [],
-      sales: ['maximum_discount'],
+      sale: ['maximum_discount'],
       channel: ['channel_cost'],
     };
     return enabledFields[roleName]?.includes(field);
@@ -85,7 +87,7 @@ useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       product_role: roles[0]?.role_id?.toString() || '',
-category_id: categories[0]?.category_id?.toString() || '',
+      category_id: categories[0]?.category_id?.toString() || '',
     }));
   }
 }, [product, categories, roles]);
@@ -175,15 +177,16 @@ category_id: categories[0]?.category_id?.toString() || '',
 
       const result = await res.json();
       if ([200, 201].includes(result.status_code)) {
+        setErrorMessage('');
         onSave();
         onClose();
       } else {
     console.error('Error response:', result); 
     if (result.message?.toLowerCase().includes('product') && result.message?.toLowerCase().includes('exist')) {
-      alert('Tên sản phẩm đã tồn tại. Vui lòng chọn tên khác.');
-    } else {
-      alert(result.message || 'Failed to save product');
-}
+    setErrorMessage('This product existed. please choose another name.');
+  } else {
+    setErrorMessage(result.detail || result.message || 'faild to save.');
+  }
   }
     } catch {
       alert('Error saving product');
@@ -211,8 +214,11 @@ category_id: categories[0]?.category_id?.toString() || '',
             onChange={handleChange}
             className="border p-2"
             required
-            
           />
+          {errorMessage && (
+            <p className="text-red-600 text-sm col-span-2 mt-1">{errorMessage}</p>
+          )}
+
 
           <select
             name="product_role"
@@ -240,10 +246,11 @@ category_id: categories[0]?.category_id?.toString() || '',
         >
           <option value="">Select a category</option>
           {categories.map((cat) => (
-            <option key={cat.category_id} value={cat.category_id.toString()}>
-              {cat.category_name}
-            </option>
-          ))}
+  <option key={cat.category_id} value={cat.category_id.toString()}>
+    {cat.category_name} {cat.type_name ? `- ${cat.type_name}` : ''}
+  </option>
+))}
+
         </select>
 
 

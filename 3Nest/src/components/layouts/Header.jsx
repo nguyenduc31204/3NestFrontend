@@ -4,6 +4,7 @@ import { FiBell, FiMessageSquare, FiSettings, FiLogOut } from 'react-icons/fi';
 import logo from '../../assets/3nestv8.png';
 import { useAuth } from '../../context/AuthContext';
 
+
 const UserProfileDropdown = ({ user, onLogout }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const settingsPath = user?.role_name === 'admin' ? '/admin/settings' : '/profile';
@@ -21,6 +22,7 @@ const UserProfileDropdown = ({ user, onLogout }) => {
           alt="User avatar"
           className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
         />
+
         <span className="hidden lg:inline-block text-sm font-medium text-gray-700 truncate">
           {user.name}
         </span>
@@ -54,11 +56,13 @@ const UserProfileDropdown = ({ user, onLogout }) => {
 const HeaderIcons = () => (
   <div className="flex items-center space-x-6">
     <button className="p-3 text-gray-600 rounded-full hover:bg-gray-200 relative" aria-label="Notifications">
-      <FiBell className="w-6 h-6" />
+      <FiBell className="w-6 h-6 text-white" />
+
       <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
     </button>
     <button className="p-3 text-gray-600 rounded-full hover:bg-gray-200 relative" aria-label="Messages">
-      <FiMessageSquare className="w-6 h-6" />
+      <FiMessageSquare className="w-6 h-6 text-white" />
+
       <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-500"></span>
     </button>
   </div>
@@ -86,7 +90,8 @@ const Header = () => {
   if (!user) return null;
 
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between px-6 py-3 bg-gray-400 text-white shadow-sm">
+    <header className="sticky top-0 z-40 flex items-center justify-between px-6 py-3 bg-black text-white shadow-sm">
+
 
       <div className="flex items-center">
         <Link to="/">

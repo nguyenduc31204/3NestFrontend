@@ -232,6 +232,28 @@ const Products = () => {
     return 0;
   });
 
+  function wrapTextByWords(text, maxLength = 50) {
+    if (!text) return ['-'];
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+
+    for (let word of words) {
+      if ((currentLine + word).length <= maxLength) {
+        currentLine += (currentLine ? ' ' : '') + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+
+    if (currentLine) lines.push(currentLine);
+
+    return lines;
+  }
+  
+
+
 
 
 
@@ -324,14 +346,20 @@ const Products = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <Th>#</Th>
-                    <Th>Product Name</Th>
+                    <Th>Item Name</Th>
                     <Th>Category Name</Th>
                     <Th>Part Number</Th>
+                    <Th>Description</Th>
                     <Th>Price</Th>
+                    {currentRoleName === 'channel' && <Th>Channel Cost</Th>}
+                    {currentRoleName === 'sale' && <Th>Max Discount Price</Th>}
                     <Th>Status</Th>
+                    {canManage && (
                     <Th>Action</Th>
+                    )}
                   </tr>
                 </thead>
+
                 <tbody className="bg-white divide-y divide-gray-200">
                   {!loading && products.length === 0 && (
                     <tr>
@@ -339,31 +367,74 @@ const Products = () => {
                     </tr>
                   )}
                   
-                  {sortedProducts.map((product, idx) => (
+                  {sortedProducts.map((product, idx) => {
+                      const discountPrice = product.maximum_discount
+                        ? product.price * (1 - product.maximum_discount / 100)
+                        : null;
 
-                    <tr key={product.product_id || idx} className="hover:bg-gray-50">
-                      <Td>{idx + 1}</Td>
-                      <Td>{product.product_name || '-'}</Td>
-                      <Td>{product.category_name || '-'}</Td>
-                      <Td>{product.sku_partnumber || '-'}</Td>
-                      <Td>{product.price ? parseFloat(product.price).toLocaleString() : '-'}</Td>
-                      <Td>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {product.status ? 'Active' : 'Inactive'}
-                        </span>
-                      </Td>
-                      <Td>
-                        <button
-                          className="text-blue-600 hover:underline mr-2" onClick={() => openDetail(product)}> Detail</button>
-                        {canManage && (
-                          <>
-                            <button className="text-indigo-600 hover:underline mr-2" onClick={() => { setEditingProduct(product); setIsModalOpen(true); }}>Edit</button>
-                            <button className="text-red-600 hover:underline" onClick={() => handleDelete(product.product_id)}>Delete</button>
-                          </>
-                        )}
-                      </Td>
-                    </tr>
-                  ))}
+                      return (
+                        <tr key={product.product_id || idx} className="hover:bg-gray-50">
+                          <Td>{idx + 1}</Td>
+                          <Td>{product.product_name || '-'}</Td>
+                          <Td>{product.category_name || '-'}</Td>
+                          <Td>{product.sku_partnumber || '-'}</Td>
+                          <Td className="break-words whitespace-normal break-words max-w-[220px]">
+                            {wrapTextByWords(product.description || product.product_description || '-', 75).map((line, index) => (
+                              <div key={index}>{line}</div>
+                            ))}
+                          </Td>
+
+                          <Td>{product.price ? parseFloat(product.price).toLocaleString() : '-'}</Td>
+
+                          {currentRoleName === 'channel' && (
+                            <Td>{product.channel_cost ? parseFloat(product.channel_cost).toLocaleString() : '-'}</Td>
+                          )}
+
+                          {currentRoleName === 'sale' && (
+                            <Td>{discountPrice ? discountPrice.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '-'}</Td>
+                          )}
+
+                          <Td>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              product.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {product.status ? 'Active' : 'Inactive'}
+                            </span>
+                          </Td>
+
+                          <Td>
+                            {canManage && (
+                            <button
+                              className="text-blue-600 hover:underline mr-2"
+                              onClick={() => openDetail(product)}
+                            >
+                              Detail
+                            </button>
+                            )}
+                            {canManage && (
+                              <>
+                                <button
+                                  className="text-indigo-600 hover:underline mr-2"
+                                  onClick={() => {
+                                    setEditingProduct(product);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  className="text-red-600 hover:underline"
+                                  onClick={() => handleDelete(product.product_id)}
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </Td>
+                        </tr>
+                      );
+                    })}
+
                 </tbody>
               </table>
             </div>
