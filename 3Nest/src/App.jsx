@@ -20,14 +20,11 @@ import ForgotPassword from './pages/Auth/ForgotPassword'
 import TypeDetail from './pages/admin/Type/TypeDetail';
 
 import DealAdmin from './pages/admin/Deal/Deal'
-import AdminEditDeal from './pages/admin/Deal/Edit'
 import EditOrderAdmin from './pages/admin/Order/EditOrder'
-import AddPermission from './pages/admin/PermissionType/AddPermission'
 import PermissionTypePage from './pages/admin/PermissionType'
 import { Toaster } from 'react-hot-toast'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import ProtectedRoute from './pages/Auth/ProtectedRoute'
-import AddDealPage from './pages/Sales/Deal/AddDeal'
 import Header from './components/layouts/Header'
 import DashboardLayout from './components/layouts/DashboardLayout'
 import EditDealPage from './pages/admin/Deal/Edit'
@@ -37,6 +34,7 @@ import RoleList from './pages/admin/Role/RoleList';
 import AddRole from './pages/admin/Role/AddRole';
 import EditRole from './pages/admin/Role/EditRole';
 import RoleDetail from './pages/admin/Role/RoleDetail';
+import Profile from './pages/admin/User/Profile'
 
 
 
@@ -56,20 +54,22 @@ const ProtectedLayout = () => {
   return <DashboardLayout />;
 };
 
+
 const App = () => {
   return (
     <AuthProvider>
-      <Toaster 
+      {/* <Toaster 
         position="top-right" 
         reverseOrder={false} 
-      />
+      /> */}
       
-      
+      <Header />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/profile" element={<Profile />} />
         
         <Route path="/" element={<RootRedirect />} />
 
@@ -161,9 +161,13 @@ const App = () => {
             element={ <ProtectedRoute permission="user:view"><UserDetail /></ProtectedRoute> } 
           />
 
-          <Route 
+          {/* <Route 
             path="/reports" 
             element={ <ProtectedRoute permission="report:view"><Reports /></ProtectedRoute> } 
+          /> */}
+          <Route 
+            path="/activitylog" 
+            element={<Reports />} 
           />
         </Route>
 

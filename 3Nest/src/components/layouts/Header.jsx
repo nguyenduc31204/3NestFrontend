@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const UserProfileDropdown = ({ user, onLogout }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const settingsPath = user?.role_name === 'admin' ? '/admin/settings' : '/profile';
+  const settingsPath = '/profile';
 
   return (
     <div className="relative">
