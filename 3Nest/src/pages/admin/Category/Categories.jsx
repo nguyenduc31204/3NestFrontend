@@ -65,18 +65,18 @@ const RoleList = () => {
 
   if (!user) return <div className="p-8 text-center">Initializing…</div>;
   if (!hasPermission(user, 'role:view')) {
-    return <div className="p-8 text-center text-red-600">Bạn không có quyền truy cập trang này.</div>;
+    return <div className="p-8 text-center text-red-600">Do not have permission access this page</div>;
   }
 
   return (
     <>
-      <div className="my-5 mx-auto max-w-4xl">
-        <div className="flex justify-between mb-4">
+      <div className="my-5 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
           <h1 className="text-xl font-semibold">Roles</h1>
           {hasPermission(user, 'role:manage') && (
             <button
               onClick={() => navigate('/roles/add')}
-              className="px-4 py-2 bg-blue-600 text-white rounded"
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded"
             >
               + Add Role
             </button>
@@ -85,16 +85,16 @@ const RoleList = () => {
 
         {error && <div className="mb-4 text-red-600">{error}</div>}
 
-        <div className="bg-white shadow rounded-lg">
-          <table className="w-full table-auto">
+        <div className="bg-white shadow rounded-lg overflow-x-auto">
+          <table className="min-w-full table-auto">
             <thead>
               <tr className="bg-gray-100 text-left">
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Description</th>
-                <th className="px-4 py-2">Detail</th>
-                {(hasPermission(user, 'role:manage')) && (
-                  <th className="px-4 py-2">Actions</th>
+                <th className="px-4 py-2 whitespace-nowrap">#</th>
+                <th className="px-4 py-2 whitespace-nowrap">Name</th>
+                <th className="px-4 py-2 whitespace-nowrap">Description</th>
+                <th className="px-4 py-2 whitespace-nowrap">Detail</th>
+                {hasPermission(user, 'role:manage') && (
+                  <th className="px-4 py-2 whitespace-nowrap">Actions</th>
                 )}
               </tr>
             </thead>
@@ -105,7 +105,6 @@ const RoleList = () => {
                   <td className="px-4 py-2">{i + 1}</td>
                   <td className="px-4 py-2">{role.role_name}</td>
                   <td className="px-4 py-2">{role.role_description}</td>
-
                   <td className="px-4 py-2">
                     <button
                       onClick={() => navigate(`/roles/detail/${role.role_id}`)}
@@ -114,7 +113,6 @@ const RoleList = () => {
                       Detail
                     </button>
                   </td>
-
                   {hasPermission(user, 'role:manage') && (
                     <td className="px-4 py-2 space-x-2">
                       <button
@@ -139,6 +137,7 @@ const RoleList = () => {
       </div>
     </>
   );
+
 };
 
 export default RoleList;

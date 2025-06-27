@@ -42,7 +42,7 @@ import RoleDetail from './pages/admin/Role/RoleDetail';
 
 const RootRedirect = () => {
   const isAuthenticated = true; 
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+  return isAuthenticated ? <Navigate to="/login" replace /> : <Navigate to="/login" replace />;
 };
 
 const ProtectedLayout = () => {

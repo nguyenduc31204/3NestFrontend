@@ -76,77 +76,73 @@ const RoleList = () => {
 
   return (
     <>
-      
-        <div className="my-5 mx-auto max-w-4xl">
-          <div className="flex justify-between mb-4">
-            <h1 className="text-xl font-semibold">Roles</h1>
-            {hasPermission(user, 'role:manage') && (
-              <button
-                onClick={() => navigate('/roles/add')}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                + Add Role
-              </button>
-            )}
-          </div>
-          {error && <div className="mb-4 text-red-600">{error}</div>}
-          <div className="bg-white shadow rounded-lg">
-            <table className="w-full table-auto">
-              <thead>
-                <tr className="bg-gray-100 text-left">
-                  <th className="px-4 py-2">#</th>
-                  <th className="px-4 py-2">Name</th>
-                  <th className="px-4 py-2">Description</th>
-                  <th className="px-4 py-2">Detail</th> 
+      <div className="my-5 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <h1 className="text-xl font-semibold">Roles</h1>
+          {hasPermission(user, 'role:manage') && (
+            <button
+              onClick={() => navigate('/roles/add')}
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              + Add Role
+            </button>
+          )}
+        </div>
+
+        {error && <div className="mb-4 text-red-600">{error}</div>}
+
+        <div className="bg-white shadow rounded-lg overflow-x-auto">
+          <table className="min-w-full table-auto">
+            <thead>
+              <tr className="bg-gray-100 text-left text-sm text-gray-700">
+                <th className="px-4 py-2 whitespace-nowrap">#</th>
+                <th className="px-4 py-2 whitespace-nowrap">Name</th>
+                <th className="px-4 py-2 whitespace-nowrap">Description</th>
+                <th className="px-4 py-2 whitespace-nowrap">Detail</th>
+                {hasPermission(user, 'role:manage') && (
+                  <th className="px-4 py-2 whitespace-nowrap">Actions</th>
+                )}
+              </tr>
+            </thead>
+            <tbody className="text-sm">
+              {roles.map((role, i) => (
+                <tr key={role.role_id} className="border-t hover:bg-gray-50">
+                  <td className="px-4 py-2">{i + 1}</td>
+                  <td className="px-4 py-2">{role.role_name}</td>
+                  <td className="px-4 py-2">{role.role_description}</td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => navigate(`/roles/detail/${role.role_id}`)}
+                      className="text-gray-700 hover:text-blue-600 hover:underline"
+                    >
+                      Detail
+                    </button>
+                  </td>
                   {hasPermission(user, 'role:manage') && (
-                  <th className="px-4 py-2">Actions</th> 
-                  )}
-                </tr>
-              </thead>
-
-              <tbody>
-                {roles.map((role, i) => (
-                  <tr key={role.role_id} className="border-t">
-                    <td className="px-4 py-2">{i + 1}</td>
-                    <td className="px-4 py-2">{role.role_name}</td>
-                    <td className="px-4 py-2">{role.role_description}</td>
-
-                    {/* Detail column */}
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 space-x-2">
                       <button
-                        onClick={() => navigate(`/roles/detail/${role.role_id}`)}
-                        className="text-gray-700 hover:text-blue-600 hover:underline"
+                        onClick={() => navigate(`/roles/edit/${role.role_id}`)}
+                        className="text-blue-600 hover:underline"
                       >
-                        Detail
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(role.role_id)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Delete
                       </button>
                     </td>
-
-                    {/* Actions column: only Edit and Delete */}
-                    {hasPermission(user, 'role:manage') && (
-                      <td className="px-4 py-2 space-x-2">
-                        <button
-                          onClick={() => navigate(`/roles/edit/${role.role_id}`)}
-                          className="text-blue-600 hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(role.role_id)}
-                          className="text-red-600 hover:underline"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-     
+      </div>
     </>
   );
+
 };
 
 export default RoleList;

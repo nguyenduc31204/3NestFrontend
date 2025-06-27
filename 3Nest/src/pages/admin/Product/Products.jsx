@@ -5,6 +5,9 @@ import {
   LuArrowDownToLine, LuArrowUpNarrowWide, LuRefreshCcw
 } from 'react-icons/lu';
 
+
+
+
 import Header from '../../../components/layouts/Header';
 import { BASE_URL } from '../../../utils/apiPath';
 import { useNavigate } from 'react-router-dom';
@@ -38,6 +41,8 @@ const Products = () => {
   const [detailProduct, setDetailProduct] = useState(null);
   const [categories, setCategories] = useState([]);
   const [user, setUser] = useState(null);
+  const [sortAsc, setSortAsc] = useState(true);
+
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -219,6 +224,13 @@ const Products = () => {
   if (!canView) {
     return <div className="p-8 text-center text-red-600">Do not have permission accessing this page</div>;
   }
+  const sortedProducts = [...products].sort((a, b) => {
+    const nameA = a.product_name?.toLowerCase() || '';
+    const nameB = b.product_name?.toLowerCase() || '';
+    if (nameA < nameB) return sortAsc ? -1 : 1;
+    if (nameA > nameB) return sortAsc ? 1 : -1;
+    return 0;
+  });
 
 
 
@@ -259,9 +271,16 @@ const Products = () => {
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-lg font-semibold">Products & Services</h2>
               <div className="flex space-x-2">
-                <IconButton title="Export Excel"><LuArrowDownToLine className="w-5 h-5" /></IconButton>
-                <IconButton title="Filter"><LuArrowUpNarrowWide className="w-5 h-5" /></IconButton>
-                <IconButton title="Refresh" onClick={handleRefresh}><LuRefreshCcw className="w-5 h-5" /></IconButton>
+                {/* <IconButton title="Export Excel"><LuArrowDownToLine className="w-5 h-5" /></IconButton>
+                <IconButton title="Filter"><LuArrowUpNarrowWide className="w-5 h-5" /></IconButton> */}
+                {/* <IconButton title="Refresh" onClick={handleRefresh}><LuRefreshCcw className="w-5 h-5" /></IconButton> */}
+                <IconButton
+                  title={`Sort ${sortAsc ? 'A → Z' : 'Z → A'}`}
+                  onClick={() => setSortAsc(prev => !prev)}
+                >
+                  <LuArrowUpNarrowWide className="w-5 h-5" />
+                </IconButton>
+
               </div>
             </div>
 
@@ -319,7 +338,9 @@ const Products = () => {
                       <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No products found</td>
                     </tr>
                   )}
-                  {products.map((product, idx) => (
+                  
+                  {sortedProducts.map((product, idx) => (
+
                     <tr key={product.product_id || idx} className="hover:bg-gray-50">
                       <Td>{idx + 1}</Td>
                       <Td>{product.product_name || '-'}</Td>
