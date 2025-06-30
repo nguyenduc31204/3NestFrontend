@@ -253,10 +253,6 @@ const Products = () => {
   }
   
 
-
-
-
-
   return (
     <div>
       
@@ -291,7 +287,7 @@ const Products = () => {
 
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold">Products & Services</h2>
+              <h2 className="text-lg font-semibold">Table Item</h2>
               <div className="flex space-x-2">
                 {/* <IconButton title="Export Excel"><LuArrowDownToLine className="w-5 h-5" /></IconButton>
                 <IconButton title="Filter"><LuArrowUpNarrowWide className="w-5 h-5" /></IconButton> */}
@@ -306,9 +302,9 @@ const Products = () => {
               </div>
             </div>
 
-
+            {hasPermission(user, 'role:manage') && (
             <div className="p-4 border-b grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50">
-              {hasPermission(user, 'role:manage') && (
+              
               <div>
                 <label className="block text-sm font-medium mb-1">Product Type</label>
                 <select
@@ -321,8 +317,8 @@ const Products = () => {
                   ))}
                 </select>
               </div>
-              )}
-              {hasPermission(user, 'role:manage') && (
+              
+              
                 <div className="flex items-end space-x-2">
                   {roles.map((r) => (
                     <RoleButton
@@ -335,8 +331,9 @@ const Products = () => {
                     </RoleButton>
                   ))}
                 </div>
-              )}
+              
             </div>
+            )}
 
             {error && <Alert msg={error} />}
             {loading && <Loader msg="Loading products..." />}

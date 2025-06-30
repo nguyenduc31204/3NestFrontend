@@ -11,7 +11,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '01', 
     label: 'Dashboard',
-    icon: LayoutDashboard,
+    //icon: LayoutDashboard,
     path: '/dashboard', 
     resourceType: 'dashboard',
     ariaLabel: 'Navigate to dashboard',
@@ -19,7 +19,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '02',
     label: 'Products',
-    icon: Package,
+    //icon: Package,
     path: '/products',
     resourceType: 'product', 
     ariaLabel: 'Navigate to products',
@@ -27,7 +27,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '03',
     label: 'Categories',
-    icon: ListTree,
+    //icon: ListTree,
     path: '/categories',
     resourceType: 'category',
     ariaLabel: 'Navigate to categories',
@@ -35,7 +35,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '04',
     label: 'Orders',
-    icon: ShoppingCart,
+    //icon: ShoppingCart,
     path: '/orders',
     resourceType: 'order',
     ariaLabel: 'Navigate to orders',
@@ -43,7 +43,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '05',
     label: 'Users',
-    icon: Users,
+    //icon: Users,
     path: '/users',
     resourceType: 'user',
     ariaLabel: 'Navigate to users',
@@ -51,7 +51,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '06',
     label: 'Reports',
-    icon: BarChart2,
+    //icon: BarChart2,
     path: '/reports',
     resourceType: 'report',
     ariaLabel: 'Navigate to reports',
@@ -59,7 +59,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '07',
     label: 'Types',
-    icon: ListTree, 
+    //icon: ListTree, 
     path: '/types',
     resourceType: 'type',
     ariaLabel: 'Navigate to types',
@@ -67,7 +67,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '08',
     label: 'Deals',
-    icon: ShoppingCart,
+    //icon: ShoppingCart,
     path: '/deals',
     resourceType: 'deal',
     ariaLabel: 'Navigate to deals',
@@ -75,7 +75,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '09',
     label: 'Per Type', 
-    icon: ShoppingCart, 
+    //icon: ShoppingCart, 
     path: '/pertype',
     resourceType: 'per_type', 
     ariaLabel: 'Navigate to per type reports',
@@ -83,7 +83,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '10',
     label: 'Roles',
-    icon: ListTree, 
+    //icon: ListTree, 
     path: '/roles',
     resourceType: 'role',
     ariaLabel: 'Navigate to roles',
@@ -91,7 +91,7 @@ export const SIDE_MENU_DATA = [
   {
     id: '11',
     label: 'Activiti Log',
-    icon: ListTree, 
+    //icon: ListTree, 
     path: '/activitylog',
     resourceType: 'role',
     ariaLabel: 'Navigate to activity log',
