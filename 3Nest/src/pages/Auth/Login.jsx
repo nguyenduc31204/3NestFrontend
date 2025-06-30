@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { decodeToken, validateEmail } from '../../utils/help';
 import Input from '../../components/input/Input';
 import { BASE_URL } from '../../utils/apiPath';
+import { useAuth } from '../../context/AuthContext';
 
 
 
@@ -12,6 +13,7 @@ const Login = () => {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+  const { refreshUser } = useAuth(); 
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,7 +46,7 @@ const Login = () => {
       });
 
       const result = await response.json();
-      console.log('Login API Response:', result);
+      //console.log('Login API Response:', result);
 
       if (response.ok) {
         const { access_token } = result;
@@ -66,7 +68,7 @@ const Login = () => {
         })
 
         const permissionResult = await permissionResponse.json();
-        console.log('Permissions:', permissionResult);
+        //console.log('Permissions:', permissionResult);
 
         const userForStorage = {
           role_name: permissionResult.data.role_name,
@@ -78,9 +80,9 @@ const Login = () => {
         localStorage.setItem('role', decoded.role);
 
 
-        console.log('Decoded token:', decoded);
-
         //console.log('Decoded token:', decoded);
+
+        await refreshUser();
          navigate('/products');
 
       } else {

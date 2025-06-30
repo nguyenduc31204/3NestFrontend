@@ -74,9 +74,9 @@ const EditType = () => {
             <div className="page-header flex justify-between items-center mb-10">
               <div className="page-title">
                 <h1 className="text-2xl font-semibold text-gray-800 mb-2">Edit Type</h1>
-                <div className="breadcrumb text-gray-500 text-sm">
-                  <a href="#" className="hover:underline">Dashboard</a> / <a href="/types" className="hover:underline">Types</a> / Edit
-                </div>
+                <div className="text-sm mt-1">
+                    <a href="/types" className="text-gray-600 hover:underline">← Back</a>
+                  </div>
               </div>
             </div>
 
@@ -117,7 +117,7 @@ const EditType = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+                      className="px-4 py-2 bg-blue-600 hover:bg-gray-700 text-white rounded"
                     >
                       Update Type
                     </button>

@@ -134,106 +134,111 @@ const AddRole = () => {
     return acc;
   }, {});
 
-  return (
-    <>
-      
-        <div className="my-5 mx-auto">
-          <div className="content p-6 sm:p-10 flex justify-center">
-            <div className="w-full max-w-2xl">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h1 className="text-2xl font-semibold text-gray-800 mb-1">Role Management</h1>
-                  <div className="text-gray-500 text-sm">
-                    <a href="/admin/dashboard" className="hover:underline">Dashboard</a> / <a href="/roles" className="hover:underline">Roles</a> / Add
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white shadow rounded-lg p-6">
-                {error && <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">{error}</div>}
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Role Name</label>
-                    <input
-                      name="role_name"
-                      value={formData.role_name}
-                      onChange={handleChange}
-                      required
-                      className="w-full border px-3 py-2 rounded"
-                      placeholder="Enter role name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Description</label>
-                    <textarea
-                      name="role_description"
-                      value={formData.role_description}
-                      onChange={handleChange}
-                      rows={3}
-                      className="w-full border px-3 py-2 rounded"
-                      placeholder="Enter role description"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Permissions</label>
-                    {Object.entries(grouped).map(([typeName, perms]) => (
-                      <div key={typeName} className="mb-4 border rounded p-4 bg-gray-50">
-                      
-                        <label className="flex items-center space-x-2 font-medium text-gray-800 mb-2 capitalize">
-                          <input
-                            type="checkbox"
-                            checked={selectedTypes[typeName] || false}
-                            onChange={() => toggleType(typeName)}
-                          />
-                          <span>{typeName}</span>
-                        </label>
-
-                        
-                        {selectedTypes[typeName] && (
-                          <div className="pl-4 space-y-2">
-                            {perms.map((perm) => (
-                              <label key={perm.permission_id} className="flex items-center space-x-2 text-sm">
-                                <input
-                                  type="radio"
-                                  name={`perm-${typeName}`}
-                                  checked={!!selectedPermissions[perm.permission_id]}
-                                  onChange={() => handlePermissionSelect(perm)}
-                                />
-                                <span>{perm.permission_name}</span>
-                              </label>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-
-                  </div>
-
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => navigate('/roles')}
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                      Create Role
-                    </button>
-                  </div>
-                </form>
-              </div>
+ return (
+  <>
+    <div className="my-5 mx-auto">
+      <div className="content p-4 sm:p-8 flex justify-center">
+        <div className="w-full max-w-2xl">
+          {/* Title + Back on top-left */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-[#C71585]">Role Management</h1>
+            <div className="text-sm mt-1">
+              <a href="/roles" className="text-fuchsia-700 hover:underline">← Back</a>
             </div>
           </div>
+
+          {/* Form Card */}
+          <div className="bg-white shadow-md border border-fuchsia-200 rounded-lg p-6">
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Role Name */}
+              <div>
+                <label className="block text-sm font-medium mb-1 text-fuchsia-800">Role Name</label>
+                <input
+                  name="role_name"
+                  value={formData.role_name}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-fuchsia-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-400"
+                  placeholder="Enter role name"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium mb-1 text-fuchsia-800">Description</label>
+                <textarea
+                  name="role_description"
+                  value={formData.role_description}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full border border-fuchsia-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-400"
+                  placeholder="Enter role description"
+                />
+              </div>
+
+              {/* Permissions */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-fuchsia-800">Permissions</label>
+                {Object.entries(grouped).map(([typeName, perms]) => (
+                  <div key={typeName} className="mb-4 border border-fuchsia-200 rounded p-4 bg-pink-50">
+                    <label className="flex items-center space-x-2 font-medium text-fuchsia-900 mb-2 capitalize">
+                      <input
+                        type="checkbox"
+                        checked={selectedTypes[typeName] || false}
+                        onChange={() => toggleType(typeName)}
+                      />
+                      <span>{typeName}</span>
+                    </label>
+
+                    {selectedTypes[typeName] && (
+                      <div className="pl-4 space-y-2">
+                        {perms.map((perm) => (
+                          <label key={perm.permission_id} className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input
+                              type="radio"
+                              name={`perm-${typeName}`}
+                              checked={!!selectedPermissions[perm.permission_id]}
+                              onChange={() => handlePermissionSelect(perm)}
+                            />
+                            <span>{perm.permission_name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => navigate('/roles')}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#C71585] text-white rounded hover:bg-pink-800 transition"
+                >
+                  Create Role
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-     
-    </>
-  );
+      </div>
+    </div>
+  </>
+);
+
 };
 
 export default AddRole;

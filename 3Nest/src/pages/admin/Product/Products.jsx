@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { FiEdit, FiTrash } from 'react-icons/fi';
 import {
   LuCoins, LuWalletMinimal, LuPersonStanding,
   LuChevronsLeft, LuChevronLeft, LuChevronRight, LuChevronsRight,
@@ -136,7 +137,7 @@ const Products = () => {
   const loadProductsByTypeAndRole = async (roleId, typeId) => {
     try {
       const url = `${BASE_URL}/products/get-products-by-role-and-type?role_id=${roleId}&type_id=${typeId}`;
-      console.log("Fetching products with URL:", url);
+      //console.log("Fetching products with URL:", url);
       const res = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -260,14 +261,12 @@ const Products = () => {
         <div className="content p-6 sm:p-10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-800 mb-1">Dashboard Management</h1>
-              <div className="text-gray-500 text-sm">
-                <a href="#" className="hover:underline">Dashboard</a> / Products
-              </div>
+              <h1 className="text-2xl font-semibold text-gray-800 mb-1">Product Management</h1>
+              
             </div>
             {canManage && (
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+                className="bg-gray-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
                 onClick={() => {
                   setEditingProduct(null);
                   setModalKey(prev => prev + 1);
@@ -401,31 +400,34 @@ const Products = () => {
 
                           <Td>
                             {canManage && (
-                            <button
-                              className="text-blue-600 hover:underline mr-2"
-                              onClick={() => openDetail(product)}
-                            >
-                              Detail
-                            </button>
-                            )}
-                            {canManage && (
-                              <>
+                              <div className="flex items-center gap-4">
                                 <button
-                                  className="text-indigo-600 hover:underline mr-2"
+                                  className="text-blue-600 hover:text-blue-800 mr-2"
+                                  onClick={() => openDetail(product)}
+                                  title="View Details"
+                                >
+                                  Detail
+                                </button>
+
+                                <button
+                                  className="text-indigo-600 hover:text-indigo-800 mr-2"
                                   onClick={() => {
                                     setEditingProduct(product);
                                     setIsModalOpen(true);
                                   }}
+                                  title="Edit"
                                 >
-                                  Edit
+                                  <FiEdit className="w-5 h-5" />
                                 </button>
+
                                 <button
-                                  className="text-red-600 hover:underline"
+                                  className="text-red-600 hover:text-red-800"
                                   onClick={() => handleDelete(product.product_id)}
+                                  title="Delete"
                                 >
-                                  Delete
+                                  <FiTrash className="w-5 h-5" />
                                 </button>
-                              </>
+                              </div>
                             )}
                           </Td>
                         </tr>

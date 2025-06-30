@@ -193,15 +193,16 @@ useEffect(() => {
     }
   };
   
-  console.log('FormData:', formData);
-  console.log('category_id:', formData.category_id, 'typeof:', typeof formData.category_id);
-  console.log('categories:', categories);
+  // console.log('FormData:', formData);
+  // console.log('category_id:', formData.category_id, 'typeof:', typeof formData.category_id);
+  // console.log('categories:', categories);
 
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+
       <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
         <h2 className="text-lg font-semibold mb-4">
           {product ? 'Edit' : 'Add'} Product
@@ -238,20 +239,20 @@ useEffect(() => {
 
 
           <select
-          name="category_id"
-          value={formData.category_id}
-          onChange={handleChange}
-          className="border p-2"
-          required
-        >
-          <option value="">Select a category</option>
-          {categories.map((cat) => (
-  <option key={cat.category_id} value={cat.category_id.toString()}>
-    {cat.category_name} {cat.type_name ? `- ${cat.type_name}` : ''}
-  </option>
-))}
+            name="category_id"
+            value={formData.category_id}
+            onChange={handleChange}
+            className="border p-2"
+            required
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat.category_id} value={cat.category_id.toString()}>
+                {cat.category_name} {cat.type_name ? `- ${cat.type_name}` : ''}
+              </option>
+            ))}
 
-        </select>
+          </select>
 
 
           <input

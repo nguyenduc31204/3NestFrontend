@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react'; 
-import SideMenu from './SideMenu';
-import Navbar from './Navbar';
-import { BASE_URL } from '../../utils/apiPath';
-import { decodeToken } from '../../utils/help';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from './Header';
+import SideMenu from './SideMenu';
+import { Outlet } from 'react-router-dom';
 
-const DashboardLayout = ({ activeMenu }) => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const decode = decodeToken(localStorage.getItem('access_token')); 
-  const [activeMenu2, setActiveMenu] = useState('');
+const DashboardLayout = () => {
+  const { user: currentUser, isLoading } = useAuth();
   const location = useLocation();
 
+  const [activeMenu2, setActiveMenu] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // NEW
+
   useEffect(() => {
-    const currentPath = location.pathname; 
+    const currentPath = location.pathname;
     if (currentPath.startsWith('/products')) setActiveMenu('02');
     else if (currentPath.startsWith('/orders')) setActiveMenu('04');
     else if (currentPath.startsWith('/users')) setActiveMenu('05');
@@ -21,49 +21,47 @@ const DashboardLayout = ({ activeMenu }) => {
     else if (currentPath.startsWith('/reports')) setActiveMenu('06');
     else if (currentPath.startsWith('/deals')) setActiveMenu('08');
     else if (currentPath.startsWith('/types')) setActiveMenu('07');
+    else if (currentPath.startsWith('/roles')) setActiveMenu('10');
     else setActiveMenu('01');
   }, [location.pathname]);
 
-  const loadPermission = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/permissions/get-permisisons-by-role?role_id=${decode?.role_id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch permissions');
-      const data = await response.json();
-      setCurrentUser(data.data || null); 
-    } catch (error) {
-      console.error('Error loading permissions:', error);
-    }
-  };
-
-  useEffect(() => {
-    loadPermission()
-  }, []);
-
-  if (!currentUser) {
+  if (isLoading || !currentUser) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header /> 
-      <Navbar activeMenu={activeMenu2} user={currentUser} />
+    <div className="min-h-screen flex flex-col relative">
+      {/* Header */}
+      <Header onToggleSidebar={() => setIsSidebarOpen(true)} />
 
-      <div className="flex flex-1">
-        <div className="max-[1080px]:hidden">
+      {/* Overlay for mobile sidebar */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Mobile */}
+      {isSidebarOpen && (
+        <div className="fixed z-50 inset-y-0 left-0 w-64 bg-white shadow-lg p-4 md:hidden">
+          <div className="flex justify-end mb-4">
+            <button onClick={() => setIsSidebarOpen(false)} className="text-gray-700">
+              ✖
+            </button>
+          </div>
           <SideMenu activeMenu={activeMenu2} user={currentUser} />
         </div>
+      )}
 
-        <div className="grow mx-5 pt-0 pb-4 overflow-auto">
-
-          <Outlet context={{ user: currentUser }} />
+      {/* Main layout */}
+      <div className="flex flex-1">
+        <div className="hidden md:block">
+          <SideMenu activeMenu={activeMenu2} user={currentUser} />
         </div>
+        <main className="flex-1 overflow-auto px-4 py-4">
+          <Outlet context={{ user: currentUser }} />
+        </main>
       </div>
     </div>
   );

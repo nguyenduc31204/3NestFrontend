@@ -230,7 +230,7 @@ const OrdersPage = () => {
             </div>
             {hasPermission(user, 'order:manage') && (
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+                className="bg-gray-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
                 onClick={() => navigate('/orders/add')}
               >
                 + Add New Order
@@ -310,7 +310,7 @@ const OrdersPage = () => {
                             <Td>
                               {hasPermission(user, 'order:view') && (
                                 <button
-                                  className="text-blue-600 hover:underline font-medium"
+                                  className="text-green-600 hover:underline font-medium"
                                   onClick={() => navigate(`/orders/edit/${order.order_id}`)}
                                 >
                                   View

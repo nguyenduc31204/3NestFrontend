@@ -37,28 +37,33 @@ const SideMenu = ({ activeMenu }) => {
   }
 
   return (
-    <div className="w-full h-full bg-white shadow-md rounded-lg p-6">
-      <div className="space-y-2">
-        {filteredMenuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => handleNavigation(item)}
-            className={`w-full flex items-center gap-4 text-[15px] 
-              ${
-                activeMenu === item.id 
-                  ? "text-white bg-primary"
-                  : "text-gray-700 hover:bg-gray-100"
-              } 
-              py-3 px-4 rounded-lg transition duration-200`}
-            aria-current={activeMenu === item.id ? "page" : undefined}
-          >
-            {item.icon && <item.icon className="text-xl" />}
-            <span>{item.label}</span>
-          </button>
-        ))}
-      </div>
+  <div className="w-full h-full shadow-md rounded-lg p-6" style={{ backgroundColor: '#F3F4F6' }}>
+    <div className="space-y-2">
+      {filteredMenuItems.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => handleNavigation(item)}
+          className={`w-full flex items-center gap-4 text-[15px] 
+            ${
+              activeMenu === item.id 
+                ? "text-white"
+                : "text-gray-700 hover:bg-gray-200"
+            } 
+            py-3 px-4 rounded-lg transition duration-200`}
+          style={{
+            backgroundColor: activeMenu === item.id ? '#4B5563' : undefined
+          }}
+          aria-current={activeMenu === item.id ? "page" : undefined}
+        >
+          {item.icon && <item.icon className="text-xl" />}
+          <span>{item.label}</span>
+        </button>
+      ))}
     </div>
-  );
+  </div>
+);
+
+
 };
 
 export default SideMenu;

@@ -79,9 +79,9 @@ const AddUser = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">User Management</h1>
-              <div className="text-gray-500 text-sm">
-                <a href="/" className="hover:underline">Dashboard</a> / <a href="/users" className="hover:underline">Users</a> / Add User
-              </div>
+              {/* <div className="text-gray-500 text-sm">
+                <a href="/users" className="hover:underline">← Back</a>
+              </div> */}
             </div>
           </div>
 
@@ -159,17 +159,17 @@ const AddUser = () => {
                 </select>
               </div>
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-5">
                 <button
                   type="button"
                   onClick={() => navigate('/users')}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-400"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-blue-700"
                 >
                   Create User
                 </button>

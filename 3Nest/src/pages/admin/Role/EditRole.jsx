@@ -89,10 +89,10 @@ const EditRole = () => {
   const handlePermissionSelect = (perm) => {
     setSelectedPermissions((prev) => {
       const updated = Object.entries(prev)
-.filter(([pid]) => {
-          const permObj = permissions.find(p => p.permission_id === Number(pid));
-          return permObj?.permission_type_name !== perm.permission_type_name;
-        })
+      .filter(([pid]) => {
+                const permObj = permissions.find(p => p.permission_id === Number(pid));
+                return permObj?.permission_type_name !== perm.permission_type_name;
+              })
         .reduce((acc, [pid, val]) => {
           acc[pid] = val;
           return acc;
@@ -110,7 +110,7 @@ const EditRole = () => {
     const payload = {
       role_id: Number(id),
       role_name: formData.role_name,
-      role_description: formData.description,
+      role_description: formData.role_description,
       permissions: selectedPermissionIds,
     };
 
@@ -145,91 +145,110 @@ const EditRole = () => {
   }, {});
 
   return (
-    <>
-      
-        <div className="my-5 mx-auto max-w-2xl">
-          <h1 className="text-xl font-semibold mb-4">Edit Role</h1>
-          {error && <div className="mb-4 text-red-600">{error}</div>}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium">Role Name</label>
-              <input
-                name="role_name"
-                value={formData.role_name}
-                onChange={handleChange}
-                required
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Description</label>
-              <textarea
-                name="role_description"
-                value={formData.role_description}
-                onChange={handleChange}
-                rows={3}
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
+  <>
+    <div className="my-5 mx-auto max-w-2xl">
+      {/* Header + Back */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Edit Role</h1>
+        <div className="text-sm mt-1">
+          <a href="/roles" className="text-gray-600 hover:underline">← Back</a>
+        </div>
+      </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Permissions</label>
-              {Object.entries(groupedPermissions).map(([typeName, perms]) => (
-                <div key={typeName} className="mb-4 border rounded p-4 bg-gray-50">
-                  <label className="flex items-center space-x-2 font-medium text-gray-800 mb-2 capitalize">
-                    <input
-                      type="checkbox"
-checked={
-                        selectedTypes[typeName] !== undefined
-                          ? selectedTypes[typeName]
-                          : Object.values(selectedPermissions).some(
-                              (perm) => perm.type === typeName
-                            )
-                      }
-                      onChange={() => toggleType(typeName)}
-                    />
-                    <span>{typeName}</span>
-                  </label>
+      {/* Error */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
+          {error}
+        </div>
+      )}
 
-                  {selectedTypes[typeName] && (
-                    <div className="pl-4 space-y-2">
-                      {perms.map((perm) => (
-                        <label key={perm.permission_id} className="flex items-center space-x-2 text-sm">
-                          <input
-                            type="radio"
-                            name={`perm-${typeName}`}
-                            checked={!!selectedPermissions[perm.permission_id]}
-                            onChange={() => handlePermissionSelect(perm)}
-                          />
-                          <span>{perm.permission_name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-end space-x-2">
-              <button
-                type="button"
-                onClick={() => navigate('/roles')}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
+      {/* Form */}
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 bg-white shadow-md border border-gray-300 rounded-lg p-6"
+      >
+        {/* Role Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Role Name</label>
+          <input
+            name="role_name"
+            value={formData.role_name}
+            onChange={handleChange}
+            required
+            className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
+          />
         </div>
 
-    </>
-  );
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea
+            name="role_description"
+            value={formData.role_description}
+            onChange={handleChange}
+            rows={3}
+            className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
+          />
+        </div>
+
+        {/* Permissions */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
+          {Object.entries(groupedPermissions).map(([typeName, perms]) => (
+            <div key={typeName} className="mb-4 border border-gray-300 rounded p-4 bg-gray-100">
+              <label className="flex items-center space-x-2 font-medium text-gray-800 mb-2 capitalize">
+                <input
+                  type="checkbox"
+                  checked={
+                    selectedTypes[typeName] !== undefined
+                      ? selectedTypes[typeName]
+                      : Object.values(selectedPermissions).some((perm) => perm.type === typeName)
+                  }
+                  onChange={() => toggleType(typeName)}
+                />
+                <span>{typeName}</span>
+              </label>
+
+              {selectedTypes[typeName] && (
+                <div className="pl-4 space-y-2">
+                  {perms.map((perm) => (
+                    <label key={perm.permission_id} className="flex items-center space-x-2 text-sm text-gray-700">
+                      <input
+                        type="radio"
+                        name={`perm-${typeName}`}
+                        checked={!!selectedPermissions[perm.permission_id]}
+                        onChange={() => handlePermissionSelect(perm)}
+                      />
+                      <span>{perm.permission_name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-end space-x-2">
+          <button
+            type="button"
+            onClick={() => navigate('/roles')}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-gray-800 transition"
+          >
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </>
+);
+
 };
 
 export default EditRole;
