@@ -23,6 +23,7 @@ const EditUser = () => {
     const fetchUser = async () => {
       try {
         const res = await fetch(
+          
           `${BASE_URL}/users/get-user?user_id=${userId}`,
           {
             method: 'GET',
@@ -40,7 +41,8 @@ const EditUser = () => {
             user_name: u.user_name || '',
             company_name: u.company_name || '',
             phone: u.phone || '',
-            status: u.status === false,
+            status: Boolean(u.status),
+
           });
           setLoading(false);
         } else {
@@ -75,6 +77,8 @@ const EditUser = () => {
       phone: formData.phone,
       status: !!formData.status,
     };
+    console.log("Payload gửi API:", payload);
+
 
     console.log('Submitting payload:', payload);
 
