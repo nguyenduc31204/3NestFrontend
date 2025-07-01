@@ -1,7 +1,7 @@
 
 
 
-export const BASE_URL = "http://localhost:8000"
+export const BASE_URL = "http://13.213.32.177:8000"
 
 
 export const API_PATHS = {
