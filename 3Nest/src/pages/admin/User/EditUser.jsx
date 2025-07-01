@@ -23,6 +23,7 @@ const EditUser = () => {
     const fetchUser = async () => {
       try {
         const res = await fetch(
+          
           `${BASE_URL}/users/get-user?user_id=${userId}`,
           {
             method: 'GET',
@@ -40,7 +41,8 @@ const EditUser = () => {
             user_name: u.user_name || '',
             company_name: u.company_name || '',
             phone: u.phone || '',
-            status: u.status === false,
+            status: Boolean(u.status),
+
           });
           setLoading(false);
         } else {
@@ -75,6 +77,8 @@ const EditUser = () => {
       phone: formData.phone,
       status: !!formData.status,
     };
+    console.log("Payload gửi API:", payload);
+
 
     console.log('Submitting payload:', payload);
 
@@ -105,15 +109,24 @@ const EditUser = () => {
   console.log('userId', userId);
 
   return (
-    <>
-      <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md">
-        <h2 className="text-2xl font-semibold mb-4">Update User</h2>
+  <>
+    <div className="max-w-2xl mx-auto my-6 px-4 sm:px-6 lg:px-8">
+      {/* Title + Back */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Update User</h2>
+        <div className="text-sm mt-1">
+          <a href="/users" className="text-gray-600 hover:underline">← Back</a>
+        </div>
+      </div>
+
+      {/* Card */}
+      <div className="bg-white shadow-md border border-gray-200 rounded-md p-6">
         {loading ? (
           <p className="text-gray-500">Loading...</p>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <p className="text-red-600">{error}</p>}
-            {success && <p className="text-green-600">{success}</p>}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {success && <p className="text-green-600 text-sm">{success}</p>}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
@@ -121,7 +134,7 @@ const EditUser = () => {
                 name="user_name"
                 value={formData.user_name}
                 onChange={handleChange}
-                className="w-full border border-gray-300 p-2 rounded"
+                className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
                 required
               />
             </div>
@@ -152,7 +165,7 @@ const EditUser = () => {
                 name="status"
                 checked={formData.status}
                 onChange={handleChange}
-                className="h-4 w-4 text-blue-600"
+                className="h-4 w-4 text-gray-600"
               />
               <label className="text-sm text-gray-700">Active</label>
             </div>
@@ -160,7 +173,7 @@ const EditUser = () => {
             <div className="text-right">
               <button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                className="bg-blue-700 hover:bg-gray-800 text-white px-4 py-2 rounded transition"
               >
                 Update
               </button>
@@ -168,8 +181,10 @@ const EditUser = () => {
           </form>
         )}
       </div>
-    </>
-  );
+    </div>
+  </>
+);
+
 };
 
 export default EditUser;

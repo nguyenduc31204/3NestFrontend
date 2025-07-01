@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
       }
       const myInfoData = await myInfoResponse.json();
       const basicUserInfo = myInfoData.data;
-      console.log("Thông tin cơ bản người dùng:", basicUserInfo);
+      //console.log("Thông tin cơ bản người dùng:", basicUserInfo);
       const roleId = basicUserInfo.role_id;
 
       const permissionsResponse = await fetch(`${BASE_URL}/permissions/get-permisisons-by-role?role_id=${roleId}`,
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         permissions: detailedPermissions.permissions,
       };
       setUser(finalUser);
-      console.log("Thông tin người dùng đã được làm mới:", finalUser);
+      //console.log("Thông tin người dùng đã được làm mới:", finalUser);
     } catch (err) {
       console.error("Lỗi khi làm mới thông tin người dùng:", err);
       setError(err.message);
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   }, [refreshUser]);
 
   const logout = () => {
-    console.log("AuthProvider: Performing logout.");
+    //console.log("AuthProvider: Performing logout.");
     localStorage.removeItem('access_token');
     localStorage.removeItem('user'); 
     localStorage.removeItem('role');

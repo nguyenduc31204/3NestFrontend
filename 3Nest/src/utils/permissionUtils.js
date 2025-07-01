@@ -6,7 +6,7 @@
  */
 export const hasPermission = (user, requiredPermission) => {
 
-  console.log("Checking permission:", requiredPermission, "for user:", user);
+  //console.log("Checking permission:", requiredPermission, "for user:", user);
     if (!user.permissions) {
       return true;
     }

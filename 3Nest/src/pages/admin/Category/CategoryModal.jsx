@@ -12,31 +12,40 @@ const CategoryModal = ({ isOpen, onClose, onSubmitSuccess, category }) => {
   useEffect(() => {
   if (!isOpen) return;
 
-    const fetchTypesAndSetForm = async () => {
-      try {
-        const res = await axiosInstance.get("/types/get-types", {
-          headers: { 'ngrok-skip-browser-warning': 'true' }
-        });
+  const fetchTypesAndSetForm = async () => {
+    try {
+      const res = await axiosInstance.get("/types/get-types", {
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      });
 
-        const fetchedTypes = res.data.data || [];
-        setTypes(fetchedTypes);
+      const fetchedTypes = res.data.data || [];
+      setTypes(fetchedTypes);
 
-        if (isEdit && category) {
-          setCategoryName(category.category_name || '');
-          setDescription(category.description || '');
-          setTypeId(category.type_id?.toString() || '');
-        } else {
-          setCategoryName('');
-          setDescription('');
-          setTypeId(fetchedTypes[0]?.type_id?.toString() || '');
+      // 👉 Sau khi types đã có, mới set form
+      if (isEdit && category) {
+        setCategoryName(category.category_name || '');
+        setDescription(category.description || '');
+
+        // 💡 Tìm trong fetchedTypes type nào có id khớp để lấy lại name nếu cần
+        const matchedType = fetchedTypes.find(t => t.type_id === category.type_id);
+        if (matchedType) {
+          setTypeId(matchedType.type_id.toString());
         }
-      } catch (err) {
-        console.error("Fetch types error:", err);
+      } else {
+        // Trường hợp tạo mới
+        setCategoryName('');
+        setDescription('');
+        setTypeId(fetchedTypes[0]?.type_id?.toString() || '');
       }
-    };
 
-    fetchTypesAndSetForm();
-  }, [isOpen, isEdit, category]);
+    } catch (err) {
+      console.error("Fetch types error:", err);
+    }
+  };
+
+  fetchTypesAndSetForm();
+}, [isOpen, isEdit, category]);
+
 
 
 

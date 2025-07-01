@@ -222,12 +222,12 @@ const DealsPage = () => {
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Deals Management</h1>
               <div className="text-sm text-gray-500">
-                <a href="/dashboard" className="hover:underline">Dashboard</a> / Deals
+                <a href="/deals" className="hover:underline">back</a>
               </div>
             </div>
             {hasPermission(user, 'deal:manage') && (
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+                className="bg-gray-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
                 onClick={() => navigate('/deals/add')}
               >
                 + Add New Deal
@@ -304,7 +304,7 @@ const DealsPage = () => {
                             <Td>
                               {hasPermission(user, 'deal:view') && (
                                 <button
-                                  className="text-blue-600 hover:underline font-medium"
+                                  className="text-green-600 hover:underline font-medium"
                                   onClick={() => navigate(`/deals/edit/${deal.deal_id}`)}
                                 >
                                   View

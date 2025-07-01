@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiBell, FiMessageSquare, FiSettings, FiLogOut } from 'react-icons/fi';
 import logo from '../../assets/3nestv8.png';
 import { useAuth } from '../../context/AuthContext';
+import { FiUser } from 'react-icons/fi';
 
 
 const UserProfileDropdown = ({ user, onLogout }) => {
@@ -17,16 +18,12 @@ const UserProfileDropdown = ({ user, onLogout }) => {
         aria-label="User menu"
         aria-expanded={isDropdownOpen}
       >
-        <img
-          src={user.avatar || '/default-avatar.png'}
-          alt="User avatar"
-          className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
-        />
-
+        <FiUser className="w-9 h-9 text-blue-500 bg-white rounded-full p-1 border-2 border-blue-500" />
         <span className="hidden lg:inline-block text-sm font-medium text-gray-700 truncate">
           {user.name}
         </span>
       </button>
+
 
       {isDropdownOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
@@ -68,14 +65,12 @@ const HeaderIcons = () => (
   </div>
 );
 
-const Header = () => {
+const Header = ({ onToggleSidebar }) => {
   const { user, isLoading, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    if (logout) {
-      await logout();
-    }
+    if (logout) await logout();
     navigate('/login');
   };
 
@@ -90,12 +85,17 @@ const Header = () => {
   if (!user) return null;
 
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between px-6 py-3 bg-black text-white shadow-sm">
+    <header className="sticky top-0 z-40 flex items-center justify-between px-4 py-3 bg-black text-white shadow-sm">
+      <div className="flex items-center space-x-4">
+       
+        <button onClick={onToggleSidebar} className="md:hidden">
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
 
-
-      <div className="flex items-center">
-        <Link to="/">
-          <img src={logo} alt="3NestInvest Logo" className="h-10 w-auto sm:h-12 mx-2 sm:mx-6" />
+        <Link to="/products">
+          <img src={logo} alt="3NestInvest Logo" className="h-10 w-auto sm:h-12" />
         </Link>
       </div>
 
@@ -106,5 +106,6 @@ const Header = () => {
     </header>
   );
 };
+
 
 export default Header;

@@ -35,6 +35,7 @@ import AddRole from './pages/admin/Role/AddRole';
 import EditRole from './pages/admin/Role/EditRole';
 import RoleDetail from './pages/admin/Role/RoleDetail';
 import Profile from './pages/admin/User/Profile'
+import { useAuth } from './context/AuthContext';
 
 
 
@@ -44,13 +45,17 @@ const RootRedirect = () => {
 };
 
 const ProtectedLayout = () => {
-  const isAuthenticated = true; 
+  const { user, isLoading } = useAuth();
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (isLoading) {
+    return <div>Loading...</div>;  // giữ nguyên loading
+  }
+
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
+
   return <DashboardLayout />;
 };
 
@@ -68,12 +73,18 @@ const App = () => {
         <Route path="/logout" element={<Logout />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
-        <Route path="/profile" element={<Profile />} />
+        {/* <Route path="/profile" element={<Profile />} /> */}
         
         <Route path="/" element={<RootRedirect />} />
 
 
         <Route element={<ProtectedLayout />}>
+
+          <Route 
+            path="/profile" 
+            element={<ProtectedRoute permission="user:view"><Profile /></ProtectedRoute>} 
+          />
+
 
           <Route 
             path="/dashboard" 
