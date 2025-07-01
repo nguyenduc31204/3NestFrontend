@@ -333,7 +333,7 @@ const AddDealAdmin = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Description</label>
+                      <label className="block text-sm font-medium text-gray-700">Why do they need us?</label>
                       <textarea
                         {...register('deal_description')}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm sm:text-base"

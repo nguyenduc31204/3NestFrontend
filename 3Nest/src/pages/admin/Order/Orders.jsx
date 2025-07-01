@@ -172,8 +172,9 @@ const OrdersPage = () => {
           console.log('2:', user.user_id);
           if (!ordersResponse.ok) throw new Error('Failed to fetch your orders');
           const ordersResult = await ordersResponse.json();
-          const orders = ordersResult.data?.[0]?.orders || [];
-          setOrders(orders);
+          const dataArray = ordersResult.data || [];
+          const allOrders = dataArray.flatMap(item => item.orders);
+          setOrders(allOrders);
           // setOrders(ordersResult.data || []);
           console.log('000111:', ordersResult.data);
         }

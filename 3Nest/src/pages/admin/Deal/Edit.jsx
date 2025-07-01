@@ -317,7 +317,7 @@ const EditDealPage = () => {
                     <InfoField label="Status" value={<span className="capitalize font-semibold">{dealData?.status}</span>} />
                   </div>
                   <div className="mt-6 pt-6 border-t">
-                    <InfoField label="Description" value={dealData?.description || 'No description provided.'} />
+                    <InfoField label="Why do they need us?" value={dealData?.description || 'No description provided.'} />
                   </div>
                 </div>
 

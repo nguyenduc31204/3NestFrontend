@@ -73,7 +73,7 @@ const AddOrderPageRefactored = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [products, setProducts] = useState([]);
-  const [deals, setDeals] = useState();
+  const [deals, setDeals] = useState([]);
   const [orderStatus, setOrderStatus] = useState('draft');
 
   const queryParams = new URLSearchParams(location.search);
@@ -112,25 +112,41 @@ const AddOrderPageRefactored = () => {
       try {
         const [productsResponse, dealsResponse] = await Promise.all([
           fetch(`${BASE_URL}/products/get-products-by-role`, { headers }),
-          preSelectedDealId ? fetch(`${BASE_URL}/deals/get-deal?deal_id=${preSelectedDealId}`, { headers }) : Promise.resolve(null)
+          preSelectedDealId 
+            ? fetch(`${BASE_URL}/deals/get-deal?deal_id=${preSelectedDealId}`, { headers })
+            : fetch(`${BASE_URL}/deals/get-deals-by-user`, { headers })
         ]);
-        // console.log('1122Response:', productsResponse.json());
-
+        
         if (!productsResponse.ok) throw new Error('Failed to load products');
         const productsResult = await productsResponse.json();
-        console.log('1122Response:', productsResult);
         setProducts(productsResult.data || []);
 
+        // --- LOGIC XỬ LÝ DEALS ĐÃ ĐƯỢC CẬP NHẬT ---
         if (dealsResponse) {
           if (!dealsResponse.ok) throw new Error('Failed to load deals');
           const dealsResult = await dealsResponse.json();
-          console.log('Deals:', dealsResult.data.deal);
-          if (dealsResult.data && dealsResult.data.deal.status === 'approved') {
-              setDeals([dealsResult.data.deal]);
+
+          if (preSelectedDealId) {
+            // Trường hợp 1: Có deal_id được chọn trước, xử lý object đơn lẻ
+            const singleDeal = dealsResult.data?.deal;
+            if (singleDeal && singleDeal.status === 'approved') {
+                setDeals([singleDeal]);
+            } else {
+                setDeals([]);
+            }
           } else {
-              setDeals([]);
+            // Trường hợp 2: Không có deal_id, xử lý mảng deals
+            const allDeals = dealsResult.data;
+            if (Array.isArray(allDeals)) {
+                // Lọc ra những deal đã được duyệt
+                const approvedDeals = allDeals.filter(deal => deal.status === 'approved');
+                setDeals(approvedDeals);
+            } else {
+                setDeals([]);
+            }
           }
         }
+        // --- KẾT THÚC LOGIC CẬP NHẬT ---
 
         if (order_id) {
           const orderResponse = await fetch(`${BASE_URL}/orders/get-order?order_id=${order_id}`, { headers });
@@ -159,7 +175,6 @@ const AddOrderPageRefactored = () => {
     };
     loadInitialData();
   }, [user, order_id, preSelectedDealId, reset]);
-   console.log('deal:', deals);
 
   // Logic tính toán Total Budget
   const totalBudget = useMemo(() => {
@@ -177,15 +192,12 @@ const AddOrderPageRefactored = () => {
 
   // Handlers
   const handleDialogSubmit = (dataFromDialog) => {
-    // lấy mảng `details` từ bên trong object đó.
     const selectedProducts = dataFromDialog.details || [];
     
-    // Lọc ra những sản phẩm mới chưa có trong danh sách
     const newProducts = selectedProducts.filter(p_new => 
       !watchedDetails.some(p_old => p_old.product_id === p_new.product_id)
     );
     
-    // Định dạng lại dữ liệu trước khi thêm vào form
     const formattedProducts = newProducts.map(p => ({
         product_id: p.product_id,
         product_name: products.find(prod => prod.product_id === p.product_id)?.product_name || 'Unknown',
