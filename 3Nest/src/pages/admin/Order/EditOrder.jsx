@@ -3,7 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../../utils/apiPath';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
-import { hasPermission } from '../../../utils/permissionUtils';
+import { generateOrderPDF } from '../../../utils/exportPDF';
+import { LuArrowDownToLine } from 'react-icons/lu';
+
+const IconButton = ({ children, title, onClick }) => (
+  <button
+    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors"
+    title={title}
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
 
 const OrderDetailRow = ({ detail, index, user }) => {
   const isChannel = user?.role_name === 'channel';
@@ -40,6 +51,7 @@ const EditOrderAdmin = () => {
   const [deal, setDeal] = useState(null);
   const [order, setOrder] = useState(null);
   const [orderDetails, setOrderDetails] = useState([]);
+  const [orderData, setOrderData] = useState();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -87,7 +99,7 @@ const EditOrderAdmin = () => {
 
         const detailsResponse = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${order_id}`, { headers });
         const detailsResult = await detailsResponse.json();
-        console.log('Order details:', detailsResult);
+        console.log('Order details2323:', detailsResult);
         if (!detailsResponse.ok || detailsResult.status_code !== 200) {
           throw new Error(detailsResult.message || 'Failed to load order details');
         }
@@ -157,6 +169,8 @@ const EditOrderAdmin = () => {
       setProcessing(false);
     }
   }, [order_id, showRejectModal]);
+  
+  
 
   const handleSubmitOrder = useCallback(async () => {
     try {
@@ -237,7 +251,27 @@ const EditOrderAdmin = () => {
   const isRejected = order?.status === 'rejected';
   const isViewOnly = isAccepted || isRejected;
 
-  console.log('Order status:', deal);
+  console.log('Order status:', order);
+  const sampleOrderData = {
+    order_id: order_id,
+    date: order.created_at,
+    customer: {
+      name: 'Nguyễn Văn A',
+      company: 'Công ty Cổ phần 3NEST',
+      address: '79 Nguyễn Đình Chiểu, P. VTS, Q.3, TPHCM',
+      phone: '0912345678',
+      email: 'contact@3nest.vn'
+    },
+    items: [
+      { name: 'Phần mềm quản lý CRM', description: 'Gói Pro - 1 năm', unit: 'Gói', quantity: 1, unitPrice: 25000000 },
+      { name: 'Dịch vụ hỗ trợ kỹ thuật', description: 'Hỗ trợ 24/7', unit: 'Tháng', quantity: 12, unitPrice: 1000000 },
+      { name: 'Tên miền .com', description: 'Đăng ký mới 1 năm', unit: 'Tên miền', quantity: 1, unitPrice: 250000 }
+    ]
+  };
+
+  const handleExport = () => {
+    generateOrderPDF(sampleOrderData); 
+  };
   
   const priceColumnHeader = user?.role_name === 'channel' ? 'Channel Cost' : 'Price';
   
@@ -352,7 +386,7 @@ const EditOrderAdmin = () => {
                     isRejected ? 'bg-red-100 text-red-800' :
                     isSubmitted ? 'bg-blue-100 text-blue-800' :
                     isDraft ? 'bg-gray-200 text-gray-800' :
-                    'bg-gray-100 text-gray-600' // Màu mặc định cho các trạng thái khác
+                    'bg-gray-100 text-gray-600' 
                   }`}
                 >
                   {order?.status || 'N/A'}
@@ -367,6 +401,9 @@ const EditOrderAdmin = () => {
             </div>
           </div>
         </div>
+        <IconButton title="Export PDF" onClick={handleExport}>
+          <LuArrowDownToLine className="w-5 h-5" />
+        </IconButton>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-lg font-semibold mb-4 text-gray-800">Order Details</h2>

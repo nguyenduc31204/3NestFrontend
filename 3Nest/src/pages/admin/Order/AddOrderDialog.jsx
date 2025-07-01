@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller  } from 'react-hook-form';
 import { BASE_URL } from '../../../utils/apiPath';
 import { toast, Toaster } from 'react-hot-toast'; 
+
+const formatCurrency = (amount, isVND, rate) => {
+  if (typeof amount !== 'number') return 'N/A';
+  
+  const displayAmount = isVND ? amount * rate : amount;
+  const currencySymbol = isVND ? 'VND' : 'USD';
+  
+  return `${displayAmount.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${currencySymbol}`;
+};
 
 const AddOrderDialog = ({
   open,
@@ -22,6 +31,7 @@ const AddOrderDialog = ({
     watch,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -42,6 +52,13 @@ const AddOrderDialog = ({
   const [selectedTypeId, setSelectedTypeId] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isVndDisplay, setIsVndDisplay] = useState(false); 
+  const [usdToVndRate, setUsdToVndRate] = useState(25450);
+
+  const toggleCurrencyDisplay = () => {
+    setIsVndDisplay(!isVndDisplay);
+  };
+
 
   useEffect(() => {
     if (open) {
@@ -89,6 +106,7 @@ const AddOrderDialog = ({
     }
   };
 
+
   useEffect(() => {
     if (!selectedTypeId) {
       setCategories([]);
@@ -124,6 +142,8 @@ const AddOrderDialog = ({
     fetchCategories();
   }, [selectedTypeId]);
 
+  console.log("Selected Type ID:", selectedCategory);
+
   useEffect(() => {
     if (!selectedCategory) {
       setProducts([]);
@@ -135,7 +155,7 @@ const AddOrderDialog = ({
       setRequestError(null);
       try {
         const response = await fetch(
-          `${BASE_URL}/products/get-products-by-role?category_name=${encodeURIComponent(selectedCategory)}`,
+          `${BASE_URL}/products/get-products-by-category-and-role?category_id=${(selectedCategory)}`,
           {
             headers: {
               'Content-Type': 'application/json',
@@ -166,7 +186,7 @@ const AddOrderDialog = ({
 
     if (!product) {
       setRequestError('Please select a valid product.');
-      toast.error('Please select a valid product.'); // <<< toast.error từ react-hot-toast
+      toast.error('Please select a valid product.'); 
       return;
     }
     setRequestError(null); 
@@ -230,6 +250,8 @@ const AddOrderDialog = ({
   const handleClose = () => {
     onClose();
   };
+
+   const displayCurrencySymbol = isVndDisplay ? 'VND' : 'USD';
   
   if (!open) return null;
 
@@ -244,6 +266,16 @@ const AddOrderDialog = ({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-semibold mb-4">Add Order Details</h2>
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-medium text-gray-700">Displaying Prices In: {displayCurrencySymbol}</span>
+          <button
+            type="button"
+            onClick={toggleCurrencyDisplay}
+            className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            {isVndDisplay ? 'Show in USD' : 'Show in VND'}
+          </button>
+        </div>
 
         {requestError && (
           <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-400 text-sm text-red-700">
@@ -275,13 +307,13 @@ const AddOrderDialog = ({
               <label className="block text-sm font-medium">Category</label>
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => setSelectedCategory(Number(e.target.value))}
                 className="border border-gray-300 rounded px-3 py-2 w-full"
                 disabled={loading || !selectedTypeId}
               >
                 <option value="">Select a category</option>
                 {categories.map((category) => (
-                  <option key={category.category_id} value={category.category_name}>
+                  <option key={category.category_id} value={category.category_id}>
                     {category.category_name}
                   </option>
                 ))}
@@ -320,13 +352,13 @@ const AddOrderDialog = ({
                 <div>
                   <span className="font-medium text-gray-700">List Price:</span>
                   <p className="text-gray-900 font-semibold text-green-600">
-                    ${selectedProduct.price?.toLocaleString() || 'N/A'}
+                    {formatCurrency(selectedProduct.price, isVndDisplay, usdToVndRate)}
                   </p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">Min Price (Max Discount):</span>
                   <p className="text-gray-900 text-orange-600">
-                    ${selectedProduct.maximum_discount_price?.toLocaleString() || 'N/A'}
+                    {formatCurrency(selectedProduct.maximum_discount_price, isVndDisplay, usdToVndRate)}
                   </p>
                 </div>
                 <div className="col-span-2">
@@ -345,19 +377,19 @@ const AddOrderDialog = ({
                 </p>
             )}
             {fields.map((field, index) => {
-              const quantity = watch(`details.${index}.quantity`) || field.quantity || 0;
-              const priceForCustomer = watch(`details.${index}.price_for_customer`); 
-              const years = Number(watch(`details.${index}.service_contract_duration`)) || field.service_contract_duration || 1;
+              const quantity = watch(`details.${index}.quantity`) || 1;
+              const priceForCustomerUSD = watch(`details.${index}.price_for_customer`) || 0;
+              const years = Number(watch(`details.${index}.service_contract_duration`)) || 1;
 
               const productInfo = products.find((p) => p.product_id?.toString() === field.product_id?.toString());
-              const originalPrice = productInfo?.price || 0;
-              const maxDiscountPrice = productInfo?.maximum_discount_price || 0;
+              const originalPriceUSD = productInfo?.price || 0;
+              const maxDiscountPriceUSD = productInfo?.maximum_discount_price || 0;
 
-              let total = 0;
+              let totalUSD = 0;
               for (let i = 0; i < years; i++) {
-                total += priceForCustomer * Math.pow(1.05, i); 
+                totalUSD += priceForCustomerUSD * Math.pow(1.05, i);
               }
-              const subtotal = Math.round(total * quantity).toLocaleString();
+              const subtotal = totalUSD * quantity;
 
               return (
                 <div key={field.id} className="grid grid-cols-5 gap-2 mb-2 items-end p-4 border border-gray-200 rounded-lg shadow-sm">
@@ -390,39 +422,49 @@ const AddOrderDialog = ({
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium">Price (Customer)</label>
-                    <input
-                      {...register(`details.${index}.price_for_customer`, {
+                    {/* --- BƯỚC 4: KIỂM SOÁT HOÀN TOÀN Ô NHẬP GIÁ --- */}
+                    <label className="block text-sm font-medium">Price (Customer) {displayCurrencySymbol}</label>
+                    <Controller
+                      name={`details.${index}.price_for_customer`}
+                      control={control}
+                      defaultValue={field.price_for_customer}
+                      rules={{
                         required: 'Price is required',
                         min: { value: 0, message: 'Price cannot be negative' },
-                        valueAsNumber: true,
                         validate: {
-                          range: (value) => {
-                            const numValue = parseFloat(value); 
-                            if (isNaN(numValue) || !productInfo) {
-                                return 'Invalid price or product information missing.'; 
+                          range: (value_in_usd) => { // validation luôn chạy trên giá trị USD
+                            if (value_in_usd > originalPriceUSD) {
+                              toast.error(`Price can't exceed ${formatCurrency(originalPriceUSD, false, usdToVndRate)}`);
+                              return ``;
                             }
-
-                            if (numValue > originalPrice) {
-                                const errorMessage = `Price cannot exceed original price ($${originalPrice.toLocaleString()}).`;
-                                toast.error(errorMessage); 
-                                return errorMessage; 
+                            if (value_in_usd < maxDiscountPriceUSD) {
+                              toast.error(`Price can't be lower than ${formatCurrency(maxDiscountPriceUSD, false, usdToVndRate)}`);
+                              return ``;
                             }
-                            if (numValue < maxDiscountPrice) {
-                                const errorMessage = `Price cannot be lower than minimum discount price ($${maxDiscountPrice.toLocaleString()}).`;
-                                toast.error(errorMessage); 
-                                return errorMessage;
-                            }
-                            return true; 
+                            return true;
                           }
                         }
-                      })}
-                      type="number"
-                      step="0.01"
-                      className="border border-gray-300 rounded px-2 py-1 w-full"
-                      defaultValue={field.price_for_customer}
+                      }}
+                      render={({ field: { onChange, value, ...restField } }) => (
+                        <input
+                          {...restField}
+                          type="number"
+                          step="any"
+                          className="border border-gray-300 rounded px-2 py-1 w-full"
+                          // Hiển thị giá trị đã được chuyển đổi
+                          value={isVndDisplay ? (value * usdToVndRate).toFixed(2) : value}
+                          // Khi người dùng nhập, chuyển đổi ngược lại về USD để lưu vào form state
+                          onChange={(e) => {
+                            const displayValue = parseFloat(e.target.value) || 0;
+                            const valueInUsd = isVndDisplay ? displayValue / usdToVndRate : displayValue;
+                            onChange(valueInUsd); // Gọi onChange của Controller để cập nhật state
+                          }}
+                        />
+                      )}
                     />
-                    
+                     {errors.details?.[index]?.price_for_customer && (
+                        <p className="text-red-600 text-sm mt-1">{errors.details[index].price_for_customer.message}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium">Contract Duration</label>
@@ -453,7 +495,7 @@ const AddOrderDialog = ({
                     </button>
                   <div className="col-span-5 flex justify-end items-center mt-2 mr-4">
                     <p className="text-sm text-gray-900 font-bold">
-                      Subtotal: ${subtotal}
+                      Subtotal: {formatCurrency(subtotal, isVndDisplay, usdToVndRate)}
                     </p>
                   </div>
                 </div>

@@ -63,7 +63,6 @@ const App = () => {
         reverseOrder={false} 
       /> */}
       
-      <Header />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />

@@ -21,6 +21,8 @@ const DashboardLayout = ({ activeMenu }) => {
     else if (currentPath.startsWith('/reports')) setActiveMenu('06');
     else if (currentPath.startsWith('/deals')) setActiveMenu('08');
     else if (currentPath.startsWith('/types')) setActiveMenu('07');
+    else if (currentPath.startsWith('/activitylog')) setActiveMenu('11');
+    else if (currentPath.startsWith('/roles')) setActiveMenu('10');
     else setActiveMenu('01');
   }, [location.pathname]);
 

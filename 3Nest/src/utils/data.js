@@ -33,6 +33,14 @@ export const SIDE_MENU_DATA = [
     ariaLabel: 'Navigate to categories',
   },
   {
+    id: '08',
+    label: 'Deals',
+    icon: ShoppingCart,
+    path: '/deals',
+    resourceType: 'deal',
+    ariaLabel: 'Navigate to deals',
+  },
+  {
     id: '04',
     label: 'Orders',
     icon: ShoppingCart,
@@ -64,14 +72,7 @@ export const SIDE_MENU_DATA = [
     resourceType: 'type',
     ariaLabel: 'Navigate to types',
   },
-  {
-    id: '08',
-    label: 'Deals',
-    icon: ShoppingCart,
-    path: '/deals',
-    resourceType: 'deal',
-    ariaLabel: 'Navigate to deals',
-  },
+  
   {
     id: '09',
     label: 'Per Type', 
@@ -90,7 +91,7 @@ export const SIDE_MENU_DATA = [
   },
   {
     id: '11',
-    label: 'Activiti Log',
+    label: 'Act Log',
     icon: ListTree, 
     path: '/activitylog',
     resourceType: 'role',
