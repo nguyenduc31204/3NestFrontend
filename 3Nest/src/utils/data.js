@@ -64,7 +64,7 @@ export const SIDE_MENU_DATA = [
     path: '/orders',
     resourceType: 'order',
     ariaLabel: 'Navigate to orders',
-
+  },
   
   {
     id: '05',
