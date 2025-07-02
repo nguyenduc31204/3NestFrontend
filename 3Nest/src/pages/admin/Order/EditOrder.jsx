@@ -18,7 +18,7 @@ const IconButton = ({ children, title, onClick }) => (
 
 const OrderDetailRow = ({ detail, index, user }) => {
   const isChannel = user?.role_name === 'channel';
-  const price = isChannel ? (detail.channel_cost || 0) : (detail.price_for_customer || 0);
+  const price = isChannel ? (detail.final_price || 0) : (detail.price_for_customer || 0);
   const priceLabel = isChannel ? 'Channel Cost' : 'Price';
 
   return (
@@ -100,7 +100,7 @@ const EditOrderAdmin = () => {
 
         const detailsResponse = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${order_id}`, { headers });
         const detailsResult = await detailsResponse.json();
-        console.log('Order details2323:', deal);
+        console.log('Order details2323:', detailsResult);
         if (!detailsResponse.ok || detailsResult.status_code !== 200) {
           throw new Error(detailsResult.message || 'Failed to load order details');
         }
@@ -286,13 +286,21 @@ const EditOrderAdmin = () => {
         phone: deal.phone,
         email: deal.contact_email
       },
-      items: orderDetails.map(item => ({ 
-        sku_partnumber: item.sku_partnumber,
-        name: item.product_name,
-        unit: 'Cái',
-        quantity: item.quantity,
-        unitPrice: item.price_for_customer
-      }))
+      items: orderDetails.map(item => {
+
+        const correctPrice = localStorage.getItem('role') === 'channel'
+            ? item.final_price
+            : item.price_for_customer;
+
+        return { 
+            sku_partnumber: item.sku_partnumber,
+            name: item.product_name,
+            unit: 'Cái',
+            quantity: item.quantity,
+
+            unitPrice: correctPrice || 0 
+        };
+      })
     };
 
     try {
@@ -453,7 +461,7 @@ const EditOrderAdmin = () => {
                       ${orderDetails
                       .reduce((total, item) => {
                         const isChannel = user?.role_name === 'channel';
-                        const price = isChannel ? (item.channel_cost || 0) : (item.price_for_customer || 0);
+                        const price = isChannel ? (item.final_price || 0) : (item.price_for_customer || 0);
                         const quantity = item.quantity || 0;
                         const years = item.service_contract_duration || 1;
                         let itemTotal = 0;
