@@ -1,75 +1,60 @@
-import { 
+import {
   LayoutDashboard,
   Package,
   ListTree,
   ShoppingCart,
   Users,
   BarChart2,
+  Tag,
+  Folders,
+  Settings,
+  Layers,
 } from 'lucide-react';
-
 export const SIDE_MENU_DATA = [
   {
-    id: '01', 
+    id: '01',
     label: 'Dashboard',
-    //icon: LayoutDashboard,
-    path: '/dashboard', 
+    icon: LayoutDashboard,
+    path: '/dashboard',
     resourceType: 'dashboard',
     ariaLabel: 'Navigate to dashboard',
   },
-  {
-    id: '04',
-    label: 'Orders',
-    //icon: ShoppingCart,
-    path: '/orders',
-    resourceType: 'order',
-    ariaLabel: 'Navigate to orders',
-  },
    {
-    id: '08',
+    id: '04',
     label: 'Deals',
-    //icon: ShoppingCart,
+    icon: Tag,
     path: '/deals',
     resourceType: 'deal',
     ariaLabel: 'Navigate to deals',
   },
   {
+    id: '08',
+    label: 'Orders',
+    icon: ShoppingCart,
+    path: '/orders',
+    resourceType: 'order',
+    ariaLabel: 'Navigate to orders',
+  },
+  {
     id: '02',
     label: 'Products',
-    //icon: Package,
+    icon: Package,
     path: '/products',
-    resourceType: 'product', 
+    resourceType: 'product',
     ariaLabel: 'Navigate to products',
   },
   {
     id: '03',
     label: 'Categories',
-    //icon: ListTree,
+    icon: Folders,
     path: '/categories',
     resourceType: 'category',
     ariaLabel: 'Navigate to categories',
   },
   {
-
-    id: '08',
-    label: 'Deals',
-    icon: ShoppingCart,
-    path: '/deals',
-    resourceType: 'deal',
-    ariaLabel: 'Navigate to deals',
-  },
-  {
-    id: '04',
-    label: 'Orders',
-    icon: ShoppingCart,
-    path: '/orders',
-    resourceType: 'order',
-    ariaLabel: 'Navigate to orders',
-
-  
-  {
     id: '05',
     label: 'Users',
-    //icon: Users,
+    icon: Users,
     path: '/users',
     resourceType: 'user',
     ariaLabel: 'Navigate to users',
@@ -77,46 +62,49 @@ export const SIDE_MENU_DATA = [
   {
     id: '06',
     label: 'Reports',
-    //icon: BarChart2,
+    icon: BarChart2,
     path: '/reports',
     resourceType: 'report',
     ariaLabel: 'Navigate to reports',
   },
-
   {
     id: '07',
     label: 'Types',
-    icon: ListTree, 
+    icon: Layers,
     path: '/types',
     resourceType: 'type',
     ariaLabel: 'Navigate to types',
   },
-
   {
     id: '09',
-    label: 'Per Type', 
-    //icon: ShoppingCart, 
+    label: 'Per Type',
+    //icon: ShoppingCart,
     path: '/pertype',
-    resourceType: 'per_type', 
+    resourceType: 'per_type',
     ariaLabel: 'Navigate to per type reports',
   },
   {
     id: '10',
     label: 'Roles',
-    //icon: ListTree, 
+    icon: Settings,
     path: '/roles',
     resourceType: 'role',
     ariaLabel: 'Navigate to roles',
   },
   {
     id: '11',
-
-    label: 'Act Log',
-    icon: ListTree, 
+    // label: 'Act Log',
+    icon: ListTree,
     label: 'Activities Log',
-    //icon: ListTree, 
+    // icon: ListTree,
     path: '/activitylog',
     resourceType: 'role',
     ariaLabel: 'Navigate to activity log',
   },
 ];
+
+
+
+
+
+

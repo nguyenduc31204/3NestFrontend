@@ -224,9 +224,9 @@ const OrdersPage = () => {
           
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Orders Management</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Quotes Management</h1>
               <div className="text-sm text-gray-500">
-                <a href="/dashboard" className="hover:underline">Dashboard</a> / Orders
+                <a href="/dashboard" className="hover:underline">Dashboard</a> / Quotes
               </div>
             </div>
             {hasPermission(user, 'order:manage') && (
@@ -241,9 +241,9 @@ const OrdersPage = () => {
 
           {/* Các thẻ thống kê */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-              <StatCard Icon={LuCoins} value={orders.length} label="Total Orders" color="blue" />
-              <StatCard Icon={LuWalletMinimal} value={orders.filter(o => o.status === 'approved').length} label="Approved Orders" color="green" />
-              <StatCard Icon={LuPersonStanding} value={orders.filter(o => o.status === 'draft').length} label="Draft Orders" color="yellow" />
+              <StatCard Icon={LuCoins} value={orders.length} label="Total Quotes" color="blue" />
+              <StatCard Icon={LuWalletMinimal} value={orders.filter(o => o.status === 'approved').length} label="Approved Quotes" color="green" />
+              <StatCard Icon={LuPersonStanding} value={orders.filter(o => o.status === 'draft').length} label="Draft Quotes" color="yellow" />
           </div>
 
           {/* Bảng dữ liệu */}
@@ -269,7 +269,7 @@ const OrdersPage = () => {
 
             <div className="overflow-x-auto">
               {error && <Alert msg={error} />}
-              {loading ? <Loader msg="Loading orders..." /> : (
+              {loading ? <Loader msg="Loading Quotes..." /> : (
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                   <thead className="bg-gray-50">
                     <tr>
@@ -284,7 +284,7 @@ const OrdersPage = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentOrders.length === 0 ? (
-                      <tr><td colSpan="7" className="text-center p-8 text-gray-500">No orders found.</td></tr>
+                      <tr><td colSpan="7" className="text-center p-8 text-gray-500">No Quotes found.</td></tr>
                     ) : (
                       currentOrders.map((order) => (
                         <tr key={order.order_id} className="hover:bg-gray-50">
