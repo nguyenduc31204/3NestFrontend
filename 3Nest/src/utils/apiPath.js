@@ -1,7 +1,7 @@
 
 
-
 export const BASE_URL = "https://1d5d-1-53-216-248.ngrok-free.app"
+
 
 
 export const API_PATHS = {
