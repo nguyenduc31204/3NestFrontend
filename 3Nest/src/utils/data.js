@@ -29,11 +29,11 @@ export const SIDE_MENU_DATA = [
   },
   {
     id: '08',
-    label: 'Orders',
+    label: 'Quotes',
     icon: ShoppingCart,
     path: '/orders',
     resourceType: 'order',
-    ariaLabel: 'Navigate to orders',
+    ariaLabel: 'Navigate to Quote',
   },
   {
     id: '02',
