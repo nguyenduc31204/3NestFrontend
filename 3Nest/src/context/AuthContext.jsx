@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { BASE_URL } from '../utils/apiPath';
+import SessionExpiredPopup from '../components/SessionExpiredPopup';
 
 const AuthContext = createContext(null);
 
@@ -7,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
   const refreshUser = useCallback(async () => {
     setIsLoading(true); 
@@ -75,9 +77,32 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('user'); 
     localStorage.removeItem('role');
+    localStorage.removeItem('expirationTime');
+    setIsSessionExpired(false);
 
     setUser(null);
   };
+  useEffect(() => {
+    const checkSession = () => {
+      const expirationTime = localStorage.getItem('expirationTime');
+      if (expirationTime && new Date().getTime() > expirationTime) {
+        
+        setIsSessionExpired(true);
+      }
+    };
+
+    const interval = setInterval(checkSession, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+
+
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
 
   const value = {
     user,
@@ -90,6 +115,10 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={value}>
       {children}
+      <SessionExpiredPopup 
+        isOpen={isSessionExpired} 
+        onConfirm={logout} // <-- Khi người dùng xác nhận, gọi hàm logout
+      />
     </AuthContext.Provider>
   );
 };

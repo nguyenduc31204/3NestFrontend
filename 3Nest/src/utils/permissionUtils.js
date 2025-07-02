@@ -7,11 +7,7 @@
 export const hasPermission = (user, requiredPermission) => {
 
   //console.log("Checking permission:", requiredPermission, "for user:", user);
-    if (!user.permissions) {
-      return true;
-    }
-
-  if (!user || !Array.isArray(user.permissions)) {
+  if (!user || !Array.isArray(user.permissions) || !requiredPermission) {
     return false;
   }
 
@@ -22,7 +18,10 @@ export const hasPermission = (user, requiredPermission) => {
   const requiredName = parts[1].toLowerCase();
 
   for (const p of user.permissions) {
-    const typeMatch = p.permission_type_name.toLowerCase() === requiredType;
+    if (!p) {
+      continue;
+    }
+    const typeMatch = p.permission_type_name?.toLowerCase() === requiredType;
 
     if (typeMatch) {
       const currentPermissionName = p.permission_name.toLowerCase().trim(); 

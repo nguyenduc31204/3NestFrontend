@@ -82,9 +82,13 @@ const Login = () => {
           permissions: permissionResult.data.permissions || [],
         };
 
+        const expiresIn = 60 * 60 * 1000; 
+        const expirationTime = new Date().getTime() + expiresIn;
+
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('user', JSON.stringify(userForStorage))
         localStorage.setItem('role', decoded.role);
+        localStorage.setItem('expirationTime', expirationTime);
 
 
         //console.log('Decoded token:', decoded);

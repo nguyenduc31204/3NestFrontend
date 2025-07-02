@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useForm, useFieldArray, Controller  } from 'react-hook-form';
+import { useForm, useFieldArray  } from 'react-hook-form';
 import { BASE_URL } from '../../../utils/apiPath';
-import { toast, Toaster } from 'react-hot-toast'; 
+import { toast } from 'react-hot-toast'; 
+import CurrencyPriceInput from '../../../components/forms/CurrencyPriceInput';
 
 const formatCurrency = (amount, isVND, rate) => {
   if (typeof amount !== 'number') return 'N/A';
@@ -61,23 +62,22 @@ const AddOrderDialog = ({
 
 
   useEffect(() => {
+    const resetFormState = () => {
+        reset({ details: [] });
+        setSelectedTypeId('');
+        setSelectedCategory('');
+        setProducts([]);
+        setSelectedProduct(null);
+        setRequestError(null);
+    };
+
     if (open) {
-      reset({ details: [] });
-      setSelectedTypeId('');
-      setSelectedCategory('');
-      setProducts([]);
-      setSelectedProduct(null);
-      setRequestError(null); 
-      fetchTypes(); 
+        resetFormState();
+        fetchTypes();
     } else {
-      reset({ details: [] }); 
-      setSelectedTypeId('');
-      setSelectedCategory('');
-      setProducts([]);
-      setSelectedProduct(null);
-      setRequestError(null);
+        resetFormState();
     }
-  }, [open, reset, existingDetails]);
+  }, [open, reset]);
 
   const fetchTypes = async () => {
     setLoading(true);
@@ -165,6 +165,7 @@ const AddOrderDialog = ({
           }
         );
         const result = await response.json();
+        console.log('result', result)
         if (result.status_code !== 200 || !Array.isArray(result.data)) {
           throw new Error(result.message || 'Invalid product data');
         }
@@ -180,35 +181,56 @@ const AddOrderDialog = ({
     fetchProducts();
   }, [selectedCategory]);
 
-  const handleProductChange = (productId) => {
-    const product = products.find((p) => p.product_id?.toString() === productId);
-    setSelectedProduct(product || null); 
+  // Thay thế hàm handleProductChange của bạn bằng hàm này để debug
 
-    if (!product) {
-      setRequestError('Please select a valid product.');
-      toast.error('Please select a valid product.'); 
-      return;
-    }
-    setRequestError(null); 
+const handleProductChange = (productId) => {
+  console.log("--- BẮT ĐẦU DEBUG handleProductChange ---");
+  console.log("1. Product ID được chọn từ dropdown:", productId);
 
-    const existingDetailIndex = fields.findIndex(
-      (field) => field.product_id?.toString() === product.product_id?.toString()
-    );
+  const product = products.find((p) => p.product_id?.toString() === productId);
+  
+  if (!product) {
+    console.error("LỖI: Không tìm thấy sản phẩm tương ứng trong state `products`.");
+    toast.error('Product data not found. Please refresh.'); 
+    return;
+  }
+  console.log("2. Đã tìm thấy đối tượng sản phẩm đầy đủ:", product);
 
-    if (existingDetailIndex >= 0) {
-      update(existingDetailIndex, {
-        ...fields[existingDetailIndex],
-        quantity: (parseInt(fields[existingDetailIndex].quantity) || 0) + 1,
-      });
-    } else {
-      append({
-        product_id: product.product_id,
-        quantity: 1,
-        price_for_customer: product.price || 0, 
-        service_contract_duration: 1, 
-      });
-    }
-  };
+  setSelectedProduct(product || null); 
+  setRequestError(null); 
+
+  // In ra trạng thái của mảng `fields` TRƯỚC KHI tìm kiếm
+  console.log("3. Trạng thái của `fields` trong form TRƯỚC KHI tìm:", fields);
+
+  const existingDetailIndex = fields.findIndex((field) => {
+    // Log ra giá trị đang được so sánh trong mỗi lần lặp
+    console.log(`   -> Đang so sánh: field.product_id (${field.product_id}) VỚI product.product_id (${product.product_id})`);
+    return field.product_id?.toString() === product.product_id?.toString();
+  });
+
+  console.log("4. Kết quả của findIndex (existingDetailIndex):", existingDetailIndex);
+
+  if (existingDetailIndex >= 0) {
+    console.log("5. KẾT LUẬN: ĐI VÀO LỆNH `update`. Sản phẩm được cho là đã tồn tại.");
+    update(existingDetailIndex, {
+      ...fields[existingDetailIndex],
+      quantity: (parseInt(fields[existingDetailIndex].quantity) || 0) + 1,
+    });
+  } else {
+    console.log("5. KẾT LUẬN: ĐI VÀO LỆNH `append`. Sản phẩm được cho là mới.");
+    append({
+      product_id: product.product_id,
+      quantity: 1,
+      price_for_customer: product.price || 0,
+      channel_cost: product.channel_cost || 0,
+      service_contract_duration: 1,
+      product_name: product.product_name,
+      // bạn có 2 product_name ở đây, tôi tạm bỏ bớt 1 cái
+    });
+  }
+  console.log("--- KẾT THÚC DEBUG ---");
+};
+
 
   const submitHandler = (data) => {
     if (Object.keys(errors).length > 0) {
@@ -228,12 +250,27 @@ const AddOrderDialog = ({
       status: '', 
       details: data.details
         .filter((detail) => detail.product_id) 
-        .map((detail) => ({
-          product_id: parseInt(detail.product_id) || 0,
-          quantity: parseInt(detail.quantity) || 0,
-          price_for_customer: parseFloat(detail.price_for_customer) || 0,
-          service_contract_duration: parseInt(detail.service_contract_duration) || 0,
-        })),
+        .map((detail) => {
+          const productInfo = products.find(p => p.product_id?.toString() === detail.product_id?.toString());
+          
+          const isChannelProduct = localStorage.getItem('role') === 'channel';
+
+          const submittedDetail = {
+            product_id: parseInt(detail.product_id) || 0,
+            quantity: parseInt(detail.quantity) || 0,
+            service_contract_duration: parseInt(detail.service_contract_duration) || 0,
+            // channel_cost: parseFloat(detail.channel_cost) || 0,
+            // price_for_customer: parseFloat(detail.price_for_customer) || 0,
+          };
+          console.log('isChannelProduct', isChannelProduct)
+          if (isChannelProduct) {
+            submittedDetail.channel_cost = parseFloat(detail.channel_cost) || 0;
+          } else {
+            submittedDetail.price_for_customer = parseFloat(detail.price_for_customer) || 0;
+          }
+
+          return submittedDetail;
+        }),
     };
 
     if (submissionData.details.length === 0) {
@@ -378,16 +415,27 @@ const AddOrderDialog = ({
             )}
             {fields.map((field, index) => {
               const quantity = watch(`details.${index}.quantity`) || 1;
-              const priceForCustomerUSD = watch(`details.${index}.price_for_customer`) || 0;
+              // const priceForCustomerUSD = watch(`details.${index}.price_for_customer`) || 0;
               const years = Number(watch(`details.${index}.service_contract_duration`)) || 1;
 
               const productInfo = products.find((p) => p.product_id?.toString() === field.product_id?.toString());
-              const originalPriceUSD = productInfo?.price || 0;
-              const maxDiscountPriceUSD = productInfo?.maximum_discount_price || 0;
+              console.log('productInfo', productInfo)
+              const isChannelProduct = localStorage.getItem('role') === 'channel';
+              const upperLimitUSD = isChannelProduct 
+              ? (productInfo?.channel_cost || 0) 
+              : (productInfo?.price || 0);
+              const lowerLimitUSD = isChannelProduct 
+              ? (productInfo?.channel_lower_price || 0) 
+              : (productInfo?.maximum_discount_price || 0);
+              // const originalPriceUSD = productInfo?.price || 0;
+              // const maxDiscountPriceUSD = productInfo?.maximum_discount_price || 0;
+              const priceToCalculate = isChannelProduct 
+              ? (watch(`details.${index}.channel_cost`) || 0)
+              : (watch(`details.${index}.price_for_customer`) || 0);
 
               let totalUSD = 0;
               for (let i = 0; i < years; i++) {
-                totalUSD += priceForCustomerUSD * Math.pow(1.05, i);
+                totalUSD += priceToCalculate  * Math.pow(1.05, i);
               }
               const subtotal = totalUSD * quantity;
 
@@ -422,50 +470,20 @@ const AddOrderDialog = ({
                     )}
                   </div>
                   <div>
-                    {/* --- BƯỚC 4: KIỂM SOÁT HOÀN TOÀN Ô NHẬP GIÁ --- */}
-                    <label className="block text-sm font-medium">Price (Customer) {displayCurrencySymbol}</label>
-                    <Controller
-                      name={`details.${index}.price_for_customer`}
+                    <CurrencyPriceInput
+                      priceType={isChannelProduct ? 'channel' : 'sales'} 
                       control={control}
-                      defaultValue={field.price_for_customer}
-                      rules={{
-                        required: 'Price is required',
-                        min: { value: 0, message: 'Price cannot be negative' },
-                        validate: {
-                          range: (value_in_usd) => { // validation luôn chạy trên giá trị USD
-                            if (value_in_usd > originalPriceUSD) {
-                              toast.error(`Price can't exceed ${formatCurrency(originalPriceUSD, false, usdToVndRate)}`);
-                              return ``;
-                            }
-                            if (value_in_usd < maxDiscountPriceUSD) {
-                              toast.error(`Price can't be lower than ${formatCurrency(maxDiscountPriceUSD, false, usdToVndRate)}`);
-                              return ``;
-                            }
-                            return true;
-                          }
-                        }
-                      }}
-                      render={({ field: { onChange, value, ...restField } }) => (
-                        <input
-                          {...restField}
-                          type="number"
-                          step="any"
-                          className="border border-gray-300 rounded px-2 py-1 w-full"
-                          // Hiển thị giá trị đã được chuyển đổi
-                          value={isVndDisplay ? (value * usdToVndRate).toFixed(2) : value}
-                          // Khi người dùng nhập, chuyển đổi ngược lại về USD để lưu vào form state
-                          onChange={(e) => {
-                            const displayValue = parseFloat(e.target.value) || 0;
-                            const valueInUsd = isVndDisplay ? displayValue / usdToVndRate : displayValue;
-                            onChange(valueInUsd); // Gọi onChange của Controller để cập nhật state
-                          }}
-                        />
-                      )}
+                      errors={errors}
+                      index={index}
+                      field={field}
+                      isVndDisplay={isVndDisplay}
+                      usdToVndRate={usdToVndRate}
+                      formatCurrency={formatCurrency}
+                      upperLimitUSD={upperLimitUSD} 
+                      lowerLimitUSD={lowerLimitUSD} 
                     />
-                     {errors.details?.[index]?.price_for_customer && (
-                        <p className="text-red-600 text-sm mt-1">{errors.details[index].price_for_customer.message}</p>
-                    )}
                   </div>
+                  
                   <div>
                     <label className="block text-sm font-medium">Contract Duration</label>
                     <select
