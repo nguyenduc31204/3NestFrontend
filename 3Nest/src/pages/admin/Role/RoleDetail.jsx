@@ -14,34 +14,32 @@ const RoleDetail = () => {
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        const [roleRes, permRes] = await Promise.all([
+        const [roleRes] = await Promise.all([
           fetch(`${BASE_URL}/roles/get-role?request_id=${id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('access_token')}`,
               'ngrok-skip-browser-warning': 'true',
             },
           }),
-          fetch(`${BASE_URL}/permissions/get-permissions`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-              'ngrok-skip-browser-warning': 'true',
-            },
-          }),
+          // fetch(`${BASE_URL}/permissions/get-permissions`, {
+          //   headers: {
+          //     Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          //     'ngrok-skip-browser-warning': 'true',
+          //   },
+          // }),
         ]);
 
         const roleData = await roleRes.json();
-        const permData = await permRes.json();
-        console.log("Role Response:", roleRes.status, roleData);
-        console.log("Permission Response:", permRes.status, permData);
+        // const permData = await permRes.json();
+        console.log("Role Response:", roleData);
+        // console.log("Permission Response:", permData);
 
 
 
-        if (roleData.status_code === 200 && permData.status_code === 200) {
+        
           setRole(roleData.data);
-          setPermissions(permData.data);
-        } else {
-          setError('Failed to fetch role details');
-        }
+          setPermissions(roleData.data.permissions);
+        
       } catch {
         setError('Error loading data');
       }
