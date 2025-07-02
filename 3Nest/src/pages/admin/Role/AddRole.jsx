@@ -141,10 +141,10 @@ const AddRole = () => {
         <div className="w-full max-w-2xl">
           {/* Title + Back on top-left */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Role Management</h1>
-            <div className="text-sm mt-1">
+            <h1 className="text-2xl font-bold text-gray-800">Roles Management</h1>
+            {/* <div className="text-sm mt-1">
               <a href="/roles" className="text-gray-600 hover:underline">← Back</a>
-            </div>
+            </div> */}
           </div>
 
           {/* Form Card */}

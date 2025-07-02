@@ -69,11 +69,9 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     loadRoles();
   }, [loadCategories, loadRoles]);
 
-useEffect(() => {
-  if (categories.length === 0 || roles.length === 0) return;
+  useEffect(() => {
+    if (!product || categories.length === 0 || roles.length === 0) return;
 
-  if (product) {
-    // 🔍 Tìm category_id tương ứng với category_name + type_name
     const matchedCategory = categories.find(
       (cat) =>
         cat.category_name === product.category_name &&
@@ -83,21 +81,16 @@ useEffect(() => {
     setFormData({
       product_name: product.product_name || '',
       product_role: product.product_role?.toString() || roles[0]?.role_id?.toString() || '',
-      category_id: matchedCategory?.category_id?.toString() || '', // ✅ fallback nếu không tìm thấy
+      category_id: matchedCategory?.category_id?.toString() || '',
       sku_partnumber: product.sku_partnumber || '',
       description: product.description || '',
       price: product.price ? String(product.price) : '',
       maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
       channel_cost: product.channel_cost ? String(product.channel_cost) : '',
     });
-  } else {
-    setFormData((prev) => ({
-      ...prev,
-      product_role: roles[0]?.role_id?.toString() || '',
-      category_id: categories[0]?.category_id?.toString() || '',
-    }));
-  }
-}, [product, categories, roles]);
+  }, [product, categories, roles]);
+
+
 
 
 
@@ -255,9 +248,10 @@ useEffect(() => {
           >
             <option value="">Select a category</option>
             {categories.map((cat) => (
-              <option key={cat.category_id} value={cat.category_id.toString()}>
-                {cat.category_name} {cat.type_name ? `- ${cat.type_name}` : ''}
-              </option>
+              <option key={cat.category_id} value={String(cat.category_id)}>
+              {cat.category_name}{cat.type_name ? ` - ${cat.type_name}` : ''}
+            </option>
+
             ))}
 
           </select>

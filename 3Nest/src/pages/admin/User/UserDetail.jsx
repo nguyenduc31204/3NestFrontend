@@ -62,40 +62,97 @@ const UserDetail = () => {
   }, [userId]);
 
   return (
-    <>
-      <div className="my-5 mx-auto max-w-3xl">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <button
-              onClick={() => navigate('/users')}
-              className="p-1 mr-3 text-gray-500 hover:text-gray-700"
-            >
-              <LuChevronLeft className="w-6 h-6" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-800">User Detail</h1>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white shadow rounded-lg p-6">
-          {loading && <p className="text-gray-500">Loading...</p>}
-          {error && <p className="text-red-600">{error}</p>}
-          {!loading && !error && user && (
-            <div className="space-y-4 text-gray-800">
-              <p><strong>Username:</strong> {user.user_name}</p>
-              <p><strong>Email:</strong> {user.user_email}</p>
-              <p><strong>Company:</strong> {user.company_name}</p>
-              <p><strong>Phone:</strong> {user.phone}</p>
-              <p><strong>Role:</strong> {getRoleName(user.role_id)}</p>
-              <p><strong>Status:</strong> {user.status === true ? 'Active' : 'Inactive'}</p>
-              <p><strong>Created At:</strong> {user.created_at}</p>
-            </div>
-          )}
+  <>
+    <div className="my-6 mx-auto max-w-3xl">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          
+          <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+            <span className="mr-2">👤</span> User Detail
+          </h1>
         </div>
       </div>
-    </>
-  );
+
+      <div className="bg-white shadow-lg border border-gray-200 rounded-xl p-6">
+        {loading && <p className="text-gray-500">Loading...</p>}
+        {error && <p className="text-red-600">{error}</p>}
+        {!loading && !error && user && (
+          <div className="space-y-4 text-gray-800">
+            <div className="py-3 flex items-center space-x-3 border-b">
+              <span>🧑</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700 min-w-[100px]">Username:</span>
+                <span className="text-gray-900">{user.user_name}</span>
+              </div>
+            </div>
+
+            <div className="py-3 flex items-center space-x-3 border-b">
+              <span>📧</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700 min-w-[100px]">Email:</span>
+                <span className="text-gray-900">{user.user_email}</span>
+              </div>
+            </div>
+
+            <div className="py-3 flex items-center space-x-3 border-b">
+              <span>🏢</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700 min-w-[100px]">Company:</span>
+                <span className="text-gray-900">{user.company_name}</span>
+              </div>
+            </div>
+
+            <div className="py-3 flex items-center space-x-3 border-b">
+              <span>📞</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700 min-w-[100px]">Phone:</span>
+                <span className="text-gray-900">{user.phone || '-'}</span>
+              </div>
+            </div>
+
+            <div className="py-3 flex items-center space-x-3 border-b">
+              <span>🛡️</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700 min-w-[100px]">Role:</span>
+                <span className="text-gray-900">{getRoleName(user.role_id)}</span>
+              </div>
+            </div>
+
+            <div className="py-3 flex items-center space-x-3 border-b">
+              <span>🟢</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700 min-w-[100px]">Status:</span>
+                <span className={user.status ? "text-green-600" : "text-red-600"}>
+                  {user.status ? "Active" : "Inactive"}
+                </span>
+              </div>
+            </div>
+
+            <div className="py-3 flex items-center space-x-3">
+              <span>📅</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-700 min-w-[100px]">Created At:</span>
+                <span className="text-gray-900">{user.created_at}</span>
+              </div>
+            </div>
+            
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => navigate('/users')}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
+              >
+                Back
+              </button>
+            </div>
+
+          </div>
+
+        )}
+      </div>
+    </div>
+  </>
+);
+
 };
 
 export default UserDetail;

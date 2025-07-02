@@ -111,12 +111,10 @@ const EditUser = () => {
   return (
   <>
     <div className="max-w-2xl mx-auto my-6 px-4 sm:px-6 lg:px-8">
-      {/* Title + Back */}
+      {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Update User</h2>
-        <div className="text-sm mt-1">
-          <a href="/users" className="text-gray-600 hover:underline">← Back</a>
-        </div>
+        {/* Optional: breadcrumb or description */}
       </div>
 
       {/* Card */}
@@ -125,8 +123,16 @@ const EditUser = () => {
           <p className="text-gray-500">Loading...</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
-            {error && <p className="text-red-600 text-sm">{error}</p>}
-            {success && <p className="text-green-600 text-sm">{success}</p>}
+            {error && (
+              <div className="bg-red-50 text-red-600 border-l-4 border-red-500 p-3 rounded text-sm">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-50 text-green-700 border-l-4 border-green-600 p-3 rounded text-sm">
+                {success}
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
@@ -170,7 +176,15 @@ const EditUser = () => {
               <label className="text-sm text-gray-700">Active</label>
             </div>
 
-            <div className="text-right">
+            {/* Button group */}
+            <div className="flex justify-end space-x-3 pt-4 border-t pt-8">
+              <button
+                type="button"
+                onClick={() => window.history.back()}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
+              >
+                Back
+              </button>
               <button
                 type="submit"
                 className="bg-blue-700 hover:bg-gray-800 text-white px-4 py-2 rounded transition"
@@ -184,6 +198,7 @@ const EditUser = () => {
     </div>
   </>
 );
+
 
 };
 
