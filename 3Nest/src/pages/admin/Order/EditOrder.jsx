@@ -90,6 +90,7 @@ const EditOrderAdmin = () => {
         if (orderResult.data.deal_id) {
           const dealResponse = await fetch(`${BASE_URL}/deals/get-deal?deal_id=${orderResult.data.deal_id}`, { headers });
           const dealResult = await dealResponse.json();
+          console.log('dealResult', dealResult)
           if (dealResponse.ok && dealResult.status_code === 200) {
             if (isMounted) setDeal(dealResult.data.deal);
           } else {
@@ -99,7 +100,7 @@ const EditOrderAdmin = () => {
 
         const detailsResponse = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${order_id}`, { headers });
         const detailsResult = await detailsResponse.json();
-        console.log('Order details2323:', detailsResult);
+        console.log('Order details2323:', deal);
         if (!detailsResponse.ok || detailsResult.status_code !== 200) {
           throw new Error(detailsResult.message || 'Failed to load order details');
         }
@@ -214,7 +215,7 @@ const EditOrderAdmin = () => {
     }
   }, [order_id, order, orderDetails]);
 
-  console.log('Order details:', order);
+  console.log('Order details:', orderDetails);
 
   const handleDiscardOrder = useCallback(async () => {
     try {
@@ -251,27 +252,7 @@ const EditOrderAdmin = () => {
   const isRejected = order?.status === 'rejected';
   const isViewOnly = isAccepted || isRejected;
 
-  console.log('Order status:', order);
-  const sampleOrderData = {
-    order_id: order_id,
-    date: order.created_at,
-    customer: {
-      name: 'Nguyễn Văn A',
-      company: 'Công ty Cổ phần 3NEST',
-      address: '79 Nguyễn Đình Chiểu, P. VTS, Q.3, TPHCM',
-      phone: '0912345678',
-      email: 'contact@3nest.vn'
-    },
-    items: [
-      { name: 'Phần mềm quản lý CRM', description: 'Gói Pro - 1 năm', unit: 'Gói', quantity: 1, unitPrice: 25000000 },
-      { name: 'Dịch vụ hỗ trợ kỹ thuật', description: 'Hỗ trợ 24/7', unit: 'Tháng', quantity: 12, unitPrice: 1000000 },
-      { name: 'Tên miền .com', description: 'Đăng ký mới 1 năm', unit: 'Tên miền', quantity: 1, unitPrice: 250000 }
-    ]
-  };
-
-  const handleExport = () => {
-    generateOrderPDF(sampleOrderData); 
-  };
+  
   
   const priceColumnHeader = user?.role_name === 'channel' ? 'Channel Cost' : 'Price';
   
@@ -285,6 +266,43 @@ const EditOrderAdmin = () => {
     );
   }
 
+  console.log("Kiểm tra giá trị của order:", order);
+  const handleExport = () => {
+
+    if (!deal || !order || !orderDetails) {
+      console.error("Dữ liệu chưa sẵn sàng để xuất PDF. Vui lòng thử lại.");
+      alert("Thông tin đơn hàng chưa được tải xong, vui lòng đợi giây lát rồi thử lại.");
+      return; 
+    }
+
+    const sampleOrderData = {
+      order_id: order_id,
+      user_name: deal.created_by, 
+      date: order.created_at,  
+      customer: {
+        name: deal.contact_name,
+        company: deal.customer_name,
+        address: deal.address,
+        phone: deal.phone,
+        email: deal.contact_email
+      },
+      items: orderDetails.map(item => ({ 
+        sku_partnumber: item.sku_partnumber,
+        name: item.product_name,
+        unit: 'Cái',
+        quantity: item.quantity,
+        unitPrice: item.price_for_customer
+      }))
+    };
+
+    try {
+      generateOrderPDF(sampleOrderData);
+    } catch (error) {
+      console.error("Đã xảy ra lỗi khi tạo file PDF:", error);
+      alert("Đã có lỗi xảy ra trong quá trình xuất file PDF. Vui lòng thử lại.");
+    }
+  };
+
   return (
     <div className="my-4 mx-auto px-4 sm:px-6 lg:px-8">
       <div className="py-6">
@@ -295,7 +313,7 @@ const EditOrderAdmin = () => {
             </h1>
             <div className="text-sm text-gray-500">
               <span className="text-gray-500 hover:text-gray-700">Dashboard</span> / 
-              <span className="text-gray-500 hover:text-gray-700">Orders</span> / 
+              <span className="text-gray-500 hover:text-gray-700">Quotes</span> / 
               <span>{isViewOnly ? 'View' : isDraft ? 'Edit' : 'Review'}</span>
             </div>
           </div>

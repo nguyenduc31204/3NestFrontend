@@ -15,12 +15,13 @@ const DashboardLayout = () => {
   useEffect(() => {
     const currentPath = location.pathname;
     if (currentPath.startsWith('/products')) setActiveMenu('02');
-    else if (currentPath.startsWith('/orders')) setActiveMenu('04');
+    else if (currentPath.startsWith('/orders')) setActiveMenu('08');
     else if (currentPath.startsWith('/users')) setActiveMenu('05');
     else if (currentPath.startsWith('/categories')) setActiveMenu('03');
     else if (currentPath.startsWith('/reports')) setActiveMenu('06');
-    else if (currentPath.startsWith('/deals')) setActiveMenu('08');
+    else if (currentPath.startsWith('/deals')) setActiveMenu('04');
     else if (currentPath.startsWith('/types')) setActiveMenu('07');
+    else if (currentPath.startsWith('/roles')) setActiveMenu('10');
 
     else if (currentPath.startsWith('/activitylog')) setActiveMenu('11');
 
