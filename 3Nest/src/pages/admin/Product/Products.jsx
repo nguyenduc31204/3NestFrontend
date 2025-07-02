@@ -28,7 +28,7 @@ const Products = () => {
   const [types, setTypes] = useState([]);
 
   const [roles, setRoles] = useState([]);
-rang
+
   const [selectedTypeId, setSelectedTypeId] = useState(1);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -359,7 +359,7 @@ rang
                     <Th>Description</Th>
                     <Th>Price</Th>
                     {currentRoleName === 'channel' && <Th>Channel Cost</Th>}
-                    {currentRoleName === 'sale' && <Th>Max Discount Price</Th>}
+                    {currentRoleName === 'sales' && <Th>Max Discount Price</Th>}
                     <Th>Status</Th>
                     {canManage && (
                     <Th>Action</Th>
@@ -397,7 +397,7 @@ rang
                             <Td>{product.channel_cost ? parseFloat(product.channel_cost).toLocaleString() : '-'}</Td>
                           )}
 
-                          {currentRoleName === 'sale' && (
+                          {currentRoleName === 'sales' && (
                             <Td>{discountPrice ? discountPrice.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '-'}</Td>
                           )}
 

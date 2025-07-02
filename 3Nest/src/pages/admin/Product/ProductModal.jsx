@@ -30,7 +30,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     if (field === 'price') return true;
     const enabledFields = {
       admin: [],
-      sale: ['maximum_discount'],
+      sales: ['maximum_discount'],
       channel: ['channel_cost'],
     };
     return enabledFields[roleName]?.includes(field);
@@ -255,9 +255,6 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             ))}
           </select>
 
-
-
-
           <select
             name="category_id"
             value={formData.category_id}
@@ -275,9 +272,6 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             ))}
 
           </select>
-
-
-
           <input
             name="sku_partnumber"
             placeholder="SKU/Part Number"
@@ -285,8 +279,6 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             onChange={handleChange}
             className="border p-2"
           />
-
-
           <div className="relative col-span-1">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             <input
