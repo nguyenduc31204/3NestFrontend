@@ -234,7 +234,7 @@ const OrdersPage = () => {
                 className="bg-gray-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
                 onClick={() => navigate('/orders/add')}
               >
-                + Add New Order
+                + Add New Quote
               </button>
             )}
           </div>
@@ -249,7 +249,7 @@ const OrdersPage = () => {
           {/* Bảng dữ liệu */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden ">
             <div className="flex flex-wrap items-center justify-between p-4 border-b gap-4">
-              <h2 className="text-lg font-semibold">Order List</h2>
+              <h2 className="text-lg font-semibold">Quote List</h2>
               <div className="flex items-center space-x-2 flex-wrap gap-2">
                 {/* Bộ lọc role chỉ hiển thị cho người có quyền Full control */}
                 {hasPermission(user, 'order:review') && roles.map((role) => (
