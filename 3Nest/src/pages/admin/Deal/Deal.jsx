@@ -220,7 +220,7 @@ const DealsPage = () => {
         <div className="content py-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Deals Management</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Registration Management</h1>
               {/* <div className="text-sm text-gray-500">
                 <a href="/deals" className="hover:underline">back</a>
               </div> */}
@@ -230,20 +230,20 @@ const DealsPage = () => {
                 className="bg-gray-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
                 onClick={() => navigate('/deals/add')}
               >
-                + Add New Deal
+                + Add New Registration
               </button>
             )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            <StatCard Icon={LuCoins} value={deals.length} label="Total Deals" color="blue" />
-            <StatCard Icon={LuWalletMinimal} value={deals.filter(d => d.status === 'approved').length} label="Approved Deals" color="green" />
-            <StatCard Icon={LuPersonStanding} value={deals.filter(d => d.status === 'draft').length} label="Draft Deals" color="yellow" />
+            <StatCard Icon={LuCoins} value={deals.length} label="Total Registration" color="blue" />
+            <StatCard Icon={LuWalletMinimal} value={deals.filter(d => d.status === 'approved').length} label="Approved Registration" color="green" />
+            <StatCard Icon={LuPersonStanding} value={deals.filter(d => d.status === 'draft').length} label="Draft Registration" color="yellow" />
           </div>
 
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="flex flex-wrap items-center justify-between p-4 border-b gap-4">
-              <h2 className="text-lg font-semibold">Deal List</h2>
+              <h2 className="text-lg font-semibold">Registration List</h2>
               <div className="flex items-center space-x-2 flex-wrap gap-2">
                 {hasPermission(user, 'deal:review') && roles.map((role) => (
                   <RoleButton
@@ -266,7 +266,7 @@ const DealsPage = () => {
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                   <thead className="bg-gray-50">
                     <tr>
-                      <Th>Deal ID</Th>
+                      <Th>Registration ID</Th>
                       <Th>Customer</Th>
                       <Th>TIN</Th>
                       <Th>Status</Th>
@@ -277,7 +277,7 @@ const DealsPage = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {currentDeals.length === 0 ? (
-                      <tr><td colSpan="7" className="text-center p-8 text-gray-500">No deals found.</td></tr>
+                      <tr><td colSpan="7" className="text-center p-8 text-gray-500">No Registration found.</td></tr>
                     ) : (
                       currentDeals.map((deal) => (
                         <tr key={deal.deal_id} className="hover:bg-gray-50">
