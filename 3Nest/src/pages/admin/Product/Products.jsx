@@ -189,7 +189,7 @@ const Products = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
       const res = await fetch(`${BASE_URL}/products/delete-product?product_id=${id}`, {
         method: 'DELETE',
@@ -290,9 +290,9 @@ const Products = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <StatCard Icon={LuCoins} value={products.length} label="Total Products" color="blue" />
-            <StatCard Icon={LuWalletMinimal} value={products.filter(p => p.status).length} label="Active Products" color="green" />
-            <StatCard Icon={LuPersonStanding} value={products.filter(p => !p.status).length} label="Inactive Products" color="yellow" />
+            <StatCard Icon={LuCoins} value={products.length} label="Total Items" color="blue" />
+            <StatCard Icon={LuWalletMinimal} value={products.filter(p => p.status).length} label="Active Items" color="green" />
+            <StatCard Icon={LuPersonStanding} value={products.filter(p => !p.status).length} label="Inactive Items" color="yellow" />
           </div>
 
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -316,7 +316,7 @@ const Products = () => {
             <div className="p-4 border-b grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50">
               
               <div>
-                <label className="block text-sm font-medium mb-1">Product Type</label>
+                <label className="block text-sm font-medium mb-1">Item Type</label>
                 <select
                   value={selectedTypeId}
                   onChange={handleTypeChange}
@@ -370,7 +370,7 @@ const Products = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {!loading && products.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No products found</td>
+                      <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No item found</td>
                     </tr>
                   )}
                   

@@ -49,7 +49,7 @@ const ProductDetail = ({ isOpen, onClose, product, roles = [] }) => {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <Dialog.Title className="text-lg font-medium leading-6 text-gray-900">
-                    Product Details
+                    Item Details
                   </Dialog.Title>
                   <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                     <LuX className="w-5 h-5" />
@@ -59,7 +59,7 @@ const ProductDetail = ({ isOpen, onClose, product, roles = [] }) => {
                 {/* Body */}
                 {product ? (
                   <dl className="divide-y divide-gray-100 max-h-[70vh] overflow-y-auto pr-1">
-                    <Field label="Product Name" value={product.product_name} />
+                    <Field label="Item Name" value={product.product_name} />
 
                     <Field label="Role" value={getRoleName(product.product_role)} />
                     <Field label="Category" value={product.category_name} />
@@ -94,7 +94,7 @@ const ProductDetail = ({ isOpen, onClose, product, roles = [] }) => {
                     />
                   </dl>
                 ) : (
-                  <p className="text-sm text-gray-500">No product data.</p>
+                  <p className="text-sm text-gray-500">No item data.</p>
                 )}
 
                 {/* Footer */}

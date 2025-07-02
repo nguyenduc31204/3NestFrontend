@@ -37,7 +37,7 @@ export const SIDE_MENU_DATA = [
   },
   {
     id: '02',
-    label: 'Products',
+    label: 'Items',
     icon: Package,
     path: '/products',
     resourceType: 'product',

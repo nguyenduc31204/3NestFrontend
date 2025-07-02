@@ -194,7 +194,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       } else {
     console.error('Error response:', result); 
     if (result.message?.toLowerCase().includes('product') && result.message?.toLowerCase().includes('exist')) {
-    setErrorMessage('This product existed. please choose another name.');
+    setErrorMessage('This item existed. please choose another name.');
   } else {
     setErrorMessage(result.detail || result.message || 'faild to save.');
   }
@@ -219,12 +219,12 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
 
       <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
         <h2 className="text-lg font-semibold mb-4">
-          {product ? 'Edit' : 'Add'} Product
+          {product ? 'Edit' : 'Add'} Item
         </h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           <input
             name="product_name"
-            placeholder="Product Name"
+            placeholder="Item Name"
             value={formData.product_name}
             onChange={handleChange}
             className="border p-2"

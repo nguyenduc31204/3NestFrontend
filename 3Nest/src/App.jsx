@@ -86,11 +86,12 @@ const App = () => {
 
         <Route element={<ProtectedLayout />}>
           <Route path="/introduction" element={<Introduction />} />
+          <Route path="/profile" element={<Profile />} />
 
-          <Route 
+          {/* <Route 
             path="/profile" 
             element={<ProtectedRoute permission="user:view"><Profile /></ProtectedRoute>} 
-          />
+          /> */}
 
 
           <Route 

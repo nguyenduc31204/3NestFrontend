@@ -55,12 +55,12 @@ const Home = () => {
                 <div className="page-title">
                     <h1 className='text-2xl font-semibold bg-#181c32 mb-2'>Dashboard Management</h1>
                     <div className="breadcrumb text-gray-500 text-sm hover:text-slate-500">
-                        <a href="#" className='text-gray-500 '>Dashboard</a> / Product
+                        <a href="#" className='text-gray-500 '>Dashboard</a> / Item
                     </div>
                 </div>
                 <div className="action-buttons mb-2">
                     <button className="btn btn-primary" onClick="openModal()">
-                        <i className="fas fa-plus"></i> Add new product
+                        <i className="fas fa-plus"></i> Add new Item
                     </button>
                 </div>
             </div>
@@ -71,7 +71,7 @@ const Home = () => {
                     <LuCoins className="w-6 h-6" />
                 </div>
                 <div className="stat-value text-2xl font-bold text-gray-800">254</div>
-                <div className="stat-label text-gray-500">Total Products</div>
+                <div className="stat-label text-gray-500">Total Item</div>
             </div>
 
             <div className="stat-card flex-1 min-w-[200px] rounded-md p-5 m-2 shadow-md bg-white">
