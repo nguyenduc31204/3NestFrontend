@@ -18,7 +18,7 @@ import UserDetail from './pages/admin/User/UserDetail';
 import ForgotPassword from './pages/Auth/ForgotPassword'
 
 import TypeDetail from './pages/admin/Type/TypeDetail';
-<<<<<<< HEAD
+
 
 import DealAdmin from './pages/admin/Deal/Deal'
 import EditOrderAdmin from './pages/admin/Order/EditOrder'
@@ -39,28 +39,7 @@ import Profile from './pages/admin/User/Profile'
 import { useAuth } from './context/AuthContext';
 
 import Introduction from './components/layouts/Introduction';
-=======
-import ChannelProducts from './pages/Channel/Products/SalesProducts'
-import TypeDetailMana from './pages/Manager/Type/TypeDetail'
-import AddTypeMana from './pages/Manager/Type/AddType'
-import EditTypeMana from './pages/Manager/Type/EditType'
-import ProductsMana from './pages/Manager/Product/Products'
-// import AddOrderMana from './pages/Manager/Order/AddOder'
-import OrdersMana from './pages/Manager/Order/Orders'
-import Deal from './pages/Sales/Deal/Deal'
-import AddDeal from './pages/Sales/Deal/AddDeal'
-import SalesEditDeal from './pages/Sales/Deal/Edit'
-import EditOrder from './pages/Sales/Order/EditOrder'
-import AddDealChannel from './pages/Channel/Deal/AddDeal'
-import ChannelEditDeal from './pages/Channel/Deal/Edit'
-import DealChannel from './pages/Channel/Deal/Deal'
-import EditOrderChannel from './pages/Channel/Order/EditOrderChannel'
-import ChannelAddOrder from './pages/Channel/Order/ChannelAddOrder'
-import ChannelOrders from './pages/Channel/Order/ChannelOrders'
-import DealMana from './pages/Manager/Deal/Deal'
-import ManaEditDeal from './pages/Manager/Deal/Edit'
-import EditOrderMana from './pages/Manager/Order/EditOrder'
->>>>>>> Trang
+
 
 
 
@@ -96,56 +75,13 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
-<<<<<<< HEAD
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         {/* <Route path="/profile" element={<Profile />} /> */}
         
         <Route path="/" element={<RootRedirect />} />
-=======
 
-        {/* admin */}
-        <Route path="/admin/dashboard" element={<Home />} />
-        <Route path="/admin/products" element={<Products />} />
-        <Route path="/admin/orders" element={<Orders />} />
-        <Route path='/admin/types' element={<TypeDetail />} />
-        <Route path="/admin/settings" element={<Setting />} />
-        <Route path="/admin/addorder" element={<AddOrder />} />
-        <Route path="/admin/editorder/:order_id" element={<AddOrder />} />
-        <Route path='/admin/types/add' element={<AddType />} />
-        <Route path='/admin/types/edit/:id' element={<EditType />} />
-        {/* sales */}
-        <Route path="/sales/products" element={<SalesProducts />} />
-        <Route path="/sales/orders" element={<SalesOrders />} />
-        <Route path="/sales/settings" element={<SalesSetting />} />
-        <Route path="/sales/addorder" element={<SalesAddOrder />} />
-        <Route path="/sales/orders/add" element={<SalesAddOrder />} />
-        <Route path="/sales/adddeals" element={<AddDeal />} />
-        <Route path="/sales/editorder/:order_id" element={<EditOrder />} />
-        <Route path="/sales/editdeals/:deal_id" element={<SalesEditDeal />} />
-        <Route path="/sales/deals" element={<Deal />} />
-        {/* channel */}
-        <Route path="/channel/products" element={<ChannelProducts />} />
-        <Route path="/channel/orders" element={<ChannelOrders />} />
-        <Route path="/channel/settings" element={<ChannelSetting />} />
-        <Route path="/channel/addorder" element={<ChannelAddOrder />} />
-        <Route path="/channel/orders/add" element={<ChannelAddOrder />} />
-        <Route path="/channel/adddeals" element={<AddDealChannel />} />
-        <Route path="/channel/deals" element={<DealChannel />} />
-        <Route path="/channel/editorder/:order_id" element={<EditOrderChannel />} />
-        <Route path="/channel/editdeals/:deal_id" element={<ChannelEditDeal />} />
-
-        {/* manager */}
-        <Route path="/manager/products" element={<ProductsMana />} />
-        {/* <Route path="/manager/addorder" element={<AddOrderMana />} /> */}
-        <Route path="/manager/orders" element={<OrdersMana />} />
-        <Route path='/manager/types' element={<TypeDetailMana />} />
-        <Route path='/manager/types/add' element={<AddTypeMana />} />
-        <Route path="/manager/editorder/:order_id" element={<EditOrderMana />} />
-        <Route path="/manager/deals" element={<DealMana />} />
-        <Route path="/manager/editdeals/:deal_id" element={<ManaEditDeal />} />
-        <Route path='/manager/types/edit/:id' element={<EditTypeMana />} />
->>>>>>> Trang
 
 
         <Route element={<ProtectedLayout />}>
