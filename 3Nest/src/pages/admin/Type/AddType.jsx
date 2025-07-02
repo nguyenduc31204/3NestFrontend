@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import axiosInstance from '../../../utils/axiosInstance';
-import Header from '../../../components/layouts/Header';
-import DashboardLayout from '../../../components/layouts/DashboardLayout';
+
 
 const AddType = () => {
   const [typeName, setTypeName] = useState('');
@@ -21,10 +21,12 @@ const AddType = () => {
     try {
       const response = await axiosInstance.post('/types/create-type', {
         type_name: typeName,
+
         type_description: type_description,
       });
       if ([200, 201].includes(response.status)) {
         navigate('/types');
+
       } else {
         setError('Cannot create new type');
       }
@@ -36,16 +38,12 @@ const AddType = () => {
 
   return (
     <div>
-      
         <div className="my-5 mx-auto">
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
               <div className="page-title">
                 <h1 className="text-2xl font-semibold text-gray-800 mb-2">Add New Type</h1>
-                <div className="text-sm mt-1">
-                  <a href="/types" className="text-gray-600 hover:underline">← Back</a>
-                </div>
-                
+
               </div>
             </div>
 
@@ -70,7 +68,9 @@ const AddType = () => {
                     <textarea
                       className="mt-1 block w-full border border-gray-300 rounded px-3 py-2"
                       rows="3"
+
                       value={type_description}
+
                       onChange={(e) => setDescription(e.target.value)}
                       required
                     />
@@ -78,7 +78,9 @@ const AddType = () => {
                   <div className="flex justify-end space-x-2">
                     <button
                       type="button"
+
                       onClick={() => navigate('/types')}
+
                       className="px-4 py-2 bg-gray-300 rounded"
                     >
                       Cancel
@@ -95,7 +97,9 @@ const AddType = () => {
             </div>
           </div>
         </div>
+
     
+
     </div>
   );
 };

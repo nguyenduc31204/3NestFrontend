@@ -3,9 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { decodeToken, validateEmail } from '../../utils/help';
 import Input from '../../components/input/Input';
 import { BASE_URL } from '../../utils/apiPath';
+<<<<<<< HEAD
 import { useAuth } from '../../context/AuthContext';
 
 
+=======
+>>>>>>> Trang
 
 const Login = () => {
   const [user_email, setEmail] = useState('');
@@ -46,7 +49,11 @@ const Login = () => {
       });
 
       const result = await response.json();
+<<<<<<< HEAD
       //console.log('Login API Response:', result);
+=======
+      console.log('Login API Response:', result);
+>>>>>>> Trang
 
       if (response.ok) {
         const { access_token } = result;

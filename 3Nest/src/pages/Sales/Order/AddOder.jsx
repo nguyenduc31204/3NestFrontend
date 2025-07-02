@@ -152,7 +152,9 @@ const SalesAddOrder = () => {
           });
           const result = await response.json();
           if (result.status_code === 200 && Array.isArray(result.data)) {
+
             const acceptedDeals = result.data.filter((deal) => deal.status === 'approved');
+
             setDeals(acceptedDeals);
           } else {
             throw new Error(result.message || 'Failed to load deals');

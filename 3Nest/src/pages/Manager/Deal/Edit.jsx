@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
 import Header from '../../../components/layouts/Header';
+
 import { BASE_URL } from '../../../utils/apiPath';
 
 const ManaEditDeal = () => {
@@ -15,15 +16,19 @@ const ManaEditDeal = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [rejectError, setRejectError] = useState('');
 
+
   const isViewOnly = dealData?.status !== 'submitted';
   const isDraft = dealData?.status === 'draft';
 
   useEffect(() => {
+
+
     const loadDealData = async () => {
       try {
         const response = await fetch(`${BASE_URL}/deals/get-deal?deal_id=${deal_id}`, {
@@ -35,7 +40,9 @@ const ManaEditDeal = () => {
         });
         const result = await response.json();
         if (result.status_code === 200) {
+
           setDealData(result.data.deal);
+
         } else {
           throw new Error(result.message || 'Failed to load deal data');
         }
@@ -73,6 +80,7 @@ const ManaEditDeal = () => {
     loadData();
   }, [deal_id]);
 
+
   useEffect(() => {
     const loadUser = async () => {
       if (!dealData?.user_id) return;
@@ -97,6 +105,7 @@ const ManaEditDeal = () => {
   }, [dealData?.user_id]);
 
   const handleStatusChange = async (newStatus, reason = '') => {
+
     setProcessing(true);
     setSuccessMessage('');
     setError('');
@@ -111,7 +120,9 @@ const ManaEditDeal = () => {
         body: JSON.stringify({
           deal_id: parseInt(deal_id),
           status: newStatus,
+
           reason: reason,
+
         }),
       });
 
@@ -129,13 +140,16 @@ const ManaEditDeal = () => {
       });
       const updatedResult = await updatedResponse.json();
       if (updatedResult.status_code === 200) {
+
         setDealData(updatedResult.data.deal);
         setSuccessMessage(`Deal ${newStatus} successfully!`);
       }
+
     } catch (err) {
       setError(`Failed to update deal status: ${err.message}`);
     } finally {
       setProcessing(false);
+
       setShowApproveConfirm(false);
       setShowRejectModal(false);
       setRejectReason('');
@@ -154,6 +168,7 @@ const ManaEditDeal = () => {
     }
     handleStatusChange('rejected', rejectReason);
   };
+
 
   if (isDraft && !loading) {
     return (
@@ -203,7 +218,9 @@ const ManaEditDeal = () => {
                       <p className="text-base text-gray-800">{dealData?.deal_id || '--'}</p>
                     </div>
                     <div>
+
                       <label className="block text-sm font-medium text-gray-700">User Name</label>
+
                       <p className="text-base text-gray-800">{user?.user_name || '--'}</p>
                     </div>
                     <div>
@@ -219,7 +236,9 @@ const ManaEditDeal = () => {
                       <p className="text-base text-gray-800">{user?.company_name || '--'}</p>
                     </div>
                     <div>
+
                       <label className="block text-sm font-medium text-gray-700">Created At</label>
+
                       <p className="text-base text-gray-800">
                         {dealData?.created_at
                           ? new Date(dealData.created_at).toLocaleString('vi-VN', {
@@ -233,6 +252,7 @@ const ManaEditDeal = () => {
                           : '--'}
                       </p>
                     </div>
+
                   </div>
                   <div className="flex-1 space-y-4">
                     <div>
@@ -259,27 +279,33 @@ const ManaEditDeal = () => {
                       <label className="block text-sm font-medium text-gray-700">Address</label>
                       <p className="text-base text-gray-800">{dealData?.address || '--'}</p>
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Description</label>
                       <p className="text-base text-gray-800">{dealData?.description || '--'}</p>
                     </div>
+
                   </div>
                 </div>
                 {!isViewOnly && (
                   <div className="flex gap-2 w-full justify-end mt-6">
                     <button
                       className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm flex items-center gap-2 touch-manipulation"
+
                       onClick={() => setShowRejectModal(true)}
+
                       disabled={processing}
                     >
                       Reject
                     </button>
                     <button
                       className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm flex items-center gap-2 touch-manipulation"
+
                       onClick={handleApprove}
                       disabled={processing}
                     >
                       {processing ? 'Processing...' : 'Approve'}
+
                     </button>
                   </div>
                 )}
@@ -313,6 +339,7 @@ const ManaEditDeal = () => {
                                   <span
                                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                                       order.status === 'submitted'
+
                                         ? 'bg-blue-100 text-blue-800'
                                         : order.status === 'approved'
                                         ? 'bg-green-100 text-green-800'
@@ -322,6 +349,7 @@ const ManaEditDeal = () => {
                                     {order.status === 'submitted' ? 'Submitted' :
                                      order.status === 'approved' ? 'Approved' :
                                      order.status || 'Unknown'}
+
                                   </span>
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900">
@@ -347,6 +375,7 @@ const ManaEditDeal = () => {
                 </div>
               </div>
             )}
+
 
             {/* Approval Confirmation Modal */}
             {showApproveConfirm && (
@@ -416,6 +445,7 @@ const ManaEditDeal = () => {
                 </div>
               </div>
             )}
+
           </div>
         </div>
       </DashboardLayout>
@@ -423,4 +453,6 @@ const ManaEditDeal = () => {
   );
 };
 
+
 export default ManaEditDeal;
+

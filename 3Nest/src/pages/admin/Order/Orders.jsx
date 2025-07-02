@@ -18,9 +18,102 @@ import { BASE_URL } from '../../../utils/apiPath';
 const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
+<<<<<<< HEAD
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;
     onPageChange(page);
+=======
+  const token = localStorage.getItem('access_token');
+  const decodedToken = decodeToken(token);
+  const userId = decodedToken?.user_id;
+  const role = decodedToken?.role; 
+
+  useEffect(() => {
+    loadOrdersByRole();
+  }, [activeRole]);
+
+  const loadOrdersByRole = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    const response = await fetch(`${BASE_URL}/orders/orders-by-role?role=${activeRole}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+      },
+    });
+    const result = await response.json();
+    if (result.status_code === 200 && Array.isArray(result.data)) {
+      const filteredOrders = activeRole === 'admin'
+        ? result.data 
+        : result.data.filter(order => order.status !== 'draft');
+      setOrders(filteredOrders);
+    } else {
+      throw new Error(result.message || 'Invalid orders data format');
+    }
+  } catch (err) {
+    setError(`Failed to load orders: ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const updateOrderStatus = async (newStatus) => {
+    try {
+      const response = await fetch(`${BASE_URL}/orders/update-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+        body: JSON.stringify(newStatus),
+      });
+      const result = await response.json();
+      if (!response.ok || result.status_code !== 200) {
+        throw new Error(result.message || 'Failed to update status');
+      }
+      loadOrdersByRole();
+    } catch (err) {
+      setError(`Failed to update status: ${err.message}`);
+    }
+  };
+
+  const loadProductChoose = async (pro_id) => {
+    try {
+      const response = await fetch(`${BASE_URL}/orders/get-order-details-by-order?order_id=${pro_id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const result = await response.json();
+      if (!response.ok || result.status_code !== 200) {
+        throw new Error(result.message || 'Failed to load order details');
+      }
+      setProducts(result.data);
+    } catch (err) {
+      setError(`Failed to load order details: ${err.message}`);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedOrder?.order_id) {
+      loadProductChoose(selectedOrder.order_id);
+    }
+  }, [selectedOrder]);
+
+  const handleRefresh = () => {
+    loadOrdersByRole();
+  };
+
+  const handleRoleChange = (role) => {
+    setActiveRole(role);
+>>>>>>> Trang
   };
 
   return (
