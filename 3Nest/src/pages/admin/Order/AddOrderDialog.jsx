@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useForm, useFieldArray  } from 'react-hook-form';
 import { BASE_URL } from '../../../utils/apiPath';
 import { toast } from 'react-hot-toast'; 
@@ -59,7 +59,21 @@ const AddOrderDialog = ({
   const toggleCurrencyDisplay = () => {
     setIsVndDisplay(!isVndDisplay);
   };
+  const resetSelectionState = useCallback(() => {
+    setSelectedTypeId('');
+    setSelectedCategory('');
+    setProducts([]);
+    setSelectedProduct(null);
+    setRequestError(null);
+  }, []);
 
+  useEffect(() => {
+    if (open) {
+      reset({ details: [] });
+      resetSelectionState();
+      fetchTypes();
+    }
+  }, [open, reset, resetSelectionState]);
 
   useEffect(() => {
     const resetFormState = () => {
@@ -181,7 +195,6 @@ const AddOrderDialog = ({
     fetchProducts();
   }, [selectedCategory]);
 
-  // Thay thế hàm handleProductChange của bạn bằng hàm này để debug
 
 const handleProductChange = (productId) => {
   console.log("--- BẮT ĐẦU DEBUG handleProductChange ---");
@@ -225,7 +238,6 @@ const handleProductChange = (productId) => {
       channel_cost: product.channel_cost || 0,
       service_contract_duration: 1,
       product_name: product.product_name,
-      // bạn có 2 product_name ở đây, tôi tạm bỏ bớt 1 cái
     });
   }
   console.log("--- KẾT THÚC DEBUG ---");
@@ -252,6 +264,7 @@ const handleProductChange = (productId) => {
         .filter((detail) => detail.product_id) 
         .map((detail) => {
           const productInfo = products.find(p => p.product_id?.toString() === detail.product_id?.toString());
+          console.log('detail', detail)
           
           const isChannelProduct = localStorage.getItem('role') === 'channel';
 
@@ -272,6 +285,8 @@ const handleProductChange = (productId) => {
           return submittedDetail;
         }),
     };
+
+    console.log('submissionData', submissionData)
 
     if (submissionData.details.length === 0) {
       setRequestError('At least one product is required.');

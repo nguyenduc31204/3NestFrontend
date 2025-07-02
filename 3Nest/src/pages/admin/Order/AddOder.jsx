@@ -22,9 +22,7 @@ const OrderItemRow = ({ field, index, register, remove, watch, isReadOnly }) => 
   const watchedItem = watch(`details.${index}`);
   console.log("ww", watchedItem)
 
-  // Tính toán subtotal cho từng dòng
  const subtotal = useMemo(() => {
-        // Lấy đúng giá dựa trên vai trò của người dùng
         const price = isChannelProduct 
             ? (watchedItem.channel_cost || 0) 
             : (watchedItem.price_for_customer || 0);
@@ -135,13 +133,11 @@ const AddOrderPageRefactored = () => {
         const productsResult = await productsResponse.json();
         setProducts(productsResult.data || []);
 
-        // --- LOGIC XỬ LÝ DEALS ĐÃ ĐƯỢC CẬP NHẬT ---
         if (dealsResponse) {
           if (!dealsResponse.ok) throw new Error('Failed to load deals');
           const dealsResult = await dealsResponse.json();
 
           if (preSelectedDealId) {
-            // Trường hợp 1: Có deal_id được chọn trước, xử lý object đơn lẻ
             const singleDeal = dealsResult.data?.deal;
             if (singleDeal && singleDeal.status === 'approved') {
                 setDeals([singleDeal]);
@@ -149,10 +145,8 @@ const AddOrderPageRefactored = () => {
                 setDeals([]);
             }
           } else {
-            // Trường hợp 2: Không có deal_id, xử lý mảng deals
             const allDeals = dealsResult.data;
             if (Array.isArray(allDeals)) {
-                // Lọc ra những deal đã được duyệt
                 const approvedDeals = allDeals.filter(deal => deal.status === 'approved');
                 setDeals(approvedDeals);
             } else {
@@ -160,7 +154,6 @@ const AddOrderPageRefactored = () => {
             }
           }
         }
-        // --- KẾT THÚC LOGIC CẬP NHẬT ---
 
         if (order_id) {
           const orderResponse = await fetch(`${BASE_URL}/orders/get-order?order_id=${order_id}`, { headers });
@@ -190,38 +183,46 @@ const AddOrderPageRefactored = () => {
     loadInitialData();
   }, [user, order_id, preSelectedDealId, reset]);
 
-  // Logic tính toán Total Budget
-  const totalBudget = useMemo(() => {
-    return watchedDetails.reduce((acc, item) => {
-      const price = item.price_for_customer || 0;
-      const quantity = item.quantity || 0;
-      const years = item.service_contract_duration || 1;
-      let itemTotal = 0;
-      for (let i = 0; i < years; i++) {
-        itemTotal += price * Math.pow(1.05, i);
-      }
-      return acc + (itemTotal * quantity);
-    }, 0);
-  }, [watchedDetails]);
 
-  // Handlers
-  const handleDialogSubmit = (dataFromDialog) => {
-    const selectedProducts = dataFromDialog.details || [];
+
+const totalBudget = useMemo(() => {
+  return watchedDetails.reduce((acc, item) => {
     
-    const newProducts = selectedProducts.filter(p_new => 
-      !watchedDetails.some(p_old => p_old.product_id === p_new.product_id)
+    const price = isChannelProduct
+        ? (item.channel_cost || 0)
+        : (item.price_for_customer || 0);
+
+    const quantity = item.quantity || 0;
+    const years = item.service_contract_duration || 1;
+    
+    let itemTotal = 0;
+    for (let i = 0; i < years; i++) {
+      itemTotal += price * Math.pow(1.05, i);
+    }
+    
+    return acc + (itemTotal * quantity);
+  }, 0);
+
+}, [watchedDetails, isChannelProduct]);
+
+
+const handleDialogSubmit = (dataFromDialog) => {
+    const itemsFromDialog = dataFromDialog.details || [];
+    
+    // Lọc ra những sản phẩm chưa có trong danh sách chính
+    const itemsToAdd = itemsFromDialog.filter(newItem => 
+        !watchedDetails.some(existingItem => existingItem.product_id === newItem.product_id)
     );
-    
-    const formattedProducts = newProducts.map(p => ({
-        product_id: p.product_id,
-        product_name: products.find(prod => prod.product_id === p.product_id)?.product_name || 'Unknown',
-        price_for_customer: p.price_for_customer,
-        quantity: p.quantity,
-        service_contract_duration: p.service_contract_duration,
-    }));
-    
-    append(formattedProducts);
-  };
+
+    if (itemsToAdd.length > 0) {
+        const formattedItems = itemsToAdd.map(item => ({
+            ...item, 
+            product_name: item.product_name || products.find(p => p.product_id === item.product_id)?.product_name || 'Unknown',
+        }));
+
+        append(formattedItems);
+    }
+};
   
   const handleFormSubmit = async (data, status) => {
     if(fields.length === 0) {
@@ -233,12 +234,26 @@ const AddOrderPageRefactored = () => {
     const action = order_id ? 'Updating' : 'Creating';
     const toastId = toast.loading(`${action} order...`);
     
-    const payload = { ...data, status, details: data.details.map(d => ({
-        product_id: d.product_id,
-        quantity: Number(d.quantity),
-        price_for_customer: Number(d.price_for_customer),
-        service_contract_duration: Number(d.service_contract_duration)
-    }))};
+    const payload = { 
+    ...data, 
+    status, 
+    details: data.details.map(d => {
+        const detailPayload = {
+            product_id: d.product_id,
+            quantity: Number(d.quantity),
+            service_contract_duration: Number(d.service_contract_duration)
+        };
+
+        if (isChannelProduct) { 
+            detailPayload.channel_cost = Number(d.channel_cost);
+        } else {
+            detailPayload.price_for_customer = Number(d.price_for_customer);
+        }
+
+        return detailPayload;
+    })
+};
+    console.log('payload', payload)
     if (order_id) payload.order_id = Number(order_id);
     
     try {
