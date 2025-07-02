@@ -114,7 +114,7 @@ export const generateOrderPDF = (orderData) => {
     
       {
           content: 'Báo giá trên đã bao gồm VAT',
-          colSpan: 3, // << Gộp 3 cột (Tên, SL, Đơn giá)
+          colSpan: 4, // << Gộp 3 cột (Tên, SL, Đơn giá)
           styles: summaryLabelStyle
       },
       
@@ -125,7 +125,7 @@ export const generateOrderPDF = (orderData) => {
       '', // << Bỏ trống ô cột SKU
       {
           content: 'Tổng giá EXW:',
-          colSpan: 3, // << Gộp 3 cột (Tên, SL, Đơn giá)
+          colSpan: 4, // << Gộp 3 cột (Tên, SL, Đơn giá)
           styles: summaryLabelStyle
       },
       {
@@ -139,7 +139,7 @@ export const generateOrderPDF = (orderData) => {
       '', '', // Bỏ trống 2 ô đầu
       {
           content: 'Phí đóng gói và vận tải:',
-          colSpan: 3,
+          colSpan: 4,
           styles: summaryLabelStyle
       },
       {
@@ -153,7 +153,7 @@ export const generateOrderPDF = (orderData) => {
       '', '', // Bỏ trống 2 ô đầu
       {
           content: 'Phí bảo hiểm:',
-          colSpan: 3,
+          colSpan: 4,
           styles: summaryLabelStyleBold
       },
       {
@@ -167,7 +167,7 @@ export const generateOrderPDF = (orderData) => {
       '', '', // Bỏ trống 2 ô đầu
       {
           content: 'Tổng giá CIP Hà Nội bằng hàng không:',
-          colSpan: 3,
+          colSpan: 4,
           styles: summaryLabelStyleBold
       },
       {

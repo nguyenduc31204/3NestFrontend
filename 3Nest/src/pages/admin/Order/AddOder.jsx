@@ -8,6 +8,9 @@ import { useAuth } from '../../../context/AuthContext';
 import { BASE_URL } from '../../../utils/apiPath';
 import AddOrderDialog from './AddOrderDialog';
 
+const isChannelProduct = localStorage.getItem('role') === 'channel';
+
+
 const InfoField = ({ label, value }) => (
   <div>
     <strong className="block font-medium text-gray-500 text-sm">{label}</strong>
@@ -17,18 +20,28 @@ const InfoField = ({ label, value }) => (
 
 const OrderItemRow = ({ field, index, register, remove, watch, isReadOnly }) => {
   const watchedItem = watch(`details.${index}`);
+  console.log("ww", watchedItem)
 
   // Tính toán subtotal cho từng dòng
-  const subtotal = useMemo(() => {
-    const price = watchedItem.price_for_customer || 0;
-    const quantity = watchedItem.quantity || 0;
-    const years = watchedItem.service_contract_duration || 1;
-    let itemTotal = 0;
-    for (let i = 0; i < years; i++) {
-      itemTotal += price * Math.pow(1.05, i);
-    }
-    return Math.round(itemTotal * quantity);
-  }, [watchedItem]);
+ const subtotal = useMemo(() => {
+        // Lấy đúng giá dựa trên vai trò của người dùng
+        const price = isChannelProduct 
+            ? (watchedItem.channel_cost || 0) 
+            : (watchedItem.price_for_customer || 0);
+            
+        const quantity = watchedItem.quantity || 0;
+        const years = watchedItem.service_contract_duration || 1;
+        
+        let itemTotal = 0;
+        for (let i = 0; i < years; i++) {
+            itemTotal += price * Math.pow(1.05, i);
+        }
+        return Math.round(itemTotal * quantity);
+    }, [watchedItem, isChannelProduct]);
+
+  const displayPrice = isChannelProduct 
+      ? (field.channel_cost || 0) 
+      : (field.price_for_customer || 0);
 
   return (
     <tr key={field.id} className="hover:bg-gray-50 transition-colors">
@@ -42,7 +55,7 @@ const OrderItemRow = ({ field, index, register, remove, watch, isReadOnly }) => 
           disabled={isReadOnly}
         />
       </td>
-      <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">${(field.price_for_customer || 0).toLocaleString()}</td>
+      <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">${displayPrice.toLocaleString()}</td>
       <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{field.service_contract_duration || 0} years</td>
       <td className="px-4 py-3 text-sm text-gray-900 font-semibold">${subtotal.toLocaleString()}</td>
       {!isReadOnly && (
@@ -79,6 +92,7 @@ const AddOrderPageRefactored = () => {
   const queryParams = new URLSearchParams(location.search);
   const preSelectedDealId = queryParams.get('deal_id') ? Number(queryParams.get('deal_id')) : null;
   console.log('Pre-selected Deal ID:', preSelectedDealId);
+
 
   // React Hook Form Setup
   const {
@@ -243,6 +257,7 @@ const AddOrderPageRefactored = () => {
   };
 
   const isReadOnly = orderStatus !== 'draft';
+  console.log("products", products)
 
   if (isAuthLoading || loading) return <div className="p-8 text-center text-gray-500">Loading...</div>;
   if (!user) return <div className="p-8 text-center text-gray-500">User not found. Redirecting...</div>;
@@ -309,7 +324,9 @@ const AddOrderPageRefactored = () => {
                             <tr>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-24">Quantity</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Price</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">
+                                  {isChannelProduct ? 'Channel Cost' : 'Price'}
+                                </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Duration</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
                                 {!isReadOnly && <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>}

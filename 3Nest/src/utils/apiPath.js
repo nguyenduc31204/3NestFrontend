@@ -1,7 +1,7 @@
 
 
 
-export const BASE_URL = "http://localhost:8000"
+export const BASE_URL = "https://b974-1-53-216-248.ngrok-free.app"
 
 
 export const API_PATHS = {
