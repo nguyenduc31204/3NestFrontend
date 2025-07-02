@@ -221,9 +221,9 @@ const DealsPage = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Deals Management</h1>
-              <div className="text-sm text-gray-500">
+              {/* <div className="text-sm text-gray-500">
                 <a href="/deals" className="hover:underline">back</a>
-              </div>
+              </div> */}
             </div>
             {hasPermission(user, 'deal:manage') && (
               <button

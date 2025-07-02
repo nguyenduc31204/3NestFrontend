@@ -98,6 +98,7 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
@@ -233,16 +234,26 @@ const Profile = () => {
                   disabled={isSubmitting}
                 />
 
-                <div className="flex justify-end pt-4">
-                  <button
-                    type="submit"
-                    className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium disabled:opacity-75 transition-colors"
-                    disabled={isSubmitting}
-                  >
-                    <FiSave className="w-5 h-5 mr-2" />
-                    {isSubmitting ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
+                <div className="flex justify-end pt-4 space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => navigate(-1)} 
+                      className="flex items-center justify-center px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-medium transition-colors"
+                      disabled={isSubmitting}
+                    >
+                      Back
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="flex items-center justify-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium disabled:opacity-75 transition-colors"
+                      disabled={isSubmitting}
+                    >
+                      <FiSave className="w-5 h-5 mr-2" />
+                      {isSubmitting ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+
               </form>
             </div>
           </div>

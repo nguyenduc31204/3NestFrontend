@@ -151,7 +151,7 @@ const AddDealAdmin = () => {
               <div className="page-title">
                 <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Add Deal</h1>
                 <div className="breadcrumb text-sm text-gray-500">
-                  <a href="#" className="text-gray-500 hover:text-gray-700">Dashboard</a> / Add Deal
+                  <a href="/deals" className="text-gray-500 hover:text-gray-700">Back</a> 
                 </div>
               </div>
             </div>

@@ -346,7 +346,7 @@ const Products = () => {
             )}
 
             {error && <Alert msg={error} />}
-            {loading && <Loader msg="Loading products..." />}
+            {/* {loading && <Loader msg="Loading products..." />} */}
 
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -448,6 +448,7 @@ const Products = () => {
                 </tbody>
               </table>
             </div>
+            {loading && <Loader msg="Loading items..." />}
           </div>
         </div>
       </div>
