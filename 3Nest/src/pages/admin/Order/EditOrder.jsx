@@ -309,7 +309,7 @@ const EditOrderAdmin = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-gray-800 mb-2">
-              {isViewOnly ? 'View Order' : isDraft ? 'Edit Order' : 'Review Order'} #{order_id}
+              {isViewOnly ? 'View Order' : isDraft ? 'Edit Order' : 'Review Quote'} #{order_id}
             </h1>
             <div className="text-sm text-gray-500">
               <span className="text-gray-500 hover:text-gray-700">Dashboard</span> / 
@@ -386,14 +386,14 @@ const EditOrderAdmin = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 lg:col-span-1">
-            <h2 className="text-lg font-semibold mb-4 text-gray-800">Order Information</h2>
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Quote Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-500">Order Title</label>
+                <label className="block text-sm font-medium text-gray-500">Quote Title</label>
                 <p className="mt-1 text-sm text-gray-900">{order?.order_title || '--'}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-500">Order des</label>
+                <label className="block text-sm font-medium text-gray-500">Quote des</label>
                 <p className="mt-1 text-sm text-gray-900">{order?.order_description || '--'}</p>
               </div>
               <div>
@@ -424,7 +424,7 @@ const EditOrderAdmin = () => {
         </IconButton>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-4 text-gray-800">Order Details</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-800">Quote Details</h2>
           {orderDetails.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -470,7 +470,7 @@ const EditOrderAdmin = () => {
             </div>
           ) : (
             <div className="text-center py-4">
-              <p className="text-sm text-gray-500">No order details available</p>
+              <p className="text-sm text-gray-500">No quote details available</p>
             </div>
           )}
         </div>
@@ -536,7 +536,7 @@ const EditOrderAdmin = () => {
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
               <h2 className="text-lg font-semibold mb-4">Reason for Rejection</h2>
-              <p className="text-sm text-gray-600 mb-4">Please provide a reason for rejecting this order. This will be visible to the user who created the order.</p>
+              <p className="text-sm text-gray-600 mb-4">Please provide a reason for rejecting this quote. This will be visible to the user who created the quote.</p>
               <textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
@@ -569,7 +569,7 @@ const EditOrderAdmin = () => {
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
               <h2 className="text-lg font-semibold mb-4">Confirm Discard</h2>
-              <p className="mb-6">Are you sure you want to discard this order? This action cannot be undone.</p>
+              <p className="mb-6">Are you sure you want to discard this quote? This action cannot be undone.</p>
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setShowDiscardConfirm(false)}
