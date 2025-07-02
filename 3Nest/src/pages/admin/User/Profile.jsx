@@ -99,6 +99,7 @@ const Profile = () => {
   const [success, setSuccess] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const currentRole = localStorage.getItem('role');
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
@@ -227,12 +228,15 @@ const Profile = () => {
                   disabled={isSubmitting}
                 />
                 
-                <ToggleSwitch 
-                  label="Active Status"
-                  name="status"
-                  register={register}
-                  disabled={isSubmitting}
-                />
+                {currentRole !== 'admin' && (
+  <ToggleSwitch 
+    label="Active Status"
+    name="status"
+    register={register}
+    disabled={isSubmitting}
+  />
+)}
+
 
                 <div className="flex justify-end pt-4 space-x-3">
                     <button
