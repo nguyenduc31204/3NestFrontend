@@ -112,15 +112,6 @@ export const generateOrderPDF = (orderData) => {
 
   tableBody.push([
     
-      {
-          content: 'Báo giá trên đã bao gồm VAT',
-          colSpan: 4, // << Gộp 3 cột (Tên, SL, Đơn giá)
-          styles: summaryLabelStyle
-      },
-      
-  ]);
-  tableBody.push([
-    
       '', // << Bỏ trống ô cột STT
       '', // << Bỏ trống ô cột SKU
       {
@@ -166,6 +157,15 @@ export const generateOrderPDF = (orderData) => {
   tableBody.push([
       '', '', // Bỏ trống 2 ô đầu
       {
+          content: 'Discount ( Nếu có):',
+          colSpan: 4,
+          styles: summaryLabelStyleBold
+      },
+  ]);
+
+  tableBody.push([
+      '', '', // Bỏ trống 2 ô đầu
+      {
           content: 'Tổng giá CIP Hà Nội bằng hàng không:',
           colSpan: 4,
           styles: summaryLabelStyleBold
@@ -175,7 +175,16 @@ export const generateOrderPDF = (orderData) => {
           styles: summaryValueStyle
       }
   ]);
-
+  
+  tableBody.push([
+    
+      {
+          content: 'Báo giá trên đã bao gồm VAT',
+          colSpan: 4, 
+          styles: summaryLabelStyle
+      },
+      
+  ]);
 
   // 3. Vẽ bảng (giữ nguyên)
   autoTable(doc, {
