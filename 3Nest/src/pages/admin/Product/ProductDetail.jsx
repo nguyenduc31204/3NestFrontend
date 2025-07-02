@@ -87,7 +87,15 @@ const ProductDetail = ({ isOpen, onClose, product, roles = [] }) => {
                           : null
                       }
                     />
-                    <Field label="Status" value={product.status ? 'Active' : 'Inactive'} />
+                    <div className="grid grid-cols-3 gap-1 mb-3">
+                      <dt className="text-sm font-medium text-gray-600 whitespace-nowrap">Status</dt>
+                      <dd className="col-span-2">
+                        <span className={`text-sm font-semibold ${product.status ? 'text-green-600' : 'text-red-600'}`}>
+                          {product.status ? 'Active' : 'Inactive'}
+                        </span>
+                      </dd>
+                    </div>
+
                     <Field
                       label="Created At"
                       value={product.created_at ? new Date(product.created_at).toLocaleString() : null}

@@ -16,6 +16,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     price: '',
     maximum_discount: '',
     channel_cost: '',
+    status: false,
   });
   const [categories, setCategories] = useState([]);
 
@@ -82,8 +83,10 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
         cat.category_name === product.category_name &&
         cat.type_name === product.type_name
     );
+    console.log("🟢 Product nhận vào từ props:", product);
 
     setFormData({
+      
       product_name: product.product_name || '',
       product_role: product.product_role?.toString() || roles[0]?.role_id?.toString() || '',
       category_id: matchedCategory?.category_id?.toString() || '',
@@ -92,6 +95,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       price: product.price ? String(product.price) : '',
       maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
       channel_cost: product.channel_cost ? String(product.channel_cost) : '',
+      status: Boolean(product?.status),
+
     });
   }, [product, categories, roles]);
 
@@ -122,13 +127,20 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+
+    if (type === 'checkbox') {
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+      return;
+    }
+
     if (['price', 'maximum_discount', 'channel_cost'].includes(name)) {
       handleNumberChange(name, value);
     } else {
-      setFormData((p) => ({ ...p, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+
 
 
   const handleSubmit = async (e) => {
@@ -170,9 +182,14 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
         ? Number(formData.channel_cost)
         : 0,
 
+      status: formData.status,
+
     };
+    console.log('📤 Payload gửi lên API:', cleaned);
+
 
     const endpoint = product ? '/products/update-product' : '/products/create-product';
+    
 
     try {
       const res = await fetch(`${BASE_URL}${endpoint}`, {
@@ -184,9 +201,11 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
         },
         body: JSON.stringify(cleaned),
       });
+      
 
 
       const result = await res.json();
+      console.log("🧾 API response after update:", result);
       if ([200, 201].includes(result.status_code)) {
         setErrorMessage('');
         onSave();
@@ -346,6 +365,18 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             onChange={handleChange}
             className="border p-2 col-span-2"
           />
+          <div className="col-span-2 flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="status"
+              checked={formData.status}
+              onChange={handleChange}
+              className="h-4 w-4 text-gray-600"
+            />
+
+            <label className="text-sm text-gray-700">Active</label>
+          </div>
+
 
           <div className="col-span-2 flex justify-end space-x-2">
             <button
