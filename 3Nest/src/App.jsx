@@ -19,6 +19,7 @@ import ForgotPassword from './pages/Auth/ForgotPassword'
 
 import TypeDetail from './pages/admin/Type/TypeDetail';
 
+
 import DealAdmin from './pages/admin/Deal/Deal'
 import EditOrderAdmin from './pages/admin/Order/EditOrder'
 import PermissionTypePage from './pages/admin/PermissionType'
@@ -36,6 +37,9 @@ import EditRole from './pages/admin/Role/EditRole';
 import RoleDetail from './pages/admin/Role/RoleDetail';
 import Profile from './pages/admin/User/Profile'
 import { useAuth } from './context/AuthContext';
+
+import Introduction from './components/layouts/Introduction';
+
 
 
 
@@ -71,6 +75,7 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         {/* <Route path="/profile" element={<Profile />} /> */}
@@ -78,7 +83,9 @@ const App = () => {
         <Route path="/" element={<RootRedirect />} />
 
 
+
         <Route element={<ProtectedLayout />}>
+          <Route path="/introduction" element={<Introduction />} />
 
           <Route 
             path="/profile" 

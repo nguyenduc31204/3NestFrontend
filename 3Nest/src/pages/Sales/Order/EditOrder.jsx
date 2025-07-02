@@ -39,11 +39,13 @@ const EditOrder = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [processing, setProcessing] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   const isDraft = order?.status === 'draft';
   const isSubmitted = order?.status === 'submitted';
   const isAccepted = order?.status === 'approved';
+
   const isRejected = order?.status === 'rejected';
   const isViewOnly = isAccepted || isRejected;
 
@@ -384,7 +386,9 @@ const EditOrder = () => {
               {isDraft && (
                 <button
                   type="button"
+
                   onClick={() => setShowSubmitConfirm(true)}
+
                   disabled={processing}
                   className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
                     processing ? 'opacity-50 cursor-not-allowed' : ''

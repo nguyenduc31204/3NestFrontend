@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
+
 import { FiEdit, FiTrash } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/layouts/Header';
-import DashboardLayout from '../../../components/layouts/DashboardLayout';
+
 import { BASE_URL } from '../../../utils/apiPath';
 import { hasPermission } from '../../../utils/permissionUtils';
+
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const navigate = useNavigate();
+
   const [roles, setRoles] = useState([]);
    const [user, setUser] = useState(null);
 
@@ -199,4 +202,5 @@ const totalPages = Math.ceil(users.length / itemsPerPage);
     </div>
   );
 };
+
 export default Users;

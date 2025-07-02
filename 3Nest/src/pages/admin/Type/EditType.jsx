@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import axiosInstance from '../../../utils/axiosInstance';
+
 import Header from '../../../components/layouts/Header';
 import DashboardLayout from '../../../components/layouts/DashboardLayout';
 
@@ -28,7 +30,9 @@ const EditType = () => {
           setFormData({
             type_id: found.type_id,
             type_name: found.type_name || '',
+
             type_description: found.type_description || '',
+
           });
         } else {
           setError('Type not existed!');
@@ -58,7 +62,9 @@ const EditType = () => {
     try {
       await axiosInstance.post('/types/update-type', formData);
       setSuccess('Updated successfully!');
+
       setTimeout(() => navigate('/types'), 1500);
+
     } catch (err) {
       setError('Update type error!');
     }
@@ -68,15 +74,19 @@ const EditType = () => {
 
   return (
     <div>
+
       
+
         <div className="my-5 mx-auto">
           <div className="content p-20">
             <div className="page-header flex justify-between items-center mb-10">
               <div className="page-title">
                 <h1 className="text-2xl font-semibold text-gray-800 mb-2">Edit Type</h1>
+
                 <div className="text-sm mt-1">
                     <a href="/types" className="text-gray-600 hover:underline">← Back</a>
                   </div>
+
               </div>
             </div>
 
@@ -99,8 +109,10 @@ const EditType = () => {
                   <div>
                     <label className="block text-sm font-medium">Description</label>
                     <textarea
+
                       name="type_description"
                       value={formData.type_description}
+
                       onChange={handleChange}
                       className="mt-1 block w-full border border-gray-300 rounded px-3 py-2"
                       rows={4}
@@ -110,14 +122,18 @@ const EditType = () => {
                   <div className="flex justify-end space-x-2">
                     <button
                       type="button"
+
                       onClick={() => navigate('/types')}
+
                       className="px-4 py-2 bg-gray-300 rounded"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
+
                       className="px-4 py-2 bg-blue-600 hover:bg-gray-700 text-white rounded"
+
                     >
                       Update Type
                     </button>
@@ -127,7 +143,7 @@ const EditType = () => {
             </div>
           </div>
         </div>
-      
+
     </div>
   );
 };

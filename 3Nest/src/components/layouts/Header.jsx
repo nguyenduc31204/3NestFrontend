@@ -94,7 +94,7 @@ const Header = ({ onToggleSidebar }) => {
           </svg>
         </button>
 
-        <Link to="/products">
+        <Link to="/introduction">
           <img src={logo} alt="3NestInvest Logo" className="h-10 w-auto sm:h-12" />
         </Link>
       </div>

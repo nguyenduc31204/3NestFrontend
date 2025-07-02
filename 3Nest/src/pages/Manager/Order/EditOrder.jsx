@@ -38,12 +38,14 @@ const EditOrderMana = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [processing, setProcessing] = useState(false);
+
   const isSubmitted = order?.status === 'submitted';
   const isDraft = order?.status === 'draft';
   const isViewOnly = order?.status !== 'submitted';
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [rejectError, setRejectError] = useState('');
+
 
   const fetchData = useCallback(async () => {
     try {
@@ -71,7 +73,9 @@ const EditOrderMana = () => {
         if (!dealResponse.ok || dealResult.status_code !== 200) {
           throw new Error(dealResult.message || 'Failed to load deal data');
         }
+
         setDeal(dealResult.data.deal);
+
       }
 
       // Fetch order details
@@ -98,6 +102,7 @@ const EditOrderMana = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
   const handleReject = () => {
     if (!rejectReason.trim()) {
       setRejectError('Please provide a reason for rejection.');
@@ -107,6 +112,7 @@ const EditOrderMana = () => {
   };
   const handleStatusChange = useCallback(
     async (newStatus, reason) => {
+
       try {
         setProcessing(true);
         setError(null);
@@ -122,7 +128,9 @@ const EditOrderMana = () => {
           body: JSON.stringify({
             order_id: parseInt(order_id),
             status: newStatus,
+
             reason: reason,
+
           }),
         });
 
@@ -138,15 +146,16 @@ const EditOrderMana = () => {
         setError(err.message);
       } finally {
         setProcessing(false);
+
         setShowRejectModal(false);
         setRejectReason('');
         setRejectError('');
+
       }
     },
     [order_id, fetchData]
   );
 
-  
 
   if (isDraft && !loading) {
     return (
@@ -205,6 +214,7 @@ const EditOrderMana = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-lg font-semibold mb-4">Deal Information</h2>
+
                 <div className='grid grid-cols-3 gap-6 mb-8'>
                   <div className=''>
                     {deal ? (
@@ -256,6 +266,7 @@ const EditOrderMana = () => {
                   )}  
                   </div>
                 </div>
+
               </div>
 
               <div className="bg-white rounded-lg shadow-md p-6">
@@ -269,7 +280,9 @@ const EditOrderMana = () => {
                     <label className="block text-sm font-medium text-gray-700">Status</label>
                     <p
                       className={`mt-1 text-sm capitalize ${
+
                         order?.status === 'approved'
+
                           ? 'text-green-800'
                           : order?.status === 'rejected'
                           ? 'text-red-800'
@@ -331,6 +344,7 @@ const EditOrderMana = () => {
               {!isViewOnly && (
                 <>
                   <button
+
                       className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm flex items-center gap-2 touch-manipulation"
                       onClick={() => setShowRejectModal(true)}
                       disabled={processing}
@@ -340,12 +354,15 @@ const EditOrderMana = () => {
                   <button
                     type="button"
                     onClick={() => handleStatusChange('approved')}
+
                     disabled={processing}
                     className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 ${
                       processing ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
+
                     {processing ? 'Processing...' : 'Approve'}
+
                   </button>
                 </>
               )}
@@ -360,6 +377,7 @@ const EditOrderMana = () => {
           </div>
         </div>
       </DashboardLayout>
+
       {showRejectModal && (
               <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
                 <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
@@ -401,6 +419,7 @@ const EditOrderMana = () => {
                 </div>
               </div>
             )}
+
     </div>
   );
 };

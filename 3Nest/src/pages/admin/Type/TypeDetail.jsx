@@ -63,7 +63,7 @@ const TypeDetail = () => {
   if (!user) return <div className="p-8 text-center">Initializing…</div>;
 
   if (!hasPermission(user, 'type:view')) {
-    return <div className="p-8 text-center text-red-600">Bạn không có quyền truy cập trang này.</div>;
+    return <div className="p-8 text-center text-red-600">Do not have permission accessing.</div>;
   }
 
   
@@ -74,7 +74,7 @@ const TypeDetail = () => {
       {/* Page Header */}
       <div className="page-header flex justify-between items-center mb-8">
         <div className="page-title">
-          <h1 className='text-2xl font-bold text-gray-800 mb-1'>Type Management</h1>
+          <h1 className='text-2xl font-bold text-gray-800 mb-1'>Types Management</h1>
           {/* <div className="breadcrumb text-gray-500 text-sm">
             <a href="#" className='hover:underline'>Dashboard</a> / Type
           </div> */}

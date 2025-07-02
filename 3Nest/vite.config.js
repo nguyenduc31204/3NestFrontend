@@ -7,5 +7,6 @@ export default defineConfig({
   plugins: [react(),
     tailwindcss(),
   ],
-  server: {    host: '0.0.0.0',    port: 5170,    allowedHosts: [      '3nestinvest.ddns.net',      'localhost'   , '13.213.32.177' ]  }
+  server: {    host: '0.0.0.0',    port: 5170 }
+
 })

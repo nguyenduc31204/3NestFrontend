@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BASE_URL } from '../../../utils/apiPath';
 
+<<<<<<< HEAD
 const formatNumber = (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 
@@ -8,6 +9,16 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   const [formData, setFormData] = useState({
     product_name: '',
     product_role: '',
+=======
+
+const formatNumber = (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+const ProductModal = ({ isOpen, onClose, onSave, product }) => {
+  
+  const [formData, setFormData] = useState({
+    product_name: '',
+    product_role: 'admin',
+>>>>>>> Trang
     category_id: '',
     sku_partnumber: '',
     description: '',
@@ -16,6 +27,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     channel_cost: '',
   });
   const [categories, setCategories] = useState([]);
+<<<<<<< HEAD
   const [roles, setRoles] = useState([]);
   const [discountErr, setDiscountErr] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -33,6 +45,11 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     return enabledFields[roleName]?.includes(field);
   };
 
+=======
+  const [discountErr, setDiscountErr] = useState('');
+
+ 
+>>>>>>> Trang
   const loadCategories = useCallback(async () => {
     try {
       const res = await fetch(`${BASE_URL}/categories/get-categories`, {
@@ -48,6 +65,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       console.error('Failed to fetch categories', err);
     }
   }, []);
+<<<<<<< HEAD
   const loadRoles = useCallback(async () => {
     try {
       const res = await fetch(`${BASE_URL}/roles/get-roles`, {
@@ -69,30 +87,55 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     loadRoles();
   }, [loadCategories, loadRoles]);
 
-useEffect(() => {
-  if (categories.length === 0 || roles.length === 0) return;
+  useEffect(() => {
+    if (!product || categories.length === 0 || roles.length === 0) return;
 
-  if (product) {
+    const matchedCategory = categories.find(
+      (cat) =>
+        cat.category_name === product.category_name &&
+        cat.type_name === product.type_name
+    );
+
     setFormData({
       product_name: product.product_name || '',
       product_role: product.product_role?.toString() || roles[0]?.role_id?.toString() || '',
-      category_id: product.category_id?.toString() || categories[0]?.category_id?.toString() || '',
+      category_id: matchedCategory?.category_id?.toString() || '',
       sku_partnumber: product.sku_partnumber || '',
-      description: product.description || product.product_description || '',
+      description: product.description || '',
       price: product.price ? String(product.price) : '',
       maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
       channel_cost: product.channel_cost ? String(product.channel_cost) : '',
     });
-  } else {
-    setFormData((prev) => ({
-      ...prev,
-      product_role: roles[0]?.role_id?.toString() || '',
-      category_id: categories[0]?.category_id?.toString() || '',
-    }));
-  }
-}, [product, categories, roles]);
+  }, [product, categories, roles]);
 
 
+
+
+
+=======
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
+
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        ...product,
+        price: product.price ? String(product.price) : '',
+        maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
+        channel_cost: product.channel_cost ? String(product.channel_cost) : '',
+      });
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        category_id: categories[0]?.category_id || '',
+      }));
+    }
+  }, [product, categories]);
+
+ 
+>>>>>>> Trang
   const handleNumberChange = (name, raw) => {
     const digits = raw.replace(/[^0-9]/g, '');
     if (digits === '') {
@@ -102,14 +145,26 @@ useEffect(() => {
     }
 
     const num = Number(digits);
+<<<<<<< HEAD
     if (name === 'maximum_discount') {
       if (num > 100) {
         setDiscountErr('Discount must be in 0‑100');
         return;
+=======
+
+    if (name === 'maximum_discount') {
+      if (num > 100) {
+        setDiscountErr('Discount must be in 0‑100');
+        return; 
+>>>>>>> Trang
       }
       setDiscountErr('');
     }
 
+<<<<<<< HEAD
+=======
+    
+>>>>>>> Trang
     if (['price', 'channel_cost'].includes(name) && num === 0) return;
 
     setFormData((p) => ({ ...p, [name]: String(num) }));
@@ -124,6 +179,7 @@ useEffect(() => {
     }
   };
 
+<<<<<<< HEAD
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -142,11 +198,27 @@ useEffect(() => {
       isFieldEnabled('maximum_discount') &&
       (discountNum < 0 || discountNum > 100)
     ) {
+=======
+ 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+   
+    const priceNum = Number(formData.price);
+    const channelNum = Number(formData.channel_cost);
+    const discountNum = Number(formData.maximum_discount || 0);
+    if (priceNum <= 0 || channelNum <= 0) {
+      alert('Price và Channel cost phải > 0');
+      return;
+    }
+    if (discountNum < 0 || discountNum > 100) {
+>>>>>>> Trang
       alert('Discount must be in 0‑100');
       return;
     }
 
     const cleaned = {
+<<<<<<< HEAD
       ...(product ? { product_id: product.product_id } : {}),
       product_name: formData.product_name,
       product_role: parseInt(formData.product_role, 10),
@@ -160,6 +232,13 @@ useEffect(() => {
       channel_cost: formData.channel_cost !== ''
         ? Number(formData.channel_cost)
         : 0,
+=======
+      ...formData,
+      category_id: parseInt(formData.category_id, 10),
+      price: priceNum,
+      maximum_discount: discountNum,
+      channel_cost: channelNum,
+>>>>>>> Trang
     };
 
     const endpoint = product ? '/products/update-product' : '/products/create-product';
@@ -174,6 +253,7 @@ useEffect(() => {
         },
         body: JSON.stringify(cleaned),
       });
+<<<<<<< HEAD
 
       const result = await res.json();
       if ([200, 201].includes(result.status_code)) {
@@ -188,10 +268,18 @@ useEffect(() => {
     setErrorMessage(result.detail || result.message || 'faild to save.');
   }
   }
+=======
+      const result = await res.json();
+      if ([200, 201].includes(result.status_code)) {
+        onSave();
+        onClose();
+      } else alert(result.message || 'Failed to save product');
+>>>>>>> Trang
     } catch {
       alert('Error saving product');
     }
   };
+<<<<<<< HEAD
   
   // console.log('FormData:', formData);
   // console.log('category_id:', formData.category_id, 'typeof:', typeof formData.category_id);
@@ -203,6 +291,14 @@ useEffect(() => {
   return (
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
 
+=======
+
+  if (!isOpen) return null;
+
+  
+  return (
+    <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex items-center justify-center z-50">
+>>>>>>> Trang
       <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
         <h2 className="text-lg font-semibold mb-4">
           {product ? 'Edit' : 'Add'} Product
@@ -216,10 +312,13 @@ useEffect(() => {
             className="border p-2"
             required
           />
+<<<<<<< HEAD
           {errorMessage && (
             <p className="text-red-600 text-sm col-span-2 mt-1">{errorMessage}</p>
           )}
 
+=======
+>>>>>>> Trang
 
           <select
             name="product_role"
@@ -227,17 +326,27 @@ useEffect(() => {
             onChange={handleChange}
             className="border p-2"
             required
+<<<<<<< HEAD
             disabled={!!product}
           >
             <option value="">Select role</option>
             {roles.map((r) => (
               <option key={r.role_id} value={r.role_id}>
                 {r.role_name}
+=======
+          >
+            {['admin', 'sales', 'channels'].map((r) => (
+              <option key={r} value={r}>
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+>>>>>>> Trang
               </option>
             ))}
           </select>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> Trang
           <select
             name="category_id"
             value={formData.category_id}
@@ -247,14 +356,24 @@ useEffect(() => {
           >
             <option value="">Select a category</option>
             {categories.map((cat) => (
-              <option key={cat.category_id} value={cat.category_id.toString()}>
-                {cat.category_name} {cat.type_name ? `- ${cat.type_name}` : ''}
-              </option>
+<<<<<<< HEAD
+              <option key={cat.category_id} value={String(cat.category_id)}>
+              {cat.category_name}{cat.type_name ? ` - ${cat.type_name}` : ''}
+            </option>
+
             ))}
 
           </select>
 
 
+=======
+              <option key={cat.category_id} value={cat.category_id}>
+                {cat.category_name}
+              </option>
+            ))}
+          </select>
+
+>>>>>>> Trang
           <input
             name="sku_partnumber"
             placeholder="SKU/Part Number"
@@ -262,6 +381,11 @@ useEffect(() => {
             onChange={handleChange}
             className="border p-2"
           />
+<<<<<<< HEAD
+=======
+
+         
+>>>>>>> Trang
           <div className="relative col-span-1">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             <input
@@ -271,11 +395,16 @@ useEffect(() => {
               min="1"
               value={formData.price === '' ? '' : formatNumber(formData.price)}
               onChange={handleChange}
+<<<<<<< HEAD
               disabled={!isFieldEnabled('price')}
               required={isFieldEnabled('price')}
               className={`border p-2 pl-6 w-full ${
                 isFieldEnabled('price') ? 'font-semibold text-black' : 'text-gray-400 bg-gray-100'
               }`}
+=======
+              className="border p-2 pl-6 w-full"
+              required
+>>>>>>> Trang
             />
           </div>
 
@@ -288,11 +417,15 @@ useEffect(() => {
               max="100"
               value={formData.maximum_discount}
               onChange={handleChange}
+<<<<<<< HEAD
               disabled={!isFieldEnabled('maximum_discount')}
               required={isFieldEnabled('maximum_discount')}
               className={`border p-2 w-full ${
                 isFieldEnabled('maximum_discount') ? 'font-semibold text-black' : 'text-gray-400 bg-gray-100'
               }`}
+=======
+              className="border p-2 w-full"
+>>>>>>> Trang
             />
             {discountErr && (
               <p className="text-red-600 text-xs mt-1">{discountErr}</p>
@@ -308,11 +441,16 @@ useEffect(() => {
               min="1"
               value={formData.channel_cost === '' ? '' : formatNumber(formData.channel_cost)}
               onChange={handleChange}
+<<<<<<< HEAD
               disabled={!isFieldEnabled('channel_cost')}
               required={isFieldEnabled('channel_cost')}
               className={`border p-2 pl-6 w-full ${
                 isFieldEnabled('channel_cost') ? 'font-semibold text-black' : 'text-gray-400 bg-gray-100'
               }`}
+=======
+              className="border p-2 pl-6 w-full"
+              required
+>>>>>>> Trang
             />
           </div>
 
@@ -345,4 +483,8 @@ useEffect(() => {
   );
 };
 
+<<<<<<< HEAD
 export default ProductModal;
+=======
+export default ProductModal;
+>>>>>>> Trang

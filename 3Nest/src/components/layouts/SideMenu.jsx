@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SIDE_MENU_DATA } from '../../utils/data'; 
 import { canAccess } from '../../utils/permissionUtils'; 
 
-const SideMenu = ({ activeMenu }) => {
+const SideMenu = ({ activeMenu, onItemClick  }) => {
   const navigate = useNavigate();
   
   const [user, setUser] = useState(null);
@@ -26,6 +26,7 @@ const SideMenu = ({ activeMenu }) => {
 
   const handleNavigation = (item) => {
     navigate(item.path);
+    if (onItemClick) onItemClick();
   };
 
   if (!user) {
