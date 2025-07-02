@@ -146,7 +146,7 @@ const Categories = () => {
                 onClick={() => { setEditingCategory(null); setModalOpen(true); }}
                 className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-md font-medium transition-colors"
               >
-                <i className="fas fa-plus mr-2"></i> Add new category
+                <i className="fas fa-plus mr-2"></i> Add Category
               </button>
             )}
           </div>

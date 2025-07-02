@@ -261,7 +261,7 @@ const Products = () => {
         <div className="content p-6 sm:p-10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-800 mb-1">Product Management</h1>
+              <h1 className="text-2xl font-semibold text-gray-800 mb-1">Item Management</h1>
               
             </div>
             {canManage && (
@@ -273,7 +273,7 @@ const Products = () => {
                   setIsModalOpen(true);
                 }}
               >
-                + Add new product
+                + Add New Item
               </button>
             )}
           </div>

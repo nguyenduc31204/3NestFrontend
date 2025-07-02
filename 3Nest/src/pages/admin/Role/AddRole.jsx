@@ -141,14 +141,14 @@ const AddRole = () => {
         <div className="w-full max-w-2xl">
           {/* Title + Back on top-left */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-[#C71585]">Role Management</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Role Management</h1>
             <div className="text-sm mt-1">
-              <a href="/roles" className="text-fuchsia-700 hover:underline">← Back</a>
+              <a href="/roles" className="text-gray-600 hover:underline">← Back</a>
             </div>
           </div>
 
           {/* Form Card */}
-          <div className="bg-white shadow-md border border-fuchsia-200 rounded-lg p-6">
+          <div className="bg-white shadow-md border border-gray-300 rounded-lg p-6">
             {error && (
               <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
                 {error}
@@ -158,36 +158,36 @@ const AddRole = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Role Name */}
               <div>
-                <label className="block text-sm font-medium mb-1 text-fuchsia-800">Role Name</label>
+                <label className="block text-sm font-medium mb-1 text-gray-800">Role Name</label>
                 <input
                   name="role_name"
                   value={formData.role_name}
                   onChange={handleChange}
                   required
-                  className="w-full border border-fuchsia-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-400"
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
                   placeholder="Enter role name"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium mb-1 text-fuchsia-800">Description</label>
+                <label className="block text-sm font-medium mb-1 text-gray-800">Description</label>
                 <textarea
                   name="role_description"
                   value={formData.role_description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full border border-fuchsia-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-400"
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
                   placeholder="Enter role description"
                 />
               </div>
 
               {/* Permissions */}
               <div>
-                <label className="block text-sm font-medium mb-2 text-fuchsia-800">Permissions</label>
+                <label className="block text-sm font-medium mb-2 text-gray-800">Permissions</label>
                 {Object.entries(grouped).map(([typeName, perms]) => (
-                  <div key={typeName} className="mb-4 border border-fuchsia-200 rounded p-4 bg-pink-50">
-                    <label className="flex items-center space-x-2 font-medium text-fuchsia-900 mb-2 capitalize">
+                  <div key={typeName} className="mb-4 border border-gray-200 rounded p-4 bg-gray-50">
+                    <label className="flex items-center space-x-2 font-medium text-gray-900 mb-2 capitalize">
                       <input
                         type="checkbox"
                         checked={selectedTypes[typeName] || false}
@@ -226,7 +226,7 @@ const AddRole = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#C71585] text-white rounded hover:bg-pink-800 transition"
+                  className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 transition"
                 >
                   Create Role
                 </button>
@@ -238,6 +238,7 @@ const AddRole = () => {
     </div>
   </>
 );
+
 
 };
 

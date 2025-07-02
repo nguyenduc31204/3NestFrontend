@@ -53,14 +53,19 @@ const DashboardLayout = () => {
               ✖
             </button>
           </div>
-          <SideMenu activeMenu={activeMenu2} user={currentUser} />
+          <SideMenu activeMenu={activeMenu2} user={currentUser}
+          onItemClick={() => setIsSidebarOpen(false)} />
+
+          
         </div>
       )}
 
       {/* Main layout */}
       <div className="flex flex-1">
         <div className="hidden md:block">
-          <SideMenu activeMenu={activeMenu2} user={currentUser} />
+          <SideMenu activeMenu={activeMenu2} user={currentUser} 
+          onItemClick={() => setIsSidebarOpen(false)}/>
+          
         </div>
         <main className="flex-1 overflow-auto px-4 py-4">
           <Outlet context={{ user: currentUser }} />

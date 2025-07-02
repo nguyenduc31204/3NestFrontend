@@ -37,6 +37,8 @@ import RoleDetail from './pages/admin/Role/RoleDetail';
 import Profile from './pages/admin/User/Profile'
 import { useAuth } from './context/AuthContext';
 
+import Introduction from './components/layouts/Introduction';
+
 
 
 const RootRedirect = () => {
@@ -79,6 +81,7 @@ const App = () => {
 
 
         <Route element={<ProtectedLayout />}>
+          <Route path="/introduction" element={<Introduction />} />
 
           <Route 
             path="/profile" 

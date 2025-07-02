@@ -73,12 +73,19 @@ useEffect(() => {
   if (categories.length === 0 || roles.length === 0) return;
 
   if (product) {
+    // 🔍 Tìm category_id tương ứng với category_name + type_name
+    const matchedCategory = categories.find(
+      (cat) =>
+        cat.category_name === product.category_name &&
+        cat.type_name === product.type_name
+    );
+
     setFormData({
       product_name: product.product_name || '',
       product_role: product.product_role?.toString() || roles[0]?.role_id?.toString() || '',
-      category_id: product.category_id?.toString() || categories[0]?.category_id?.toString() || '',
+      category_id: matchedCategory?.category_id?.toString() || '', // ✅ fallback nếu không tìm thấy
       sku_partnumber: product.sku_partnumber || '',
-      description: product.description || product.product_description || '',
+      description: product.description || '',
       price: product.price ? String(product.price) : '',
       maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
       channel_cost: product.channel_cost ? String(product.channel_cost) : '',
@@ -91,6 +98,7 @@ useEffect(() => {
     }));
   }
 }, [product, categories, roles]);
+
 
 
   const handleNumberChange = (name, raw) => {

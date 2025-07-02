@@ -83,7 +83,7 @@ const Login = () => {
         //console.log('Decoded token:', decoded);
 
         await refreshUser();
-         navigate('/products');
+         navigate('/introduction'); // Redirect to introduction page after login
 
       } else {
         setError(result.detail || 'Đăng nhập không thành công. Vui lòng thử lại.');
