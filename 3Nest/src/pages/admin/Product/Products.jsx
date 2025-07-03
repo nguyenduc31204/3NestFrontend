@@ -357,6 +357,7 @@ const Products = () => {
                     <Th>Category Name</Th>
                     <Th>Part Number</Th>
                     <Th>Description</Th>
+                    {['admin', 'manager'].includes(currentRoleName) && <Th>Original Cost</Th>}
                     <Th>Price</Th>
                     {currentRoleName === 'channel' && <Th>Channel Cost</Th>}
                     {currentRoleName === 'sales' && <Th>Max Discount Price</Th>}
@@ -390,6 +391,9 @@ const Products = () => {
                               <div key={index}>{line}</div>
                             ))}
                           </Td>
+                          {['admin', 'manager'].includes(currentRoleName) && (
+                            <Td>{product.original_cost ? parseFloat(product.original_cost).toLocaleString() : '-'}</Td>
+                          )}
 
                           <Td>{product.price ? parseFloat(product.price).toLocaleString() : '-'}</Td>
 

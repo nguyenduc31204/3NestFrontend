@@ -15,6 +15,7 @@ import {
 import { hasPermission } from '../../../utils/permissionUtils';
 import { BASE_URL } from '../../../utils/apiPath';
 
+
 const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
@@ -42,6 +43,7 @@ const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
           <LuChevronsRight />
         </IconButton>
       </div>
+      
     </div>
   );
 };

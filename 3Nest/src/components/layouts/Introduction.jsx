@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import DealReview from '../../pages/admin/Deal/DealReview';
 
 const Home = () => {
   useEffect(() => {
@@ -89,6 +90,7 @@ const Home = () => {
           <p className="text-sm mt-2">49A Le Van Huu, Hai Ba Trung, Hanoi, Vietnam</p>
         </div>
       </footer>
+      <DealReview />
     </div>
   );
 };

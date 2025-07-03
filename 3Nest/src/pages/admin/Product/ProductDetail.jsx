@@ -66,6 +66,11 @@ const ProductDetail = ({ isOpen, onClose, product, roles = [] }) => {
                     <Field label="SKU / Part Number" value={product.sku_partnumber} />
                     <Field label="Description" value={product.description || product.product_description} />
 
+                    <Field
+                      label="Original cost"
+                      value={product.original_cost ? Number(product.original_cost).toLocaleString() : null}
+                    />
+
 
                     <Field
                       label="Price"

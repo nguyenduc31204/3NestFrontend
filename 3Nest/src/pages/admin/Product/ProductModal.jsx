@@ -9,6 +9,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
   const [formData, setFormData] = useState({
     product_name: '',
     product_role: '',
+    original_cost: '',
 
     category_id: '',
     sku_partnumber: '',
@@ -95,6 +96,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       price: product.price ? String(product.price) : '',
       maximum_discount: product.maximum_discount ? String(product.maximum_discount) : '',
       channel_cost: product.channel_cost ? String(product.channel_cost) : '',
+      original_cost: product.original_cost ? String(product.original_cost) : '',
       status: Boolean(product?.status),
 
     });
@@ -121,7 +123,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
     }
 
 
-    if (['price', 'channel_cost'].includes(name) && num === 0) return;
+    if (['price', 'channel_cost', 'original_cost'].includes(name) && num === 0) return;
 
     setFormData((p) => ({ ...p, [name]: String(num) }));
   };
@@ -175,6 +177,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
       sku_partnumber: formData.sku_partnumber,
       product_description: formData.description,
       price: formData.price !== '' ? Number(formData.price) : 0,
+      original_cost: formData.original_cost !== '' ? Number(formData.original_cost) : 0,
+
       maximum_discount: formData.maximum_discount !== ''
         ? Number(formData.maximum_discount)
         : 0,
@@ -298,11 +302,30 @@ const ProductModal = ({ isOpen, onClose, onSave, product }) => {
             onChange={handleChange}
             className="border p-2"
           />
+
+          <div className="relative col-span-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+            <input
+              name="original_cost"
+              placeholder="Original Cost"
+              inputMode="numeric"
+              min="1"
+              value={formData.original_cost === '' ? '' : formatNumber(formData.original_cost)}
+              onChange={handleChange}
+              className={`border p-2 pl-6 w-full ${
+                'font-semibold text-black'
+              }`}
+            />
+          </div>
+
+
+
+
           <div className="relative col-span-1">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             <input
               name="price"
-              placeholder="0"
+              placeholder="price"
               inputMode="numeric"
               min="1"
               value={formData.price === '' ? '' : formatNumber(formData.price)}
