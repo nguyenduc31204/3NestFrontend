@@ -199,7 +199,7 @@ const AddDealPage = () => {
                 {/* CỘT PHẢI */}
                 <div className="space-y-4">
                   <div>
-                      <label className="block text-sm font-medium text-gray-700">Deal Type</label>
+                      <label className="block text-sm font-medium text-gray-700">Deal Typesss</label>
                       <input {...register('deal_type')} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" placeholder="Enter deal type" />
                   </div>
                   <div>
